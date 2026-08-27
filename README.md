@@ -24,7 +24,7 @@ Plus email/password authentication and a credits system for tracking generations
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS + shadcn/ui
 - **Auth & DB:** Supabase (SSR)
-- **AI:** OpenAI (GPT-4o-mini)
+- **AI:** LLM API
 
 ## Getting Started
 
@@ -32,7 +32,7 @@ Plus email/password authentication and a credits system for tracking generations
 
 - Node.js 18+
 - A [Supabase](https://supabase.com) project
-- An [OpenAI](https://platform.openai.com) API key
+- An LLM provider API key
 
 ### 1. Install
 
@@ -47,14 +47,18 @@ Create a `.env.local` file in the project root:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-OPENAI_API_KEY=your_openai_api_key
-# Optional: override the OpenAI base URL (custom gateway/proxy)
+OPENAI_API_KEY=your_llm_api_key
+# Optional: override the LLM base URL (custom gateway/proxy)
 OPENAI_BASE_URL=
-# Optional: set to "true" to run without calling the OpenAI API
+# Optional: set to "true" to run without calling the LLM API
 USE_MOCK_AI=false
 ```
 
-### 3. Run
+### 3. Set up the database
+
+Run the migration in `supabase/migrations/0001_init.sql` (SQL Editor or `supabase db push`).
+
+### 4. Run
 
 ```bash
 npm run dev
@@ -68,20 +72,20 @@ Open [http://localhost:3000](http://localhost:3000).
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
-| `OPENAI_API_KEY` | Yes | OpenAI API key |
-| `OPENAI_BASE_URL` | No | Override the OpenAI base URL (custom gateway/proxy) |
-| `USE_MOCK_AI` | No | Set `true` to use mock responses instead of the OpenAI API |
+| `OPENAI_API_KEY` | Yes | LLM API key |
+| `OPENAI_BASE_URL` | No | Override the LLM base URL (custom gateway/proxy) |
+| `USE_MOCK_AI` | No | Set `true` to use mock responses instead of the LLM API |
 
-> The OpenAI API key is used **server-side only** and is never exposed to the browser. Never commit `.env.local`.
+> The API key is used **server-side only** and is never exposed to the browser. Never commit `.env.local`.
 
 ## Database
 
-The app uses two Supabase tables:
+The schema lives in [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql):
 
-- `profiles` — user profiles with a `credits_remaining` column
+- `profiles` — one row per user, tracks `credits_remaining`
 - `generations` — a log of every AI generation
-
-Create these tables (and a `profiles` row per user) in your Supabase project before using the dashboard.
+- `handle_new_user()` trigger — auto-creates a profile row on signup
+- Row Level Security policies on both tables
 
 ## Project Structure
 
@@ -91,6 +95,8 @@ app/
   api/              # AI generation + credits API routes
   dashboard/        # tool pages
 lib/
-  openai.ts         # OpenAI integration
+  openai.ts         # LLM integration
   supabase/         # Supabase clients (browser / server / middleware)
+supabase/
+  migrations/       # SQL schema migrations
 ```
