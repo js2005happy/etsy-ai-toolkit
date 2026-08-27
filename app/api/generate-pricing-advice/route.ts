@@ -1,0 +1,60 @@
+import { createClient } from "@/lib/supabase/server";
+import { generatePricingAdvice } from "@/lib/openai";
+import { NextResponse } from "next/server";
+
+export async function POST(request: Request) {
+  try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("credits_remaining")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return NextResponse.json({ error: "Profile not found" }, { status: 403 });
+    }
+
+    if (profile.credits_remaining <= 0) {
+      return NextResponse.json({ error: "Insufficient credits" }, { status: 403 });
+    }
+
+    const body = await request.json();
+    const { material_cost, labor_cost, shipping_cost, competitor_price_min, competitor_price_max, desired_profit_margin } = body;
+
+    if (!material_cost || !labor_cost || !shipping_cost) {
+      return NextResponse.json({ error: "Material, labor, and shipping costs are required" }, { status: 400 });
+    }
+
+    const result = await generatePricingAdvice({
+      material_cost: Number(material_cost),
+      labor_cost: Number(labor_cost),
+      shipping_cost: Number(shipping_cost),
+      competitor_price_min: competitor_price_min ? Number(competitor_price_min) : undefined,
+      competitor_price_max: competitor_price_max ? Number(competitor_price_max) : undefined,
+      desired_profit_margin: desired_profit_margin ? Number(desired_profit_margin) : undefined,
+    });
+
+    await supabase.from("generations").insert({
+      user_id: user.id,
+      tool_type: "pricing_advice",
+      input_data: body,
+      output_data: result,
+    });
+
+    await supabase
+      .from("profiles")
+      .update({ credits_remaining: profile.credits_remaining - 1 })
+      .eq("id", user.id);
+
+    return NextResponse.json(result);
+  } catch (error: any) {
+    console.error("Error in generate-pricing-advice:", error);
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+  }
+}
