@@ -92,7 +92,7 @@ export default function SocialPage() {
     <div className="container mx-auto py-10 px-4 max-w-5xl">
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Social Media Post Generator</h1>
+          <h1 className="text-3xl font-bold font-display">Social Media Post Generator</h1>
           <p className="text-muted-foreground">Create eye-catching captions and hashtags for your social media.</p>
         </div>
         {credits !== null && (
@@ -106,7 +106,7 @@ export default function SocialPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>Post Details</CardTitle>
+            <CardTitle className="font-display">Post Details</CardTitle>
             <CardDescription>Describe your product and select the target platform.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -183,7 +183,7 @@ export default function SocialPage() {
             <div className="space-y-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Caption</CardTitle>
+                  <CardTitle className="text-sm font-medium font-display">Caption</CardTitle>
                   <Button 
                     variant="ghost" 
                     size="sm" 
@@ -199,7 +199,7 @@ export default function SocialPage() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Hashtags</CardTitle>
+                  <CardTitle className="text-sm font-medium font-display">Hashtags</CardTitle>
                   <Button 
                     variant="ghost" 
                     size="sm" 

@@ -92,7 +92,7 @@ export default function MessagesPage() {
     <div className="container mx-auto py-10 px-4 max-w-5xl">
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Customer Message Assistant</h1>
+          <h1 className="text-3xl font-bold font-display">Customer Message Assistant</h1>
           <p className="text-muted-foreground">Generate professional, high-converting replies to your customers.</p>
         </div>
         {credits !== null && (
@@ -106,7 +106,7 @@ export default function MessagesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>Message Details</CardTitle>
+            <CardTitle className="font-display">Message Details</CardTitle>
             <CardDescription>Provide the customer's message and the desired tone.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -190,7 +190,7 @@ export default function MessagesPage() {
 
           {result && (
             <div className="space-y-4">
-              <h3 className="text-lg font-medium">Suggested Replies</h3>
+              <h3 className="text-lg font-medium font-display">Suggested Replies</h3>
               {result.replies.map((reply, index) => (
                 <Card key={index} className="relative group">
                   <CardContent className="pt-6 pb-4">

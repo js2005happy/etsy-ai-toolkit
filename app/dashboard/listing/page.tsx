@@ -95,7 +95,7 @@ export default function ListingPage() {
     <div className="container mx-auto py-10 px-4 max-w-5xl">
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Etsy Listing Generator</h1>
+          <h1 className="text-3xl font-bold font-display">Etsy Listing Generator</h1>
           <p className="text-muted-foreground">Generate SEO-optimized titles, descriptions, and tags for your products.</p>
         </div>
         {credits !== null && (
@@ -109,7 +109,7 @@ export default function ListingPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>Product Details</CardTitle>
+            <CardTitle className="font-display">Product Details</CardTitle>
             <CardDescription>Fill in the information below to generate your listing.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -206,7 +206,7 @@ export default function ListingPage() {
               <TabsContent value="title">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Optimized Title</CardTitle>
+                    <CardTitle className="text-sm font-medium font-display">Optimized Title</CardTitle>
                     <Button 
                       variant="ghost" 
                       size="sm" 
@@ -224,7 +224,7 @@ export default function ListingPage() {
               <TabsContent value="description">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Engaging Description</CardTitle>
+                    <CardTitle className="text-sm font-medium font-display">Engaging Description</CardTitle>
                     <Button 
                       variant="ghost" 
                       size="sm" 
@@ -244,7 +244,7 @@ export default function ListingPage() {
               <TabsContent value="tags">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">SEO Tags</CardTitle>
+                    <CardTitle className="text-sm font-medium font-display">SEO Tags</CardTitle>
                     <Button 
                       variant="ghost" 
                       size="sm" 
