@@ -64,17 +64,17 @@ export default function KeywordsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-stone-50 py-10">
+    <div className="min-h-screen py-10">
       <div className="mx-auto max-w-3xl px-4">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold text-stone-900">Keyword Research Tool</h1>
-          <p className="mt-2 text-stone-600">Find high-search-volume keywords for your products.</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">Keyword Research Tool</h1>
+          <p className="mt-2 text-muted-foreground">Find high-search-volume keywords for your products.</p>
           {credits !== null && (
-            <p className="mt-2 text-sm text-stone-500">{credits} Credits Left</p>
+            <p className="mt-2 text-sm text-muted-foreground">{credits} Credits Left</p>
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">
+        <Card className="mb-8 rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
           <CardHeader className="p-0">
             <CardTitle>Product Details</CardTitle>
             <CardDescription>Describe your product to get relevant keywords.</CardDescription>
@@ -109,7 +109,7 @@ export default function KeywordsPage() {
                   placeholder="e.g. minimalist, boho, vintage"
                 />
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-amber-600 text-white hover:bg-amber-700">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#0077ed]">
                 {loading ? 'Generating...' : 'Generate Keywords'}
               </Button>
             </form>
@@ -118,14 +118,14 @@ export default function KeywordsPage() {
         </Card>
 
         {keywords.length > 0 && (
-          <Card className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+          <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Suggested Keywords</h3>
               <Button variant="ghost" size="sm" onClick={copyAll}>Copy All</Button>
             </div>
             <ul className="space-y-2">
               {keywords.map((keyword, index) => (
-                <li key={index} className="rounded-lg bg-stone-50 px-3 py-2 text-sm text-stone-700">{keyword}</li>
+                <li key={index} className="rounded-lg bg-[#f5f5f7] px-3 py-2 text-sm text-foreground">{keyword}</li>
               ))}
             </ul>
           </Card>

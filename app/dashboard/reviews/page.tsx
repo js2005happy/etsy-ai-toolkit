@@ -65,17 +65,17 @@ export default function ReviewReplyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-stone-50 py-10">
+    <div className="min-h-screen py-10">
       <div className="mx-auto max-w-3xl px-4">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold text-stone-900">Review Reply Assistant</h1>
-          <p className="mt-2 text-stone-600">Generate professional replies to customer reviews.</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">Review Reply Assistant</h1>
+          <p className="mt-2 text-muted-foreground">Generate professional replies to customer reviews.</p>
           {credits !== null && (
-            <p className="mt-2 text-sm text-stone-500">{credits} Credits Left</p>
+            <p className="mt-2 text-sm text-muted-foreground">{credits} Credits Left</p>
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">
+        <Card className="mb-8 rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
           <CardHeader className="p-0">
             <CardTitle>Review Details</CardTitle>
             <CardDescription>Enter the customer review and desired tone.</CardDescription>
@@ -116,7 +116,7 @@ export default function ReviewReplyPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-amber-600 text-white hover:bg-amber-700">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#0077ed]">
                 {loading ? 'Generating...' : 'Generate Replies'}
               </Button>
             </form>
@@ -127,9 +127,9 @@ export default function ReviewReplyPage() {
         {replies.length > 0 && (
           <div className="space-y-4">
             {replies.map((reply, index) => (
-              <Card key={index} className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+              <Card key={index} className="rounded-2xl border border-[#d2d2d7] bg-white p-4 shadow-sm">
                 <div className="flex justify-between items-start">
-                  <p className="text-sm text-stone-700 whitespace-pre-wrap">{reply}</p>
+                  <p className="text-sm text-foreground whitespace-pre-wrap">{reply}</p>
                   <Button variant="ghost" size="sm" onClick={() => copyToClipboard(reply)} className="ml-2">Copy</Button>
                 </div>
               </Card>

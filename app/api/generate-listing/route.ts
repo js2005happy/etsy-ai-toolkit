@@ -21,27 +21,29 @@ export async function POST(request: Request) {
     // 3. Credit Check
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('credits_remaining')
+      .select('credits_remaining, plan')
       .eq('id', user.id)
       .single()
 
-    if (profileError || !profile || profile.credits_remaining <= 0) {
+    const isPro = profile?.plan === 'pro'
+
+    if (profileError || !profile || (!isPro && profile.credits_remaining <= 0)) {
       return NextResponse.json({ error: 'Insufficient credits. Please upgrade your plan.' }, { status: 403 })
     }
 
     // 4. Generate Content
     const result = await generateListing(body)
 
-    // 5. Persistence & Credit Deduction
-    // Wrap in a transaction-like sequence (though Supabase is REST)
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ credits_remaining: profile.credits_remaining - 1 })
-      .eq('id', user.id)
+    // 5. Persistence & Credit Deduction (Pro 用户不限次数，跳过扣减)
+    if (!isPro) {
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ credits_remaining: profile.credits_remaining - 1 })
+        .eq('id', user.id)
 
-    if (updateError) {
-      console.error('Failed to update credits:', updateError)
-      // We continue because the content is already generated, but log it.
+      if (updateError) {
+        console.error('Failed to update credits:', updateError)
+      }
     }
 
     await supabase.from('generations').insert({

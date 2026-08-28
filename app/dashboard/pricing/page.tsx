@@ -70,17 +70,17 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-stone-50 py-10">
+    <div className="min-h-screen py-10">
       <div className="mx-auto max-w-4xl px-4">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold text-stone-900">Pricing Advisor</h1>
-          <p className="mt-2 text-stone-600">Get a suggested price and profit analysis for your product.</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">Pricing Advisor</h1>
+          <p className="mt-2 text-muted-foreground">Get a suggested price and profit analysis for your product.</p>
           {credits !== null && (
-            <p className="mt-2 text-sm text-stone-500">{credits} Credits Left</p>
+            <p className="mt-2 text-sm text-muted-foreground">{credits} Credits Left</p>
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">
+        <Card className="mb-8 rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
           <CardHeader className="p-0">
             <CardTitle>Cost Details</CardTitle>
             <CardDescription>Enter your costs to calculate pricing.</CardDescription>
@@ -158,7 +158,7 @@ export default function PricingPage() {
                   placeholder="e.g. 40"
                 />
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-amber-600 text-white hover:bg-amber-700">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#0077ed]">
                 {loading ? 'Calculating...' : 'Get Pricing Advice'}
               </Button>
             </form>
@@ -167,18 +167,18 @@ export default function PricingPage() {
         </Card>
 
         {result && (
-          <Card className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm space-y-3">
+          <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm space-y-3">
             <div>
-              <h4 className="font-semibold text-sm text-stone-500">Suggested Price</h4>
-              <p className="text-2xl font-bold text-amber-600">${Number(result.suggested_price).toFixed(2)}</p>
+              <h4 className="font-semibold text-sm text-muted-foreground">Suggested Price</h4>
+              <p className="text-2xl font-bold text-secondary-foreground">${Number(result.suggested_price).toFixed(2)}</p>
             </div>
             <div>
-              <h4 className="font-semibold text-sm text-stone-500">Estimated Profit</h4>
-              <p className="text-xl font-semibold text-stone-800">${Number(result.estimated_profit).toFixed(2)}</p>
+              <h4 className="font-semibold text-sm text-muted-foreground">Estimated Profit</h4>
+              <p className="text-xl font-semibold text-foreground">${Number(result.estimated_profit).toFixed(2)}</p>
             </div>
             <div>
-              <h4 className="font-semibold text-sm text-stone-500">Pricing Strategy</h4>
-              <p className="text-sm text-stone-700">{result.pricing_strategy}</p>
+              <h4 className="font-semibold text-sm text-muted-foreground">Pricing Strategy</h4>
+              <p className="text-sm text-foreground">{result.pricing_strategy}</p>
             </div>
           </Card>
         )}

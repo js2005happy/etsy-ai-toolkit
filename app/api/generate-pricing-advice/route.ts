@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
-      .select("credits_remaining")
+      .select("credits_remaining, plan")
       .eq("id", user.id)
       .single();
 
@@ -20,7 +20,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Profile not found" }, { status: 403 });
     }
 
-    if (profile.credits_remaining <= 0) {
+    const isPro = profile.plan === "pro";
+
+    if (!isPro && profile.credits_remaining <= 0) {
       return NextResponse.json({ error: "Insufficient credits" }, { status: 403 });
     }
 
@@ -47,10 +49,12 @@ export async function POST(request: Request) {
       output_data: result,
     });
 
-    await supabase
-      .from("profiles")
-      .update({ credits_remaining: profile.credits_remaining - 1 })
-      .eq("id", user.id);
+    if (!isPro) {
+      await supabase
+        .from("profiles")
+        .update({ credits_remaining: profile.credits_remaining - 1 })
+        .eq("id", user.id);
+    }
 
     return NextResponse.json(result);
   } catch (error: any) {

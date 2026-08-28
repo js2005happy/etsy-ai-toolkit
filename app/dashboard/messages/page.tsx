@@ -179,7 +179,7 @@ export default function MessagesPage() {
           )}
 
           {!result && !loading && !error && (
-            <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed rounded-lg text-muted-foreground">
+            <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-[#d2d2d7] rounded-2xl text-muted-foreground">
               <p>Input the customer message and click generate to see a few options!</p>
             </div>
           )}

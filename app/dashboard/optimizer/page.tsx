@@ -65,17 +65,17 @@ export default function OptimizerPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-stone-50 py-10">
+    <div className="min-h-screen py-10">
       <div className="mx-auto max-w-4xl px-4">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold text-stone-900">Listing Optimizer</h1>
-          <p className="mt-2 text-stone-600">Improve your existing Etsy listing for better SEO.</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">Listing Optimizer</h1>
+          <p className="mt-2 text-muted-foreground">Improve your existing Etsy listing for better SEO.</p>
           {credits !== null && (
-            <p className="mt-2 text-sm text-stone-500">{credits} Credits Left</p>
+            <p className="mt-2 text-sm text-muted-foreground">{credits} Credits Left</p>
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">
+        <Card className="mb-8 rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
           <CardHeader className="p-0">
             <CardTitle>Current Listing</CardTitle>
             <CardDescription>Paste any part of your listing. Leave blank if not available.</CardDescription>
@@ -109,7 +109,7 @@ export default function OptimizerPage() {
                   placeholder="e.g. handmade, mug, ceramic, coffee, gift"
                 />
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-amber-600 text-white hover:bg-amber-700">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#0077ed]">
                 {loading ? 'Optimizing...' : 'Optimize Listing'}
               </Button>
             </form>
@@ -120,42 +120,42 @@ export default function OptimizerPage() {
         {result && (
           <div className="space-y-4">
             {result.title && (
-              <Card className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+              <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-4 shadow-sm">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-semibold text-sm text-stone-500 mb-1">Optimized Title</h4>
-                    <p className="text-sm text-stone-800">{result.title}</p>
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">Optimized Title</h4>
+                    <p className="text-sm text-foreground">{result.title}</p>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => copyToClipboard(result.title)} className="ml-2">Copy</Button>
                 </div>
               </Card>
             )}
             {result.description && (
-              <Card className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+              <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-4 shadow-sm">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-semibold text-sm text-stone-500 mb-1">Optimized Description</h4>
-                    <p className="text-sm text-stone-800 whitespace-pre-wrap">{result.description}</p>
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">Optimized Description</h4>
+                    <p className="text-sm text-foreground whitespace-pre-wrap">{result.description}</p>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => copyToClipboard(result.description)} className="ml-2">Copy</Button>
                 </div>
               </Card>
             )}
             {result.tags && result.tags.length > 0 && (
-              <Card className="rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
+              <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-4 shadow-sm">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-semibold text-sm text-stone-500 mb-1">Optimized Tags</h4>
-                    <p className="text-sm text-stone-800">{result.tags.join(', ')}</p>
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">Optimized Tags</h4>
+                    <p className="text-sm text-foreground">{result.tags.join(', ')}</p>
                   </div>
                   <Button variant="ghost" size="sm" onClick={() => copyToClipboard(result.tags.join(', '))} className="ml-2">Copy</Button>
                 </div>
               </Card>
             )}
             {result.suggestions && (
-              <Card className="rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-sm">
-                <h4 className="font-semibold text-sm text-amber-700 mb-1">Improvement Suggestions</h4>
-                <p className="text-sm text-stone-700">{result.suggestions}</p>
+              <Card className="rounded-2xl border border-[#d2d2d7] bg-[#f5f5f7] p-4 shadow-sm">
+                <h4 className="font-semibold text-sm text-secondary-foreground mb-1">Improvement Suggestions</h4>
+                <p className="text-sm text-foreground">{result.suggestions}</p>
               </Card>
             )}
           </div>

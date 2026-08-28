@@ -43,38 +43,36 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4 py-12 bg-slate-50">
+    <div className="flex min-h-screen items-center justify-center bg-[#f5f5f7] px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
+          <CardTitle className="text-2xl font-semibold tracking-tight">Log in</CardTitle>
           <CardDescription>Enter your email and password to access your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
-              <Input 
-                id="email" 
-                type="email" 
-                placeholder="name@example.com" 
+              <Input
+                id="email"
+                type="email"
+                placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                required 
+                required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input 
-                id="password" 
-                type="password" 
+              <Input
+                id="password"
+                type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                required 
+                required
               />
             </div>
-            {error && (
-              <p className="text-sm text-destructive font-medium">{error}</p>
-            )}
+            {error && <p className="text-sm font-medium text-destructive">{error}</p>}
             <Button className="w-full" type="submit" disabled={loading}>
               {loading ? (
                 <>
@@ -88,7 +86,10 @@ export default function LoginPage() {
           </form>
         </CardContent>
         <CardFooter className="flex justify-center text-sm text-muted-foreground">
-          Don't have an account? <a href="/signup" className="ml-1 text-primary hover:underline">Sign up</a>
+          Don't have an account?{' '}
+          <a href="/signup" className="ml-1 text-primary hover:underline">
+            Sign up
+          </a>
         </CardFooter>
       </Card>
     </div>

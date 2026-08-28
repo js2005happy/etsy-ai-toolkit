@@ -4,26 +4,26 @@
 
 @layer base {
   :root {
-    --background: 40 33% 98%;
-    --foreground: 24 10% 10%;
+    --background: 0 0% 100%;
+    --foreground: 240 3% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 24 10% 10%;
+    --card-foreground: 240 3% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 24 10% 10%;
-    --primary: 28 88% 47%;
+    --popover-foreground: 240 3% 12%;
+    --primary: 210 100% 45%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 43 96% 90%;
-    --secondary-foreground: 28 88% 25%;
-    --muted: 40 20% 96%;
-    --muted-foreground: 24 5% 40%;
-    --accent: 43 96% 90%;
-    --accent-foreground: 28 88% 25%;
+    --secondary: 240 8% 96%;
+    --secondary-foreground: 240 3% 12%;
+    --muted: 240 8% 96%;
+    --muted-foreground: 240 2% 44%;
+    --accent: 240 8% 96%;
+    --accent-foreground: 240 3% 12%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 30 15% 90%;
-    --input: 30 15% 90%;
-    --ring: 28 88% 47%;
-    --radius: 0.75rem;
+    --border: 240 6% 83%;
+    --input: 240 6% 83%;
+    --ring: 210 100% 45%;
+    --radius: 1rem;
   }
 }
 
@@ -31,16 +31,125 @@
   * {
     @apply border-border;
   }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
 }
 
-/* 自定义卡片样式 */
-.card-hover {
-  transition: all 0.2s ease;
+@layer utilities {
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-up {
+    animation: fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @keyframes film-grain {
+    0%, 100% {
+      transform: translate(0, 0);
+    }
+    20% {
+      transform: translate(-2%, 1%);
+    }
+    40% {
+      transform: translate(1%, -1%);
+    }
+    60% {
+      transform: translate(-1%, 2%);
+    }
+    80% {
+      transform: translate(2%, 1%);
+    }
+  }
+  .animate-film-grain {
+    animation: film-grain 0.6s steps(4) infinite;
+  }
+
+  @keyframes aurora-1 {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(12%, -10%) scale(1.15);
+    }
+  }
+  .animate-aurora-1 {
+    animation: aurora-1 20s ease-in-out infinite;
+  }
+
+  @keyframes aurora-2 {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(-14%, 12%) scale(1.2);
+    }
+  }
+  .animate-aurora-2 {
+    animation: aurora-2 26s ease-in-out infinite;
+  }
+
+  @keyframes aurora-3 {
+    0%, 100% {
+      transform: translate(0, 0) scale(1);
+    }
+    50% {
+      transform: translate(10%, 14%) scale(1.1);
+    }
+  }
+  .animate-aurora-3 {
+    animation: aurora-3 32s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  .animate-float-slow {
+    animation: float 9s ease-in-out infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: 0% 50%;
+    }
+    100% {
+      background-position: 200% 50%;
+    }
+  }
+  .animate-shimmer {
+    background-size: 200% auto;
+    animation: shimmer 4s linear infinite;
+  }
 }
-.card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-aurora-1,
+  .animate-aurora-2,
+  .animate-aurora-3,
+  .animate-float,
+  .animate-float-slow,
+  .animate-shimmer,
+  .animate-film-grain {
+    animation: none !important;
+  }
 }

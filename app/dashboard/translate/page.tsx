@@ -64,17 +64,17 @@ export default function TranslatePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-stone-50 py-10">
+    <div className="min-h-screen py-10">
       <div className="mx-auto max-w-3xl px-4">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold text-stone-900">Listing Translator</h1>
-          <p className="mt-2 text-stone-600">Translate your listing into multiple languages.</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">Listing Translator</h1>
+          <p className="mt-2 text-muted-foreground">Translate your listing into multiple languages.</p>
           {credits !== null && (
-            <p className="mt-2 text-sm text-stone-500">{credits} Credits Left</p>
+            <p className="mt-2 text-sm text-muted-foreground">{credits} Credits Left</p>
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">
+        <Card className="mb-8 rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
           <CardHeader className="p-0">
             <CardTitle>Translation Details</CardTitle>
             <CardDescription>Enter text and choose target language.</CardDescription>
@@ -106,7 +106,7 @@ export default function TranslatePage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-amber-600 text-white hover:bg-amber-700">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#0077ed]">
                 {loading ? 'Translating...' : 'Translate'}
               </Button>
             </form>
@@ -115,9 +115,9 @@ export default function TranslatePage() {
         </Card>
 
         {translatedText && (
-          <Card className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+          <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
             <div className="flex justify-between items-start">
-              <p className="text-sm text-stone-700 whitespace-pre-wrap">{translatedText}</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{translatedText}</p>
               <Button variant="ghost" size="sm" onClick={() => copyToClipboard(translatedText)} className="ml-2">Copy</Button>
             </div>
           </Card>

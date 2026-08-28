@@ -18,8 +18,24 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
-        display: ["var(--font-playfair)", "Georgia", "serif"],
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "SF Pro Display",
+          "SF Pro Text",
+          "var(--font-inter)",
+          "system-ui",
+          "sans-serif",
+        ],
+        display: [
+          "var(--font-playfair)",
+          "Georgia",
+          "serif",
+        ],
+        accent: [
+          "var(--font-caveat)",
+          "cursive",
+        ],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -28,28 +44,28 @@ const config: Config = {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#D97706",
-          foreground: "#ffffff",
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "#fef3c7",
-          foreground: "#92400e",
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
         },
         destructive: {
-          DEFAULT: "#ef4444",
-          foreground: "#ffffff",
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
         },
         muted: {
-          DEFAULT: "#f5f5f4",
-          foreground: "#78716c",
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
         },
         accent: {
-          DEFAULT: "#fef3c7",
-          foreground: "#92400e",
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
         },
         card: {
-          DEFAULT: "#ffffff",
-          foreground: "#1c1917",
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
         },
       },
       borderRadius: {
@@ -58,8 +74,8 @@ const config: Config = {
         sm: "0.5rem",
       },
       boxShadow: {
-        soft: "0 4px 20px rgba(0,0,0,0.05)",
-        hover: "0 8px 30px rgba(0,0,0,0.08)",
+        soft: "0 4px 20px rgba(0, 0, 0, 0.05)",
+        hover: "0 8px 30px rgba(0, 0, 0, 0.08)",
       },
     },
   },

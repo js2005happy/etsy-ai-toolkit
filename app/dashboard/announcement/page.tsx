@@ -65,17 +65,17 @@ export default function AnnouncementPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-stone-50 py-10">
+    <div className="min-h-screen py-10">
       <div className="mx-auto max-w-3xl px-4">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold text-stone-900">Announcement Generator</h1>
-          <p className="mt-2 text-stone-600">Create welcome, promo, or about us text for your shop.</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">Announcement Generator</h1>
+          <p className="mt-2 text-muted-foreground">Create welcome, promo, or about us text for your shop.</p>
           {credits !== null && (
-            <p className="mt-2 text-sm text-stone-500">{credits} Credits Left</p>
+            <p className="mt-2 text-sm text-muted-foreground">{credits} Credits Left</p>
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border border-amber-100 bg-white p-6 shadow-sm">
+        <Card className="mb-8 rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
           <CardHeader className="p-0">
             <CardTitle>Announcement Details</CardTitle>
             <CardDescription>Describe your shop and choose the type.</CardDescription>
@@ -114,7 +114,7 @@ export default function AnnouncementPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-amber-600 text-white hover:bg-amber-700">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#0077ed]">
                 {loading ? 'Generating...' : 'Generate Announcement'}
               </Button>
             </form>
@@ -123,9 +123,9 @@ export default function AnnouncementPage() {
         </Card>
 
         {announcement && (
-          <Card className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm">
+          <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
             <div className="flex justify-between items-start">
-              <p className="text-sm text-stone-700 whitespace-pre-wrap">{announcement}</p>
+              <p className="text-sm text-foreground whitespace-pre-wrap">{announcement}</p>
               <Button variant="ghost" size="sm" onClick={() => copyToClipboard(announcement)} className="ml-2">Copy</Button>
             </div>
           </Card>
