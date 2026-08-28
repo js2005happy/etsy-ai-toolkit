@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import CinematicBackground from '@/components/cinematic/cinematic-background';
 
 export default function ReviewReplyPage() {
   const router = useRouter();
@@ -66,6 +67,7 @@ export default function ReviewReplyPage() {
 
   return (
     <div className="min-h-screen py-10">
+      <CinematicBackground theme="reviews" />
       <div className="mx-auto max-w-3xl px-4">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold text-foreground">Review Reply Assistant</h1>
@@ -75,7 +77,7 @@ export default function ReviewReplyPage() {
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
+        <Card className="mb-8 rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
           <CardHeader className="p-0">
             <CardTitle>Review Details</CardTitle>
             <CardDescription>Enter the customer review and desired tone.</CardDescription>
@@ -116,18 +118,18 @@ export default function ReviewReplyPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#0077ed]">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#d9560f]">
                 {loading ? 'Generating...' : 'Generate Replies'}
               </Button>
             </form>
-            {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
           </CardContent>
         </Card>
 
         {replies.length > 0 && (
           <div className="space-y-4">
             {replies.map((reply, index) => (
-              <Card key={index} className="rounded-2xl border border-[#d2d2d7] bg-white p-4 shadow-sm">
+              <Card key={index} className="rounded-2xl border-white/15 bg-white/[0.04] p-4 shadow-sm">
                 <div className="flex justify-between items-start">
                   <p className="text-sm text-foreground whitespace-pre-wrap">{reply}</p>
                   <Button variant="ghost" size="sm" onClick={() => copyToClipboard(reply)} className="ml-2">Copy</Button>

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import CinematicBackground from '@/components/cinematic/cinematic-background';
 
 export default function PricingPage() {
   const router = useRouter();
@@ -71,6 +72,7 @@ export default function PricingPage() {
 
   return (
     <div className="min-h-screen py-10">
+      <CinematicBackground theme="pricing" />
       <div className="mx-auto max-w-4xl px-4">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold text-foreground">Pricing Advisor</h1>
@@ -80,7 +82,7 @@ export default function PricingPage() {
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
+        <Card className="mb-8 rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
           <CardHeader className="p-0">
             <CardTitle>Cost Details</CardTitle>
             <CardDescription>Enter your costs to calculate pricing.</CardDescription>
@@ -158,16 +160,16 @@ export default function PricingPage() {
                   placeholder="e.g. 40"
                 />
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#0077ed]">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#d9560f]">
                 {loading ? 'Calculating...' : 'Get Pricing Advice'}
               </Button>
             </form>
-            {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
           </CardContent>
         </Card>
 
         {result && (
-          <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm space-y-3">
+          <Card className="rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm space-y-3">
             <div>
               <h4 className="font-semibold text-sm text-muted-foreground">Suggested Price</h4>
               <p className="text-2xl font-bold text-secondary-foreground">${Number(result.suggested_price).toFixed(2)}</p>

@@ -9,3 +9,13 @@ build
 .vercel
 .env*
 tsconfig.tsbuildinfo
+
+.vercel
+.env*
+
+# one-off scripts with hardcoded Paddle API keys (never commit)
+paddle_notif.cjs
+paddle_preflight.cjs
+
+# design reference material (screenshots, prompts, analysis)
+design-ref/

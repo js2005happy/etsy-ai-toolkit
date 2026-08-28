@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import CinematicBackground from '@/components/cinematic/cinematic-background';
 
 export default function OptimizerPage() {
   const router = useRouter();
@@ -66,6 +67,7 @@ export default function OptimizerPage() {
 
   return (
     <div className="min-h-screen py-10">
+      <CinematicBackground theme="optimizer" />
       <div className="mx-auto max-w-4xl px-4">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold text-foreground">Listing Optimizer</h1>
@@ -75,7 +77,7 @@ export default function OptimizerPage() {
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
+        <Card className="mb-8 rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
           <CardHeader className="p-0">
             <CardTitle>Current Listing</CardTitle>
             <CardDescription>Paste any part of your listing. Leave blank if not available.</CardDescription>
@@ -109,18 +111,18 @@ export default function OptimizerPage() {
                   placeholder="e.g. handmade, mug, ceramic, coffee, gift"
                 />
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#0077ed]">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#d9560f]">
                 {loading ? 'Optimizing...' : 'Optimize Listing'}
               </Button>
             </form>
-            {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
           </CardContent>
         </Card>
 
         {result && (
           <div className="space-y-4">
             {result.title && (
-              <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-4 shadow-sm">
+              <Card className="rounded-2xl border-white/15 bg-white/[0.04] p-4 shadow-sm">
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-semibold text-sm text-muted-foreground mb-1">Optimized Title</h4>
@@ -131,7 +133,7 @@ export default function OptimizerPage() {
               </Card>
             )}
             {result.description && (
-              <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-4 shadow-sm">
+              <Card className="rounded-2xl border-white/15 bg-white/[0.04] p-4 shadow-sm">
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-semibold text-sm text-muted-foreground mb-1">Optimized Description</h4>
@@ -142,7 +144,7 @@ export default function OptimizerPage() {
               </Card>
             )}
             {result.tags && result.tags.length > 0 && (
-              <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-4 shadow-sm">
+              <Card className="rounded-2xl border-white/15 bg-white/[0.04] p-4 shadow-sm">
                 <div className="flex justify-between items-start">
                   <div>
                     <h4 className="font-semibold text-sm text-muted-foreground mb-1">Optimized Tags</h4>
@@ -153,7 +155,7 @@ export default function OptimizerPage() {
               </Card>
             )}
             {result.suggestions && (
-              <Card className="rounded-2xl border border-[#d2d2d7] bg-[#f5f5f7] p-4 shadow-sm">
+              <Card className="rounded-2xl border-white/15 bg-white/[0.04] p-4 shadow-sm">
                 <h4 className="font-semibold text-sm text-secondary-foreground mb-1">Improvement Suggestions</h4>
                 <p className="text-sm text-foreground">{result.suggestions}</p>
               </Card>

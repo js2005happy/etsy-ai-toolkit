@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import CinematicBackground from '@/components/cinematic/cinematic-background';
 
 export default function AnnouncementPage() {
   const router = useRouter();
@@ -66,6 +67,7 @@ export default function AnnouncementPage() {
 
   return (
     <div className="min-h-screen py-10">
+      <CinematicBackground theme="announcement" />
       <div className="mx-auto max-w-3xl px-4">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold text-foreground">Announcement Generator</h1>
@@ -75,7 +77,7 @@ export default function AnnouncementPage() {
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
+        <Card className="mb-8 rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
           <CardHeader className="p-0">
             <CardTitle>Announcement Details</CardTitle>
             <CardDescription>Describe your shop and choose the type.</CardDescription>
@@ -114,16 +116,16 @@ export default function AnnouncementPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#0077ed]">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#d9560f]">
                 {loading ? 'Generating...' : 'Generate Announcement'}
               </Button>
             </form>
-            {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
           </CardContent>
         </Card>
 
         {announcement && (
-          <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
+          <Card className="rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
             <div className="flex justify-between items-start">
               <p className="text-sm text-foreground whitespace-pre-wrap">{announcement}</p>
               <Button variant="ghost" size="sm" onClick={() => copyToClipboard(announcement)} className="ml-2">Copy</Button>

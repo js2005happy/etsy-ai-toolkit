@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import CinematicBackground from '@/components/cinematic/cinematic-background';
 
 export default function KeywordsPage() {
   const router = useRouter();
@@ -65,6 +66,7 @@ export default function KeywordsPage() {
 
   return (
     <div className="min-h-screen py-10">
+      <CinematicBackground theme="keywords" />
       <div className="mx-auto max-w-3xl px-4">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold text-foreground">Keyword Research Tool</h1>
@@ -74,7 +76,7 @@ export default function KeywordsPage() {
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
+        <Card className="mb-8 rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
           <CardHeader className="p-0">
             <CardTitle>Product Details</CardTitle>
             <CardDescription>Describe your product to get relevant keywords.</CardDescription>
@@ -109,23 +111,23 @@ export default function KeywordsPage() {
                   placeholder="e.g. minimalist, boho, vintage"
                 />
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#0077ed]">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#d9560f]">
                 {loading ? 'Generating...' : 'Generate Keywords'}
               </Button>
             </form>
-            {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
           </CardContent>
         </Card>
 
         {keywords.length > 0 && (
-          <Card className="rounded-2xl border border-[#d2d2d7] bg-white p-6 shadow-sm">
+          <Card className="rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Suggested Keywords</h3>
               <Button variant="ghost" size="sm" onClick={copyAll}>Copy All</Button>
             </div>
             <ul className="space-y-2">
               {keywords.map((keyword, index) => (
-                <li key={index} className="rounded-lg bg-[#f5f5f7] px-3 py-2 text-sm text-foreground">{keyword}</li>
+                <li key={index} className="rounded-lg bg-white/[0.04] px-3 py-2 text-sm text-foreground">{keyword}</li>
               ))}
             </ul>
           </Card>

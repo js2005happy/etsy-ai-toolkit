@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, Copy, Check, Coins } from 'lucide-react'
+import CinematicBackground from '@/components/cinematic/cinematic-background'
 
 interface MessageReplyOutput {
   replies: string[]
@@ -91,6 +92,7 @@ export default function MessagesPage() {
 
   return (
     <div className="container mx-auto py-10 px-4 max-w-5xl">
+      <CinematicBackground theme="messages" />
       <div className="flex justify-between items-end mb-8">
         <div>
           <h1 className="text-3xl font-bold font-display">Customer Message Assistant</h1>
@@ -169,7 +171,7 @@ export default function MessagesPage() {
                 <p className="text-destructive font-medium">{error}</p>
                 {error.includes('credits') && (
                   <Button variant="link" className="p-0 h-auto text-destructive mt-2" asChild>
-  <Link href="/settings">
+  <Link href="/pricing">
     Upgrade Plan &rarr;
   </Link>
 </Button>
@@ -179,7 +181,7 @@ export default function MessagesPage() {
           )}
 
           {!result && !loading && !error && (
-            <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-[#d2d2d7] rounded-2xl text-muted-foreground">
+            <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-white/15 rounded-2xl text-muted-foreground">
               <p>Input the customer message and click generate to see a few options!</p>
             </div>
           )}

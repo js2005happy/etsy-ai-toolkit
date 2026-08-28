@@ -99,7 +99,7 @@ export default function TiltCard({ href, icon, title, description }: TiltCardPro
           transformStyle: 'preserve-3d',
           transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
         }}
-        className="relative flex h-full flex-col rounded-3xl border border-[#d2d2d7] bg-white p-8 shadow-sm will-change-transform"
+        className="relative flex h-full flex-col rounded-3xl border border-white/15 bg-white/[0.04] p-8 backdrop-blur-xl will-change-transform"
       >
         {/* 高光跟随 */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
@@ -110,14 +110,14 @@ export default function TiltCard({ href, icon, title, description }: TiltCardPro
               top: 'var(--glow-y)',
               transform: 'translate(-50%, -50%)',
               background:
-                'radial-gradient(circle, rgba(0,113,227,0.08) 0%, rgba(0,113,227,0) 70%)',
+                'radial-gradient(circle, rgba(255,138,82,0.10) 0%, rgba(255,138,82,0) 70%)',
             }}
           />
         </div>
 
         {/* 图标层（浮起） */}
         <div
-          className="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f5f5f7] text-[#1d1d1f] transition-transform duration-100 ease-out"
+          className="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/[0.06] text-white transition-transform duration-100 ease-out"
           style={{ transform: 'translate3d(var(--icon-x), var(--icon-y), 24px)' }}
         >
           {icon}
@@ -128,13 +128,13 @@ export default function TiltCard({ href, icon, title, description }: TiltCardPro
           className="transition-transform duration-100 ease-out"
           style={{ transform: 'translate3d(var(--text-x), var(--text-y), 8px)' }}
         >
-          <h3 className="text-lg font-semibold text-[#1d1d1f]">{title}</h3>
-          <p className="mt-2 text-sm font-normal leading-relaxed text-[#6e6e73]">{description}</p>
+          <h3 className="text-lg font-semibold text-white">{title}</h3>
+          <p className="mt-2 text-sm font-normal leading-relaxed text-white/60">{description}</p>
         </div>
 
         {/* Open Tool */}
         <div className="mt-auto pt-8">
-          <span className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-[#0071e3] transition-colors duration-300 group-hover:bg-[#0071e3]/10">
+          <span className="inline-flex items-center gap-1 rounded-full px-3 py-2 text-sm font-medium text-[#ff8a52] transition-colors duration-300 group-hover:bg-[#ff8a52]/10">
             Open Tool
             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
           </span>

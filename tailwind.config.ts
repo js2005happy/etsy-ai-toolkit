@@ -36,6 +36,21 @@ const config: Config = {
           "var(--font-caveat)",
           "cursive",
         ],
+        heading: [
+          "var(--font-instrument-serif)",
+          "Georgia",
+          "serif",
+        ],
+        barlow: [
+          "var(--font-barlow)",
+          "sans-serif",
+        ],
+        mono: [
+          "var(--font-jetbrains-mono)",
+          "ui-monospace",
+          "SFMono-Regular",
+          "monospace",
+        ],
       },
       colors: {
         border: "hsl(var(--border))",
