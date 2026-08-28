@@ -72,7 +72,7 @@ export default function SignupPage() {
               />
             </div>
             {error && (
-              <p className={	ext-sm font-medium }>
+              <p className="text-sm font-medium">
                 {error}
               </p>
             )}

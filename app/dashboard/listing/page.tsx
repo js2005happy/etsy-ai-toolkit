@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -174,9 +175,11 @@ export default function ListingPage() {
               <CardContent className="pt-6">
                 <p className="text-destructive font-medium">{error}</p>
                 {error.includes('credits') && (
-                  <Button variant="link" className="p-0 h-auto text-destructive mt-2" href="/settings">
-                    Upgrade Plan &rarr;
-                  </Button>
+                  <Button variant="link" className="p-0 h-auto text-destructive mt-2" asChild>
+  <Link href="/settings">
+    Upgrade Plan &rarr;
+  </Link>
+</Button>
                 )}
               </CardContent>
             </Card>
