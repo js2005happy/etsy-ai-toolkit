@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 
 const FROM = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev'
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://craftly.world'
 
 function getResend(): Resend | null {
   const apiKey = process.env.RESEND_API_KEY
@@ -57,7 +58,7 @@ export async function sendWelcomeEmail(to: string): Promise<void> {
   const html = shell(`
     <p style="margin:0 0 16px;font-size:15px;color:#e5e5e5;">Welcome aboard — your free account is ready with <strong style="color:#ffffff;">10 credits</strong> to try every tool.</p>
     <p style="margin:0;font-size:14px;color:#9a9aa5;line-height:1.6;">Generate listings, replies, keywords, translations and more. When you're ready for more volume and image generation, upgrade to Pro or Scale.</p>
-    ${button('https://etsy-ai-toolkit.vercel.app/dashboard', 'Open your dashboard')}
+    ${button(`${SITE_URL}/dashboard`, 'Open your dashboard')}
   `)
   await send(to, 'Welcome to Etsy AI Toolkit', html)
 }
@@ -67,7 +68,7 @@ export async function sendSubscriptionActiveEmail(to: string, tier: string): Pro
   const html = shell(`
     <p style="margin:0 0 16px;font-size:15px;color:#e5e5e5;">Your <strong style="color:#ffffff;">${label}</strong> plan is now active. 🎉</p>
     <p style="margin:0;font-size:14px;color:#9a9aa5;line-height:1.6;">Your credits and image quota have been loaded to your account and are ready to use.</p>
-    ${button('https://etsy-ai-toolkit.vercel.app/dashboard', 'Start generating')}
+    ${button(`${SITE_URL}/dashboard`, 'Start generating')}
   `)
   await send(to, `Your ${label} plan is active`, html)
 }
@@ -76,7 +77,7 @@ export async function sendSubscriptionCanceledEmail(to: string): Promise<void> {
   const html = shell(`
     <p style="margin:0 0 16px;font-size:15px;color:#e5e5e5;">Your subscription has been <strong style="color:#ffffff;">canceled</strong>.</p>
     <p style="margin:0;font-size:14px;color:#9a9aa5;line-height:1.6;">Your account is back on the free tier. You can resubscribe at any time — your settings and history are safe.</p>
-    ${button('https://etsy-ai-toolkit.vercel.app/pricing', 'View plans')}
+    ${button(`${SITE_URL}/pricing`, 'View plans')}
   `)
   await send(to, 'Your subscription was canceled', html)
 }
