@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useI18n } from "@/lib/i18n/client";
 import LanguageSwitcher from "@/components/shared/language-switcher";
+import Logo from "@/components/shared/logo";
 import type { User } from "@supabase/supabase-js";
 import { LayoutDashboard, UserRound, LogOut } from "lucide-react";
 
@@ -70,9 +71,7 @@ export default function Navbar() {
           background: scrolled ? "rgba(40, 43, 88, 0.72)" : "rgba(40, 43, 88, 0.35)",
         }}
       >
-        <Link href="/" className="font-display text-xl text-foreground">
-          {t("nav.brand")}
-        </Link>
+        <Logo brand={t("nav.brand")} />
 
         <div className="hidden items-center gap-8 md:flex">
           {links.map((l) => (

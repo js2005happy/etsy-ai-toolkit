@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getServerTranslations } from "@/lib/i18n/server";
+import Logo from "@/components/shared/logo";
 
 type Column = {
   title: string;
@@ -54,6 +55,9 @@ export default function SiteFooter() {
   return (
     <footer className="px-5 pb-12 pt-20">
       <div className="mx-auto max-w-[1200px] border-t border-border pt-12">
+        <div className="mb-12 flex items-center gap-2.5">
+          <Logo brand={t("nav.brand")} />
+        </div>
         <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-5">
           {columns.map((col) => (
             <div key={col.title}>
