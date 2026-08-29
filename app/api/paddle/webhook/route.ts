@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       case EventName.SubscriptionPaused:
       case EventName.SubscriptionResumed:
       case EventName.SubscriptionTrialing:
-        await handleSubscription(event.data)
+        await handleSubscription(event.data, event.eventType)
         break
 
       case EventName.TransactionCompleted:

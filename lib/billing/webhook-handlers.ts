@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { hasPaidAccess } from './access'
 import { PRICE_TO_TIER, tierQuota, type TierName } from '@/lib/pricing'
+import { sendSubscriptionActiveEmail, sendSubscriptionCanceledEmail } from '@/lib/email'
 import type {
   CustomerNotification,
   SubscriptionNotification,
@@ -37,6 +38,11 @@ async function resolveUserId(
   return data?.id ?? undefined
 }
 
+async function resolveEmail(userId: string): Promise<string | undefined> {
+  const { data } = await supabase.auth.admin.getUserById(userId)
+  return data?.user?.email ?? undefined
+}
+
 /**
  * Persist the Paddle customer → user link directly on the profile (single
  * source of truth; the customers mirror table is gone).
@@ -53,10 +59,12 @@ export async function handleCustomer(data: CustomerNotification): Promise<void> 
 
 /**
  * Store the subscription id (for the portal) and recompute the user's tier +
- * quota from the subscription's price and status.
+ * quota from the subscription's price and status. Emits lifecycle emails on
+ * activation and cancellation.
  */
 export async function handleSubscription(
-  data: SubscriptionNotification
+  data: SubscriptionNotification,
+  eventType?: string
 ): Promise<void> {
   const userId = await resolveUserId(data.customerId, data.customData?.user_id)
   if (!userId) return
@@ -67,7 +75,15 @@ export async function handleSubscription(
     .eq('id', userId)
 
   const priceId = data.items?.[0]?.price?.id
-  await syncUserPlan(userId, priceId, data.status)
+  const tier = await syncUserPlan(userId, priceId, data.status)
+
+  if (eventType === 'subscription.activated') {
+    const email = await resolveEmail(userId)
+    if (email) await sendSubscriptionActiveEmail(email, tier.toLowerCase())
+  } else if (eventType === 'subscription.canceled') {
+    const email = await resolveEmail(userId)
+    if (email) await sendSubscriptionCanceledEmail(email)
+  }
 }
 
 /**
@@ -107,7 +123,7 @@ export async function syncUserPlan(
   userId: string,
   priceId?: string,
   status?: string
-): Promise<void> {
+): Promise<TierName> {
   const tier = resolveTier(priceId, status)
   const quota = tierQuota(tier)
 
@@ -119,4 +135,6 @@ export async function syncUserPlan(
       images_remaining: quota.images,
     })
     .eq('id', userId)
+
+  return tier
 }
