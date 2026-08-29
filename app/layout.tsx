@@ -44,6 +44,14 @@ export default function RootLayout({
       translate="no"
       className={`notranslate ${inter.variable} ${fraunces.variable} ${caveat.variable}`}
     >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body className="relative isolate min-h-screen bg-background font-sans text-foreground antialiased">
         <I18nProvider initialLocale={locale}>
           <AnimatedBackground />

@@ -35,13 +35,19 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    overflow-x: hidden;
   }
   body {
     @apply bg-background text-foreground antialiased;
+    overflow-x: hidden;
   }
 }
 
 @layer utilities {
+  .font-instrument {
+    font-family: 'Instrument Serif', serif;
+  }
+
   @keyframes fade-up {
     from {
       opacity: 0;

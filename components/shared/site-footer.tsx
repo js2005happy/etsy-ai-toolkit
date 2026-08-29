@@ -14,10 +14,16 @@ export default function SiteFooter() {
     {
       title: t("footer.product"),
       links: [
-        { label: t("footer.listingGenerator"), href: "/dashboard/listing" },
-        { label: t("footer.messageAssistant"), href: "/dashboard/messages" },
-        { label: t("footer.keywordResearch"), href: "/dashboard/keywords" },
-        { label: t("footer.pricingAdvisor"), href: "/dashboard/pricing" },
+        { label: t("dashboard.toolListingTitle"), href: "/dashboard/listing" },
+        { label: t("dashboard.toolMessagesTitle"), href: "/dashboard/messages" },
+        { label: t("dashboard.toolSocialTitle"), href: "/dashboard/social" },
+        { label: t("dashboard.toolReviewsTitle"), href: "/dashboard/reviews" },
+        { label: t("dashboard.toolAnnouncementTitle"), href: "/dashboard/announcement" },
+        { label: t("dashboard.toolKeywordsTitle"), href: "/dashboard/keywords" },
+        { label: t("dashboard.toolTranslateTitle"), href: "/dashboard/translate" },
+        { label: t("dashboard.toolOptimizerTitle"), href: "/dashboard/optimizer" },
+        { label: t("dashboard.toolPricingTitle"), href: "/dashboard/pricing" },
+        { label: t("dashboard.toolImagesTitle"), href: "/dashboard/images" },
       ],
     },
     {

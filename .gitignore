@@ -22,3 +22,6 @@ design-ref/
 
 # one-off image-gen scripts with hardcoded API keys (never commit)
 scripts/
+
+# supabase CLI cache
+supabase/.temp/

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Mail, Coins, Crown, ArrowLeft, LogOut, KeyRound, Sparkles } from 'lucide-react'
+import { Loader2, Mail, Coins, Crown, ArrowLeft, LogOut, KeyRound, Sparkles, Upload } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import Navbar from '@/components/shared/navbar'
 import type { User } from '@supabase/supabase-js'
@@ -36,6 +36,12 @@ export default function AccountPage() {
   const [brandError, setBrandError] = useState<string | null>(null)
   const [savingBrand, setSavingBrand] = useState(false)
 
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
+  const [avatarError, setAvatarError] = useState<string | null>(null)
+  const [avatarMessage, setAvatarMessage] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const isPaid = plan !== 'free' && plan != null
   const planLabel =
     plan === 'free'
@@ -48,7 +54,10 @@ export default function AccountPage() {
 
   useEffect(() => {
     const supabase = createClient()
-    supabase.auth.getUser().then(({ data }) => setUser(data.user ?? null))
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user ?? null)
+      setAvatarUrl((data.user?.user_metadata?.avatar_url as string) ?? null)
+    })
 
     fetch('/api/user/credits')
       .then((res) => (res.ok ? res.json() : null))
@@ -138,6 +147,55 @@ export default function AccountPage() {
     }
   }
 
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !user) return
+    setAvatarError(null)
+    setAvatarMessage(null)
+
+    const allowed = ['image/png', 'image/jpeg', 'image/webp', 'image/gif']
+    if (!allowed.includes(file.type)) {
+      setAvatarError(t('account.avatarInvalidType'))
+      e.target.value = ''
+      return
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarError(t('account.avatarTooLarge'))
+      e.target.value = ''
+      return
+    }
+
+    setUploading(true)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop() || 'png'
+      const path = `${user.id}/${Date.now()}.${ext}`
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(path, file, { upsert: false })
+      if (uploadError) {
+        setAvatarError(uploadError.message)
+        return
+      }
+      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
+      const publicUrl = urlData.publicUrl
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: { avatar_url: publicUrl },
+      })
+      if (updateError) {
+        setAvatarError(updateError.message)
+        return
+      }
+      setAvatarUrl(publicUrl)
+      setAvatarMessage(t('account.avatarUpdated'))
+    } catch {
+      setAvatarError(t('auth.unexpectedError'))
+    } finally {
+      setUploading(false)
+      e.target.value = ''
+    }
+  }
+
   const handleSignOut = async () => {
     setSigningOut(true)
     const supabase = createClient()
@@ -173,6 +231,44 @@ export default function AccountPage() {
             <CardTitle>{t('account.accountInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border border-border bg-secondary">
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-2xl font-semibold text-foreground">
+                    {user?.email?.[0]?.toUpperCase() ?? 'U'}
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/gif"
+                  onChange={handleAvatarChange}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={uploading}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  {uploading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="mr-2 h-4 w-4" />
+                  )}
+                  {t('account.uploadAvatar')}
+                </Button>
+                {avatarError && <p className="text-sm font-medium text-destructive">{avatarError}</p>}
+                {avatarMessage && <p className="text-sm font-medium text-emerald-400">{avatarMessage}</p>}
+              </div>
+            </div>
+
             <div className="flex items-center gap-4 rounded-lg border border-border bg-secondary p-4">
               <div className="flex h-11 w-11 items-center justify-center rounded-full bg-secondary text-foreground">
                 <Mail className="h-5 w-5" />

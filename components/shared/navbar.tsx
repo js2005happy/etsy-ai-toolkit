@@ -62,6 +62,7 @@ export default function Navbar() {
   };
 
   const initial = user?.email?.[0]?.toUpperCase() ?? "U";
+  const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
 
   return (
     <header className="sticky top-0 z-50 w-full px-5 py-4">
@@ -94,9 +95,14 @@ export default function Navbar() {
                 type="button"
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-label={t("nav.account")}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-secondary text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+                className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border bg-secondary text-sm font-semibold text-foreground transition-colors hover:bg-accent"
               >
-                {initial}
+                {avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+                ) : (
+                  initial
+                )}
               </button>
 
               {menuOpen && (

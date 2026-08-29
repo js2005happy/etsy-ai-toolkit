@@ -73,6 +73,10 @@ const config: Config = {
         soft: "0 4px 20px rgba(0, 0, 0, 0.05)",
         hover: "0 8px 30px rgba(0, 0, 0, 0.08)",
       },
+      transitionTimingFunction: {
+        entrance: "cubic-bezier(0.16, 1, 0.3, 1)",
+        overlay: "cubic-bezier(0.76, 0, 0.24, 1)",
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
