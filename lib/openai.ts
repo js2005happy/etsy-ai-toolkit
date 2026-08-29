@@ -116,6 +116,59 @@ export async function optimizeListing(input: OptimizeListingInput): Promise<Opti
   return JSON.parse(content) as OptimizeListingOutput;
 }
 
+export interface ProductImageInput { product_name: string; product_description: string; platform: string; size: string; style: string; language?: string; }
+export interface ProductImageOutput { imageUrl: string; revised_prompt?: string | null; }
+
+export async function generateImagePrompt(input: ProductImageInput): Promise<string> {
+  if (process.env.USE_MOCK_AI === "true") {
+    return "professional product photography of " + input.product_name + ", " + input.style + ", high detail";
+  }
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, baseURL: process.env.OPENAI_BASE_URL });
+  const language = input.language && input.language !== "No text" ? input.language : "no text";
+  const prompt =
+    "You are an expert prompt engineer for AI product photography. " +
+    "Write a single, detailed English prompt for an image generation model that renders a product marketing poster.\n\n" +
+    "Product name: " + input.product_name + "\n" +
+    "Product description: " + input.product_description + "\n" +
+    "Target platform: " + input.platform + "\n" +
+    "Visual style: " + input.style + "\n" +
+    "On-image text language: " + language + "\n\n" +
+    "Requirements:\n" +
+    "- Vividly describe the product, its material, colors, and key details.\n" +
+    "- Specify composition, lighting, background, and mood.\n" +
+    "- If a real language is given, require any on-image text to be written in that language and keep it minimal; if 'no text', require no text or lettering at all.\n" +
+    "- Output ONLY the prompt text, with no quotes, labels, or explanations.";
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: prompt }],
+  });
+  const content = response.choices[0]?.message?.content?.trim().replace(/^["']+|["']+$/g, "");
+  if (content) return content;
+  return "Professional product marketing poster of " + input.product_name + " — " + input.product_description + " in " + input.style + " style, " + (language === "no text" ? "no text" : "text in " + language) + ".";
+}
+
+export async function generateProductImage(input: ProductImageInput): Promise<ProductImageOutput> {
+  if (process.env.USE_MOCK_AI === "true") {
+    return { imageUrl: "https://placehold.co/1024x1024/png?text=Product+Poster" };
+  }
+  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, baseURL: process.env.OPENAI_BASE_URL });
+  const prompt = await generateImagePrompt(input);
+  const response = await openai.images.generate({
+    model: "gpt-image-2-all",
+    prompt,
+    size: input.size as any,
+    n: 1,
+  });
+  const data = response.data?.[0] as any;
+  if (data?.b64_json) {
+    return { imageUrl: "data:image/png;base64," + data.b64_json, revised_prompt: data?.revised_prompt ?? null };
+  }
+  if (data?.url) {
+    return { imageUrl: data.url, revised_prompt: data?.revised_prompt ?? null };
+  }
+  throw new Error("Image generation returned no image");
+}
+
 export async function generatePricingAdvice(input: PricingInput): Promise<PricingOutput> {
   if (process.env.USE_MOCK_AI === "true") {
     const totalCost = input.material_cost + input.labor_cost + input.shipping_cost;

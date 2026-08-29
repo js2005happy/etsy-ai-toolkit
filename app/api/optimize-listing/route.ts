@@ -1,57 +1,40 @@
-import { createClient } from "@/lib/supabase/server";
-import { optimizeListing } from "@/lib/openai";
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server'
+import { authenticateRequest } from '@/lib/auth'
+import { optimizeListing } from '@/lib/openai'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await authenticateRequest(request)
+    if ('error' in auth) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status })
     }
+    const { db, userId, credits } = auth
 
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("credits_remaining, plan")
-      .eq("id", user.id)
-      .single();
-
-    if (profileError || !profile) {
-      return NextResponse.json({ error: "Profile not found" }, { status: 403 });
-    }
-
-    const isPro = profile.plan === "pro";
-
-    if (!isPro && profile.credits_remaining <= 0) {
-      return NextResponse.json({ error: "Insufficient credits" }, { status: 403 });
-    }
-
-    const body = await request.json();
-    const { current_title, current_description, current_tags } = body;
+    const body = await request.json()
+    const { current_title, current_description, current_tags } = body
 
     if (!current_title && !current_description && !current_tags) {
-      return NextResponse.json({ error: "At least one field is required" }, { status: 400 });
+      return NextResponse.json({ error: 'At least one field is required' }, { status: 400 })
     }
 
-    const result = await optimizeListing({ current_title, current_description, current_tags });
+    if (credits <= 0) {
+      return NextResponse.json({ error: 'Insufficient credits' }, { status: 403 })
+    }
 
-    await supabase.from("generations").insert({
-      user_id: user.id,
-      tool_type: "optimize_listing",
+    const result = await optimizeListing({ current_title, current_description, current_tags })
+
+    await db.from('profiles').update({ credits_remaining: credits - 1 }).eq('id', userId)
+
+    await db.from('generations').insert({
+      user_id: userId,
+      tool_type: 'optimize_listing',
       input_data: body,
       output_data: result,
-    });
+    })
 
-    if (!isPro) {
-      await supabase
-        .from("profiles")
-        .update({ credits_remaining: profile.credits_remaining - 1 })
-        .eq("id", user.id);
-    }
-
-    return NextResponse.json(result);
+    return NextResponse.json(result)
   } catch (error: any) {
-    console.error("Error in optimize-listing:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    console.error('Error in optimize-listing:', error)
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
   }
 }

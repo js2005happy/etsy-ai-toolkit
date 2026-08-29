@@ -18,28 +18,25 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { data: customer } = await service
-      .from('customers')
-      .select('customer_id')
-      .eq('user_id', user.id)
+    const { data: profile } = await service
+      .from('profiles')
+      .select('paddle_customer_id, paddle_subscription_id')
+      .eq('id', user.id)
       .maybeSingle()
 
-    if (!customer?.customer_id) {
+    if (!profile?.paddle_customer_id) {
       return NextResponse.json(
         { error: 'No billing account found. Please subscribe first.' },
         { status: 400 }
       )
     }
 
-    const { data: subscriptions } = await service
-      .from('subscriptions')
-      .select('subscription_id')
-      .eq('customer_id', customer.customer_id)
-
-    const subscriptionIds = (subscriptions ?? []).map((s) => s.subscription_id)
+    const subscriptionIds = profile.paddle_subscription_id
+      ? [profile.paddle_subscription_id]
+      : []
 
     const session = await paddle.customerPortalSessions.create(
-      customer.customer_id,
+      profile.paddle_customer_id,
       subscriptionIds
     )
 

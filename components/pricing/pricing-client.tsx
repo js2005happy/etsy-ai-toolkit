@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
 import { initializePaddle, CheckoutEventNames } from '@paddle/paddle-js'
 import type { Paddle } from '@paddle/paddle-js'
 import { Check, Loader2 } from 'lucide-react'
@@ -75,6 +76,7 @@ export default function PricingClient({
   }, [])
 
   // Fetch localized price previews whenever the billing period changes.
+  // The Free tier has no priceId — skip it (it renders a static $0).
   useEffect(() => {
     if (!paddle) return
     let cancelled = false
@@ -82,12 +84,13 @@ export default function PricingClient({
     setError(null)
 
     const address = countryCode ? { countryCode } : undefined
+    const paidTiers = TIERS.filter((tier) => tier.priceId !== null)
 
     Promise.all(
-      TIERS.map((tier) =>
+      paidTiers.map((tier) =>
         paddle
           .PricePreview({
-            items: [{ priceId: tier.priceId[period], quantity: 1 }],
+            items: [{ priceId: tier.priceId![period], quantity: 1 }],
             ...(address ? { address } : {}),
           })
           .then((res) => ({
@@ -116,7 +119,7 @@ export default function PricingClient({
 
   const handleSubscribe = useCallback(
     (tier: Tier) => {
-      if (!paddle) return
+      if (!paddle || !tier.priceId) return
       const priceId = tier.priceId[period]
       paddle.Checkout.open({
         items: [{ priceId, quantity: 1 }],
@@ -134,6 +137,7 @@ export default function PricingClient({
   )
 
   const isPro = (name: string) => name === 'Pro'
+  const isFree = (name: string) => name === 'Free'
 
   return (
     <section className="px-5 pb-24 md:pb-32">
@@ -161,7 +165,7 @@ export default function PricingClient({
           <p className="mb-8 text-center text-sm text-[#ff8a52]">{error}</p>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-4">
           {TIERS.map((tier, i) => (
             <Reveal key={tier.name} delay={i * 100} className="h-full">
               <div
@@ -180,10 +184,16 @@ export default function PricingClient({
                 <h3 className="text-xl font-semibold tracking-tight text-white">
                   {tier.name}
                 </h3>
-                <p className="mt-3 text-sm text-white/60">{t(`tiers.${tier.name}.description`)}</p>
+                <p className="mt-3 text-sm text-white/60">
+                  {t(`tiers.${tier.name}.description`)}
+                </p>
 
                 <div className="mt-6 flex items-baseline gap-1">
-                  {loading ? (
+                  {isFree(tier.name) ? (
+                    <span className="text-5xl font-semibold tracking-tight text-white">
+                      $0
+                    </span>
+                  ) : loading ? (
                     <span className="flex items-center gap-2 text-white/50">
                       <Loader2 className="h-6 w-6 animate-spin" />
                     </span>
@@ -192,14 +202,16 @@ export default function PricingClient({
                       {prices[tier.name] || '—'}
                     </span>
                   )}
-                  {!loading && prices[tier.name] && (
+                  {!isFree(tier.name) && !loading && prices[tier.name] && (
                     <span className="text-base text-white/60">
                       /{period === 'month' ? t('pricing.mo') : t('pricing.yr')}
                     </span>
                   )}
                 </div>
-                {period === 'year' && (
-                  <p className="mt-1 text-xs text-white/40">{t('pricing.billedAnnually')}</p>
+                {period === 'year' && !isFree(tier.name) && (
+                  <p className="mt-1 text-xs text-white/40">
+                    {t('pricing.billedAnnually')}
+                  </p>
                 )}
 
                 <ul className="mt-8 flex-1 space-y-3.5 text-[15px] text-white">
@@ -214,17 +226,26 @@ export default function PricingClient({
                   ))}
                 </ul>
 
-                <button
-                  onClick={() => handleSubscribe(tier)}
-                  disabled={!paddle || loading}
-                  className={`mt-10 block w-full rounded-full py-3 text-center font-medium transition-colors ${
-                    isPro(tier.name)
-                      ? 'bg-[#F1641E] text-white hover:bg-[#d9560f]'
-                      : 'border border-white/20 text-white hover:bg-white/10'
-                  } disabled:cursor-not-allowed disabled:opacity-50`}
-                >
-                  {t('pricing.subscribeTo')} {tier.name}
-                </button>
+                {isFree(tier.name) ? (
+                  <Link
+                    href="/signup"
+                    className="mt-10 block w-full rounded-full border border-white/20 py-3 text-center font-medium text-white hover:bg-white/10"
+                  >
+                    {t('pricing.startFree')}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => handleSubscribe(tier)}
+                    disabled={!paddle || loading}
+                    className={`mt-10 block w-full rounded-full py-3 text-center font-medium transition-colors ${
+                      isPro(tier.name)
+                        ? 'bg-[#F1641E] text-white hover:bg-[#d9560f]'
+                        : 'border border-white/20 text-white hover:bg-white/10'
+                    } disabled:cursor-not-allowed disabled:opacity-50`}
+                  >
+                    {t('pricing.subscribeTo')} {tier.name}
+                  </button>
+                )}
               </div>
             </Reveal>
           ))}

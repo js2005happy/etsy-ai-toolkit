@@ -7,7 +7,8 @@ export async function middleware(request: NextRequest) {
 
   const url = new URL(request.url)
   const isAuthRoute = url.pathname === '/login' || url.pathname === '/signup'
-  const isProtectedRoute = url.pathname.startsWith('/dashboard')
+  const isProtectedRoute =
+    url.pathname.startsWith('/dashboard') || url.pathname === '/account'
 
   // 逻辑 A: 用户已登录，但尝试访问登录/注册页 -> 跳转到 /dashboard
   if (user && isAuthRoute) {

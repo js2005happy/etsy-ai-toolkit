@@ -1,5 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { hasPaidAccess } from './access'
+import { PRICE_TO_TIER, tierQuota, type TierName } from '@/lib/pricing'
 import type {
   CustomerNotification,
   SubscriptionNotification,
@@ -8,79 +9,17 @@ import type {
 
 const supabase = createServiceClient()
 
-function now() {
-  return new Date().toISOString()
-}
-
-/**
- * Upsert a Paddle customer into the mirror. Keyed on the Paddle customer ID,
- * so at-least-once / duplicate deliveries are idempotent.
- */
-export async function handleCustomer(data: CustomerNotification): Promise<void> {
-  const userId = (data.customData?.user_id as string | undefined) ?? null
-
-  await supabase.from('customers').upsert(
-    {
-      customer_id: data.id,
-      user_id: userId,
-      email: data.email,
-      updated_at: now(),
-    },
-    { onConflict: 'customer_id' }
-  )
-}
-
-/**
- * Upsert a Paddle subscription into the mirror, then recompute the linked
- * user's paid access from the source of truth (`subscriptions.status`).
- */
-export async function handleSubscription(
-  data: SubscriptionNotification
-): Promise<void> {
-  const item = data.items?.[0]
-  const priceId = item?.price?.id ?? ''
-  const productId = item?.price?.productId ?? item?.product?.id ?? ''
-
-  await supabase.from('subscriptions').upsert(
-    {
-      subscription_id: data.id,
-      customer_id: data.customerId,
-      status: data.status,
-      price_id: priceId,
-      product_id: productId,
-      scheduled_change_action: data.scheduledChange?.action ?? null,
-      scheduled_change_at: data.scheduledChange?.effectiveAt ?? null,
-      updated_at: now(),
-    },
-    { onConflict: 'subscription_id' }
-  )
-
-  const userId = await resolveUserId(data.customerId, data.customData?.user_id)
-  if (userId) {
-    await syncUserPlan(userId)
-  }
-}
-
-/**
- * transaction.completed is the reliable "payment captured" signal. It backfills
- * the customer -> user link (without clobbering a known email) and recomputes
- * access in case subscription events were missed.
- */
-export async function handleTransactionCompleted(
-  data: TransactionNotification
-): Promise<void> {
-  const userId = data.customData?.user_id as string | undefined
-  if (!userId) return
-
-  if (data.customerId) {
-    await supabase
-      .from('customers')
-      .update({ user_id: userId, updated_at: now() })
-      .eq('customer_id', data.customerId)
-      .is('user_id', null)
-  }
-
-  await syncUserPlan(userId)
+// Map a subscription's price + status into the tier it should grant. Only
+// active/trialing grant access; anything else downgrades to free. An unknown
+// active price_id (legacy rows) defaults to Pro so existing subscribers keep
+// image access.
+function resolveTier(
+  priceId: string | undefined,
+  status: string | undefined
+): TierName {
+  if (!hasPaidAccess(status)) return 'Free'
+  if (priceId && PRICE_TO_TIER[priceId]) return PRICE_TO_TIER[priceId]
+  return 'Pro'
 }
 
 async function resolveUserId(
@@ -90,37 +29,94 @@ async function resolveUserId(
   if (customDataUserId) return customDataUserId
 
   const { data } = await supabase
-    .from('customers')
-    .select('user_id')
-    .eq('customer_id', customerId)
+    .from('profiles')
+    .select('id')
+    .eq('paddle_customer_id', customerId)
     .maybeSingle()
 
-  return data?.user_id ?? undefined
+  return data?.id ?? undefined
 }
 
 /**
- * Recompute a user's paid access from all of their subscriptions and write the
- * denormalized `profiles.plan` flag. Grants `pro` if any subscription is
- * `active` or `trialing`, otherwise `free`.
+ * Persist the Paddle customer → user link directly on the profile (single
+ * source of truth; the customers mirror table is gone).
  */
-export async function syncUserPlan(userId: string): Promise<void> {
-  const { data: customers } = await supabase
-    .from('customers')
-    .select('customer_id')
-    .eq('user_id', userId)
-
-  const customerIds = (customers ?? []).map((c) => c.customer_id)
-  if (customerIds.length === 0) return
-
-  const { data: subscriptions } = await supabase
-    .from('subscriptions')
-    .select('status')
-    .in('customer_id', customerIds)
-
-  const pro = (subscriptions ?? []).some((s) => hasPaidAccess(s.status))
+export async function handleCustomer(data: CustomerNotification): Promise<void> {
+  const userId = data.customData?.user_id as string | undefined
+  if (!userId) return
 
   await supabase
     .from('profiles')
-    .update({ plan: pro ? 'pro' : 'free' })
+    .update({ paddle_customer_id: data.id })
+    .eq('id', userId)
+}
+
+/**
+ * Store the subscription id (for the portal) and recompute the user's tier +
+ * quota from the subscription's price and status.
+ */
+export async function handleSubscription(
+  data: SubscriptionNotification
+): Promise<void> {
+  const userId = await resolveUserId(data.customerId, data.customData?.user_id)
+  if (!userId) return
+
+  await supabase
+    .from('profiles')
+    .update({ paddle_subscription_id: data.id })
+    .eq('id', userId)
+
+  const priceId = data.items?.[0]?.price?.id
+  await syncUserPlan(userId, priceId, data.status)
+}
+
+/**
+ * transaction.completed backfills the customer/subscription links and — in case
+ * subscription events were missed — recomputes tier from the line-item price.
+ */
+export async function handleTransactionCompleted(
+  data: TransactionNotification
+): Promise<void> {
+  const userId = data.customData?.user_id as string | undefined
+  if (!userId) return
+
+  if (data.customerId) {
+    await supabase
+      .from('profiles')
+      .update({ paddle_customer_id: data.customerId })
+      .eq('id', userId)
+  }
+  if (data.subscriptionId) {
+    await supabase
+      .from('profiles')
+      .update({ paddle_subscription_id: data.subscriptionId })
+      .eq('id', userId)
+  }
+
+  const priceId = data.items?.[0]?.price?.id
+  if (priceId) {
+    await syncUserPlan(userId, priceId, 'active')
+  }
+}
+
+/**
+ * Recompute a user's tier and reset their credit/image quota. Writes the
+ * denormalized `profiles.subscription_status` flag (free | basic | pro | scale).
+ */
+export async function syncUserPlan(
+  userId: string,
+  priceId?: string,
+  status?: string
+): Promise<void> {
+  const tier = resolveTier(priceId, status)
+  const quota = tierQuota(tier)
+
+  await supabase
+    .from('profiles')
+    .update({
+      subscription_status: tier.toLowerCase(),
+      credits_remaining: quota.credits,
+      images_remaining: quota.images,
+    })
     .eq('id', userId)
 }

@@ -15,6 +15,7 @@ import {
   Languages,
   Wand2,
   DollarSign,
+  ImageIcon,
   Coins,
   Loader2,
 } from 'lucide-react'
@@ -23,10 +24,11 @@ export default function DashboardPage() {
   const { t } = useI18n()
   const [credits, setCredits] = useState<number | null>(null)
   const [plan, setPlan] = useState<string | null>(null)
+  const [quota, setQuota] = useState<number | null>(null)
   const [isUpgrading, setIsUpgrading] = useState(false)
   const [isManaging, setIsManaging] = useState(false)
 
-  const isPro = plan === 'pro'
+  const isPaid = plan !== 'free' && plan != null
 
   const tools = [
     {
@@ -83,6 +85,12 @@ export default function DashboardPage() {
       description: t('dashboard.toolPricingDesc'),
       href: '/dashboard/pricing',
     },
+    {
+      icon: ImageIcon,
+      title: t('dashboard.toolImagesTitle'),
+      description: t('dashboard.toolImagesDesc'),
+      href: '/dashboard/images',
+    },
   ]
 
   useEffect(() => {
@@ -93,6 +101,7 @@ export default function DashboardPage() {
           const data = await res.json()
           setCredits(data.credits)
           setPlan(data.plan ?? null)
+          setQuota(data.quota ?? null)
         }
       } catch (e) {
         console.error('Failed to fetch credits', e)
@@ -135,7 +144,7 @@ export default function DashboardPage() {
     }
   }
 
-  const progressPercentage = credits !== null ? Math.min((credits / 10) * 100, 100) : 0
+  const progressPercentage = credits !== null && quota ? Math.min((credits / quota) * 100, 100) : 0
 
   return (
     <div className="min-h-screen">
@@ -160,23 +169,23 @@ export default function DashboardPage() {
               </div>
               <div>
                 <div className="text-sm font-normal text-white/60">
-                  {isPro ? t('dashboard.yourPlan') : t('dashboard.yourCredits')}
+                  {t('dashboard.yourCredits')}
                 </div>
                 <div className="mt-1 flex items-baseline gap-2">
                   <span className="text-4xl font-semibold tracking-tight text-white">
-                    {isPro ? '∞' : credits !== null ? credits : '…'}
+                    {credits !== null ? credits : '…'}
                   </span>
-                  {!isPro && (
-                    <span className="text-lg text-white/60">/ 10</span>
+                  {quota !== null && (
+                    <span className="text-lg text-white/60">/ {quota}</span>
                   )}
                 </div>
                 <p className="mt-1 text-sm text-white/60">
-                  {isPro ? t('dashboard.unlimitedGenerations') : t('dashboard.creditsRemaining')}
+                  {t('dashboard.creditsRemaining')}
                 </p>
               </div>
             </div>
 
-            {isPro ? (
+            {isPaid ? (
               <Button
                 variant="outline"
                 className="rounded-full px-6 py-3 font-medium"
@@ -191,7 +200,7 @@ export default function DashboardPage() {
                 <div className="mb-2 flex justify-between text-xs font-medium text-white/60">
                   <span>{t('dashboard.usageThisMonth')}</span>
                   <span>
-                    {credits !== null ? credits : 0} {t('dashboard.of10Used')}
+                    {credits !== null ? credits : 0} / {quota ?? '—'}
                   </span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
