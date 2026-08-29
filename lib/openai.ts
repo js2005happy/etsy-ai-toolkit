@@ -14,6 +14,8 @@ export interface KeywordsInput { product_type: string; market?: string; style?: 
 export interface KeywordsOutput { keywords: string[]; }
 export interface TranslateInput { text: string; target_language: string; }
 export interface TranslateOutput { translated_text: string; }
+export interface TranslateImageInput { image: string; target_language: string; }
+export interface TranslateImageOutput { translated_text: string; extracted_text?: string; }
 export interface OptimizeListingInput { current_title?: string; current_description?: string; current_tags?: string; brand_tone?: string; brand_keywords?: string; }
 export interface OptimizeListingOutput { title: string; description: string; tags: string[]; suggestions: string; }
 export interface PricingInput { material_cost: number; labor_cost: number; shipping_cost: number; competitor_price_min?: number; competitor_price_max?: number; desired_profit_margin?: number; }
@@ -22,6 +24,12 @@ export interface PricingOutput { suggested_price: number; estimated_profit: numb
 const PRIMARY_CHAT_MODEL = "gpt-4o-mini";
 const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
 const GROQ_CHAT_MODEL = process.env.GROQ_CHAT_MODEL || "llama-3.3-70b-versatile";
+const MOMA_VISION_BASE_URL = process.env.MOMA_VISION_BASE_URL || "https://moma.cmecloud.cn/v1";
+const MOMA_VISION_MODEL = process.env.MOMA_VISION_MODEL || "qwen/qwen3.7-plus";
+
+function momaVisionClient(): OpenAI {
+  return new OpenAI({ apiKey: process.env.MOMA_VISION_API_KEY, baseURL: MOMA_VISION_BASE_URL });
+}
 
 function primaryClient(): OpenAI {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY, baseURL: process.env.OPENAI_BASE_URL });
@@ -129,6 +137,40 @@ export async function translateListing(input: TranslateInput): Promise<Translate
   const prompt = "Translate the following Etsy listing text to " + input.target_language + ". Keep SEO-friendly keywords and formatting.\n\nText:\n" + input.text + "\n\nReturn JSON with exactly one field:\n\"translated_text\": the translated text";
   const content = await chat(prompt, { system: "You are a professional translator. Always return valid JSON.", json: true });
   return JSON.parse(content) as TranslateOutput;
+}
+
+export async function translateImage(input: TranslateImageInput): Promise<TranslateImageOutput> {
+  if (process.env.USE_MOCK_AI === "true") {
+    return { translated_text: "[MOCK Image Translation to " + input.target_language + "]", extracted_text: "[MOCK extracted text]" };
+  }
+  const prompt =
+    "You are given an image that may contain text (e.g. a product poster or listing graphic). " +
+    "Step 1: transcribe ALL readable text from the image. " +
+    "Step 2: translate that text into " + input.target_language + ", keeping SEO-friendly keywords and line breaks.\n\n" +
+    "Return JSON with exactly two fields:\n" +
+    "1. \"extracted_text\": the original text found in the image\n" +
+    "2. \"translated_text\": the translation in " + input.target_language;
+
+  const r = await momaVisionClient().chat.completions.create({
+    model: MOMA_VISION_MODEL,
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: prompt },
+          { type: "image_url", image_url: { url: input.image } },
+        ],
+      },
+    ],
+  });
+
+  const content = r.choices[0]?.message?.content || "";
+  const cleaned = content.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
+  try {
+    return JSON.parse(cleaned) as TranslateImageOutput;
+  } catch {
+    return { translated_text: content };
+  }
 }
 
 export async function optimizeListing(input: OptimizeListingInput): Promise<OptimizeListingOutput> {
