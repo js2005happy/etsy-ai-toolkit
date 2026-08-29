@@ -15,7 +15,8 @@ export const messages: Record<string, NestedDict> = {
       signOut: 'Sign out',
     },
     home: {
-      heroTitle: 'Sell more. Write less.',
+      heroTitleA: 'Sell more.',
+      heroTitleB: 'Write less.',
       heroSub:
         'AI writes your listings, answers customers, and grows your shop — so you can get back to making.',
       learnMore: 'Learn more >',
@@ -212,7 +213,8 @@ export const messages: Record<string, NestedDict> = {
       signOut: 'Abmelden',
     },
     home: {
-      heroTitle: 'Mehr verkaufen. Weniger schreiben.',
+      heroTitleA: 'Mehr verkaufen.',
+      heroTitleB: 'Weniger schreiben.',
       heroSub:
         'KI schreibt deine Listings, beantwortet Kunden und lässt deinen Shop wachsen — damit du dich wieder aufs Herstellen konzentrieren kannst.',
       learnMore: 'Mehr erfahren >',
@@ -409,7 +411,8 @@ export const messages: Record<string, NestedDict> = {
       signOut: 'Se déconnecter',
     },
     home: {
-      heroTitle: 'Vendez plus. Écrivez moins.',
+      heroTitleA: 'Vendez plus.',
+      heroTitleB: 'Écrivez moins.',
       heroSub:
         "L'IA rédige vos annonces, répond à vos clients et fait grandir votre boutique — pour que vous puissiez revenir à la création.",
       learnMore: 'En savoir plus >',
@@ -611,7 +614,8 @@ export const messages: Record<string, NestedDict> = {
       signOut: 'Cerrar sesión',
     },
     home: {
-      heroTitle: 'Vende más. Escribe menos.',
+      heroTitleA: 'Vende más.',
+      heroTitleB: 'Escribe menos.',
       heroSub:
         'La IA escribe tus anuncios, responde a tus clientes y hace crecer tu tienda — para que vuelvas a crear.',
       learnMore: 'Más información >',
@@ -809,7 +813,8 @@ export const messages: Record<string, NestedDict> = {
       signOut: '退出登录',
     },
     home: {
-      heroTitle: '卖得更多，写得更少。',
+      heroTitleA: '卖得更多，',
+      heroTitleB: '写得更少。',
       heroSub: 'AI 帮你写商品文案、回复客户、让店铺增长——你可以专心去创作。',
       learnMore: '了解更多 >',
       startFree: '免费开始 >',
@@ -1002,7 +1007,8 @@ export const messages: Record<string, NestedDict> = {
       signOut: 'ログアウト',
     },
     home: {
-      heroTitle: 'もっと売る。書くのはもっと少なく。',
+      heroTitleA: 'もっと売る。',
+      heroTitleB: '書くのはもっと少なく。',
       heroSub:
         'AI がリスティングを書き、顧客に返信し、ショップを成長させます。あなたは制作に集中できます。',
       learnMore: '詳しく見る >',
@@ -1198,7 +1204,8 @@ export const messages: Record<string, NestedDict> = {
       signOut: 'Esci',
     },
     home: {
-      heroTitle: 'Vendi di più. Scrivi di meno.',
+      heroTitleA: 'Vendi di più.',
+      heroTitleB: 'Scrivi di meno.',
       heroSub:
         "L'IA scrive i tuoi annunci, risponde ai clienti e fa crescere il tuo negozio — così puoi tornare a creare.",
       learnMore: 'Scopri di più >',

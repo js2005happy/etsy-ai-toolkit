@@ -144,15 +144,15 @@ export default function PricingClient({
       <div className="mx-auto max-w-6xl">
         {/* Billing toggle */}
         <div className="mb-12 flex justify-center">
-          <div className="flex items-center gap-1 rounded-full border border-white/15 bg-white/[0.04] p-1.5 backdrop-blur-xl">
+          <div className="flex items-center gap-1 rounded-full border border-border bg-card p-1.5">
             {(['month', 'year'] as BillingPeriod[]).map((p) => (
               <button
                 key={p}
                 onClick={() => setPeriod(p)}
                 className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
                   period === p
-                    ? 'bg-white text-black'
-                    : 'text-white/60 hover:text-white'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {p === 'month' ? t('pricing.monthly') : t('pricing.yearly')}
@@ -162,63 +162,63 @@ export default function PricingClient({
         </div>
 
         {error && (
-          <p className="mb-8 text-center text-sm text-[#ff8a52]">{error}</p>
+          <p className="mb-8 text-center text-sm text-destructive">{error}</p>
         )}
 
         <div className="grid gap-6 lg:grid-cols-4">
           {TIERS.map((tier, i) => (
             <Reveal key={tier.name} delay={i * 100} className="h-full">
               <div
-                className={`relative flex h-full flex-col rounded-[28px] p-8 md:p-10 ${
+                className={`relative flex h-full flex-col rounded-xl p-8 md:p-10 ${
                   isPro(tier.name)
-                    ? 'border-2 border-[#F1641E] bg-white/[0.04]'
-                    : 'border border-white/15 bg-white/[0.04]'
+                    ? 'border-2 border-primary bg-card'
+                    : 'border border-border bg-card'
                 }`}
               >
                 {isPro(tier.name) && (
-                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-[#F1641E] px-3 py-1 text-xs font-semibold text-white">
+                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
                     {t('pricing.mostPopular')}
                   </span>
                 )}
 
-                <h3 className="text-xl font-semibold tracking-tight text-white">
+                <h3 className="text-xl font-semibold tracking-tight text-foreground">
                   {tier.name}
                 </h3>
-                <p className="mt-3 text-sm text-white/60">
+                <p className="mt-3 text-sm text-muted-foreground">
                   {t(`tiers.${tier.name}.description`)}
                 </p>
 
                 <div className="mt-6 flex items-baseline gap-1">
                   {isFree(tier.name) ? (
-                    <span className="text-5xl font-semibold tracking-tight text-white">
+                    <span className="text-5xl font-semibold tracking-tight text-foreground">
                       $0
                     </span>
                   ) : loading ? (
-                    <span className="flex items-center gap-2 text-white/50">
+                    <span className="flex items-center gap-2 text-muted-foreground">
                       <Loader2 className="h-6 w-6 animate-spin" />
                     </span>
                   ) : (
-                    <span className="text-5xl font-semibold tracking-tight text-white">
+                    <span className="text-5xl font-semibold tracking-tight text-foreground">
                       {prices[tier.name] || '—'}
                     </span>
                   )}
                   {!isFree(tier.name) && !loading && prices[tier.name] && (
-                    <span className="text-base text-white/60">
+                    <span className="text-base text-muted-foreground">
                       /{period === 'month' ? t('pricing.mo') : t('pricing.yr')}
                     </span>
                   )}
                 </div>
                 {period === 'year' && !isFree(tier.name) && (
-                  <p className="mt-1 text-xs text-white/40">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {t('pricing.billedAnnually')}
                   </p>
                 )}
 
-                <ul className="mt-8 flex-1 space-y-3.5 text-[15px] text-white">
+                <ul className="mt-8 flex-1 space-y-3.5 text-[15px] text-foreground">
                   {ta(`tiers.${tier.name}.features`).map((f) => (
                     <li key={f} className="flex items-start gap-3">
                       <Check
-                        className="mt-0.5 h-5 w-5 flex-none text-[#ff8a52]"
+                        className="mt-0.5 h-5 w-5 flex-none text-primary"
                         strokeWidth={2.5}
                       />
                       <span>{f}</span>
@@ -229,7 +229,7 @@ export default function PricingClient({
                 {isFree(tier.name) ? (
                   <Link
                     href="/signup"
-                    className="mt-10 block w-full rounded-full border border-white/20 py-3 text-center font-medium text-white hover:bg-white/10"
+                    className="mt-10 block w-full rounded-full border border-border py-3 text-center font-medium text-foreground hover:bg-accent"
                   >
                     {t('pricing.startFree')}
                   </Link>
@@ -239,8 +239,8 @@ export default function PricingClient({
                     disabled={!paddle || loading}
                     className={`mt-10 block w-full rounded-full py-3 text-center font-medium transition-colors ${
                       isPro(tier.name)
-                        ? 'bg-[#F1641E] text-white hover:bg-[#d9560f]'
-                        : 'border border-white/20 text-white hover:bg-white/10'
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        : 'border border-border text-foreground hover:bg-accent'
                     } disabled:cursor-not-allowed disabled:opacity-50`}
                   >
                     {t('pricing.subscribeTo')} {tier.name}

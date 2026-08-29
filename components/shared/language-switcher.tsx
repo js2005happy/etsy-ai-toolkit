@@ -9,20 +9,20 @@ export default function LanguageSwitcher() {
 
   return (
     <div className="relative flex items-center">
-      <Globe className="pointer-events-none absolute left-3 h-4 w-4 text-white/60" />
+      <Globe className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
       <select
         value={locale}
         onChange={(e) => setLocale(e.target.value as Locale)}
         aria-label="Language"
-        className="h-9 cursor-pointer appearance-none rounded-full border border-white/20 bg-white/[0.06] pl-9 pr-8 text-sm text-white/80 outline-none transition-colors hover:bg-white/10 focus:border-white/40"
+        className="h-9 cursor-pointer appearance-none rounded-full border border-border bg-secondary pl-9 pr-8 text-sm text-foreground outline-none transition-colors hover:bg-accent focus:border-primary"
       >
         {locales.map((l) => (
-          <option key={l.code} value={l.code} className="bg-neutral-900 text-white">
+          <option key={l.code} value={l.code} className="bg-card text-foreground">
             {l.label}
           </option>
         ))}
       </select>
-      <span className="pointer-events-none absolute right-3 text-[10px] text-white/50">
+      <span className="pointer-events-none absolute right-3 text-[10px] text-muted-foreground">
         ▾
       </span>
     </div>

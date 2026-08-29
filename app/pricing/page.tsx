@@ -36,7 +36,7 @@ export default async function PricingPage() {
           title={
             <>
               Simple pricing.{" "}
-              <span className="text-[#ff8a52]">Powerful AI.</span>
+              <span className="text-primary">Powerful AI.</span>
             </>
           }
           subtitle="Choose the plan that fits your shop. Upgrade, downgrade, or cancel anytime."
@@ -50,16 +50,16 @@ export default async function PricingPage() {
 
         <section className="px-5 pb-24 md:pb-32">
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-sm text-white/60">
+            <p className="text-sm text-muted-foreground">
               Questions about billing?{" "}
               <a
                 href="mailto:js2005happy@gmail.com"
-                className="text-[#ff8a52] hover:underline"
+                className="text-primary hover:underline"
               >
                 Contact us
               </a>
               . See our{" "}
-              <Link href="/refund" className="text-[#ff8a52] hover:underline">
+              <Link href="/refund" className="text-primary hover:underline">
                 refund policy
               </Link>
               .

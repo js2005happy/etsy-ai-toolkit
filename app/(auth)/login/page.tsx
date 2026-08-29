@@ -48,15 +48,15 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center px-4 py-12">
       <CinematicBackground />
-      <Card className="glass-cinematic w-full max-w-md text-white">
+      <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <CardTitle className="text-2xl font-semibold tracking-tight">{t('auth.logIn')}</CardTitle>
-          <CardDescription className="text-white/60">{t('auth.loginSub')}</CardDescription>
+          <CardDescription>{t('auth.loginSub')}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/80">{t('auth.email')}</Label>
+              <Label htmlFor="email">{t('auth.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -64,22 +64,20 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="border-white/20 bg-white/[0.06] text-white placeholder:text-white/40"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/80">{t('auth.password')}</Label>
+              <Label htmlFor="password">{t('auth.password')}</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="border-white/20 bg-white/[0.06] text-white placeholder:text-white/40"
               />
             </div>
             {error && <p className="text-sm font-medium text-destructive">{error}</p>}
-            <Button className="w-full bg-[#F1641E] hover:bg-[#d9560f]" type="submit" disabled={loading}>
+            <Button className="w-full" type="submit" disabled={loading}>
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -91,9 +89,9 @@ export default function LoginPage() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex justify-center text-sm text-white/60">
+        <CardFooter className="flex justify-center text-sm text-muted-foreground">
           {t('auth.noAccount')}{' '}
-          <a href="/signup" className="ml-1 text-[#ff8a52] hover:underline">
+          <a href="/signup" className="ml-1 text-primary hover:underline">
             {t('auth.signUp')}
           </a>
         </CardFooter>

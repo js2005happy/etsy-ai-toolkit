@@ -19,3 +19,6 @@ paddle_preflight.cjs
 
 # design reference material (screenshots, prompts, analysis)
 design-ref/
+
+# one-off image-gen scripts with hardcoded API keys (never commit)
+scripts/

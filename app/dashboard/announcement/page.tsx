@@ -77,7 +77,7 @@ export default function AnnouncementPage() {
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
+        <Card className="mb-8 rounded-xl border-border bg-card p-6">
           <CardHeader className="p-0">
             <CardTitle>Announcement Details</CardTitle>
             <CardDescription>Describe your shop and choose the type.</CardDescription>
@@ -116,16 +116,16 @@ export default function AnnouncementPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#d9560f]">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
                 {loading ? 'Generating...' : 'Generate Announcement'}
               </Button>
             </form>
-            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+            {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
           </CardContent>
         </Card>
 
         {announcement && (
-          <Card className="rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
+          <Card className="rounded-xl border-border bg-card p-6">
             <div className="flex justify-between items-start">
               <p className="text-sm text-foreground whitespace-pre-wrap">{announcement}</p>
               <Button variant="ghost" size="sm" onClick={() => copyToClipboard(announcement)} className="ml-2">Copy</Button>

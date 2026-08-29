@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Playfair_Display, Caveat, Instrument_Serif, Barlow, JetBrains_Mono } from "next/font/google";
+import { Inter, Fraunces, Caveat } from "next/font/google";
 import { cookies } from "next/headers";
 import AnimatedBackground from "@/components/shared/animated-background";
 import { I18nProvider } from "@/lib/i18n/client";
@@ -12,35 +12,15 @@ const inter = Inter({
   display: "swap",
 });
 
-const playfair = Playfair_Display({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-playfair",
+  variable: "--font-fraunces",
   display: "swap",
 });
 
 const caveat = Caveat({
   subsets: ["latin"],
   variable: "--font-caveat",
-  display: "swap",
-});
-
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-instrument-serif",
-  display: "swap",
-});
-
-const barlow = Barlow({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600"],
-  variable: "--font-barlow",
-  display: "swap",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
   display: "swap",
 });
 
@@ -61,9 +41,9 @@ export default function RootLayout({
     <html
       lang={locale}
       translate="no"
-      className={`notranslate ${inter.variable} ${playfair.variable} ${caveat.variable} ${instrumentSerif.variable} ${barlow.variable} ${jetbrainsMono.variable}`}
+      className={`notranslate ${inter.variable} ${fraunces.variable} ${caveat.variable}`}
     >
-      <body className="relative isolate min-h-screen bg-white font-sans text-foreground antialiased">
+      <body className="relative isolate min-h-screen bg-background font-sans text-foreground antialiased">
         <I18nProvider initialLocale={locale}>
           <AnimatedBackground />
           {children}

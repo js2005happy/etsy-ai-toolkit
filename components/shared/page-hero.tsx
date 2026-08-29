@@ -14,19 +14,19 @@ export default function PageHero({
       <div className="mx-auto max-w-4xl">
         {eyebrow && (
           <Reveal>
-            <p className="mb-5 font-mono text-[13px] uppercase tracking-[0.2em] text-[#ff8a52]">
+            <p className="mb-5 text-[13px] uppercase tracking-[0.2em] text-primary">
               {eyebrow}
             </p>
           </Reveal>
         )}
         <Reveal delay={80}>
-          <h1 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-white md:text-7xl">
+          <h1 className="font-display text-5xl font-semibold leading-[1.05] tracking-tight text-foreground md:text-7xl">
             {title}
           </h1>
         </Reveal>
         {subtitle && (
           <Reveal delay={160}>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/60 md:text-xl">
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
               {subtitle}
             </p>
           </Reveal>

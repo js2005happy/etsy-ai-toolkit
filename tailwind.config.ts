@@ -19,37 +19,18 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: [
-          "-apple-system",
-          "BlinkMacSystemFont",
-          "SF Pro Display",
-          "SF Pro Text",
           "var(--font-inter)",
           "system-ui",
           "sans-serif",
         ],
         display: [
-          "var(--font-playfair)",
+          "var(--font-fraunces)",
           "Georgia",
           "serif",
         ],
-        accent: [
+        hand: [
           "var(--font-caveat)",
           "cursive",
-        ],
-        heading: [
-          "var(--font-instrument-serif)",
-          "Georgia",
-          "serif",
-        ],
-        barlow: [
-          "var(--font-barlow)",
-          "sans-serif",
-        ],
-        mono: [
-          "var(--font-jetbrains-mono)",
-          "ui-monospace",
-          "SFMono-Regular",
-          "monospace",
         ],
       },
       colors: {

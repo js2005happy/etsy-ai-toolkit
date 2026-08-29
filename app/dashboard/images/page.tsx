@@ -138,8 +138,8 @@ export default function ImagesPage() {
       <CinematicBackground theme="social" />
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold font-display text-white">Product Image Generator</h1>
-          <p className="text-white/60">Create scroll-stopping product posters and banners for Etsy and social platforms.</p>
+          <h1 className="text-3xl font-bold font-display text-foreground">Product Image Generator</h1>
+          <p className="text-muted-foreground">Create scroll-stopping product posters and banners for Etsy and social platforms.</p>
         </div>
         {credits !== null && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20">
@@ -150,15 +150,15 @@ export default function ImagesPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <Card className="text-white">
+        <Card>
           <CardHeader>
             <CardTitle className="font-display">Poster Details</CardTitle>
-            <CardDescription className="text-white/60">Describe your product and pick a platform and style.</CardDescription>
+            <CardDescription>Describe your product and pick a platform and style.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="product_name" className="text-white/80">Product Name</Label>
+                <Label htmlFor="product_name">Product Name</Label>
                 <Input
                   id="product_name"
                   placeholder="e.g. Handmade blue ceramic vase"
@@ -168,7 +168,7 @@ export default function ImagesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="product_description" className="text-white/80">Product Description</Label>
+                <Label htmlFor="product_description">Product Description</Label>
                 <Textarea
                   id="product_description"
                   placeholder="e.g. A minimalist ceramic vase with floral patterns, glazed in deep blue, perfect for home decor..."
@@ -179,7 +179,7 @@ export default function ImagesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-white/80">Platform</Label>
+                <Label>Platform</Label>
                 <Select
                   value={formData.platform}
                   onValueChange={(value) => setFormData({ ...formData, platform: value })}
@@ -197,7 +197,7 @@ export default function ImagesPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-white/80">Visual Style</Label>
+                <Label>Visual Style</Label>
                 <Select
                   value={formData.style}
                   onValueChange={(value) => setFormData({ ...formData, style: value })}
@@ -215,7 +215,7 @@ export default function ImagesPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-white/80">Poster Text Language</Label>
+                <Label>Poster Text Language</Label>
                 <Select
                   value={formData.language}
                   onValueChange={(value) => setFormData({ ...formData, language: value })}
@@ -248,7 +248,7 @@ export default function ImagesPage() {
 
         <div className="space-y-6">
           {error && (
-            <Card className="border-destructive bg-destructive/10 text-white">
+            <Card className="border-destructive bg-destructive/10">
               <CardContent className="pt-6">
                 <p className="text-destructive font-medium">{error}</p>
                 {error.includes('credits') && (
@@ -261,21 +261,21 @@ export default function ImagesPage() {
           )}
 
           {!result && !loading && !error && (
-            <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-white/15 rounded-2xl text-white/50">
+            <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
               <ImageIcon className="h-12 w-12 mb-4" />
               <p>Describe your product and click generate to get a marketing poster.</p>
             </div>
           )}
 
           {loading && (
-            <div className="h-full flex flex-col items-center justify-center p-12 text-center text-white">
+            <div className="h-full flex flex-col items-center justify-center p-12 text-center text-foreground">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
               <p className="text-lg font-medium">AI is painting your poster...</p>
             </div>
           )}
 
           {result && (
-            <Card className="text-white overflow-hidden">
+            <Card className="overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium font-display">Generated Poster</CardTitle>
                 <div className="flex gap-2">
@@ -303,7 +303,7 @@ export default function ImagesPage() {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-xl overflow-hidden border border-white/10 bg-black/20">
+                <div className="rounded-xl overflow-hidden border border-border bg-secondary">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={result.imageUrl}
@@ -312,7 +312,7 @@ export default function ImagesPage() {
                   />
                 </div>
                 {result.revised_prompt && (
-                  <p className="text-xs text-white/50 whitespace-pre-wrap">
+                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">
                     {result.revised_prompt}
                   </p>
                 )}

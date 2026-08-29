@@ -76,7 +76,7 @@ export default function TranslatePage() {
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
+        <Card className="mb-8 rounded-xl border-border bg-card p-6">
           <CardHeader className="p-0">
             <CardTitle>Translation Details</CardTitle>
             <CardDescription>Enter text and choose target language.</CardDescription>
@@ -108,16 +108,16 @@ export default function TranslatePage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#d9560f]">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
                 {loading ? 'Translating...' : 'Translate'}
               </Button>
             </form>
-            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+            {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
           </CardContent>
         </Card>
 
         {translatedText && (
-          <Card className="rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
+          <Card className="rounded-xl border-border bg-card p-6">
             <div className="flex justify-between items-start">
               <p className="text-sm text-foreground whitespace-pre-wrap">{translatedText}</p>
               <Button variant="ghost" size="sm" onClick={() => copyToClipboard(translatedText)} className="ml-2">Copy</Button>

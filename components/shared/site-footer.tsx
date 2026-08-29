@@ -30,6 +30,7 @@ export default function SiteFooter() {
     {
       title: t("footer.company"),
       links: [
+        { label: "GitHub", href: "https://github.com/js2005happy/etsy-ai-toolkit" },
         { label: t("footer.contact"), href: "mailto:js2005happy@gmail.com" },
       ],
     },
@@ -51,30 +52,35 @@ export default function SiteFooter() {
   ];
 
   return (
-    <footer className="px-5 pb-10">
-      <div className="glass-cinematic mx-auto max-w-[1200px] rounded-3xl px-8 pb-10 pt-16">
+    <footer className="px-5 pb-12 pt-20">
+      <div className="mx-auto max-w-[1200px] border-t border-border pt-12">
         <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-5">
           {columns.map((col) => (
             <div key={col.title}>
-              <h3 className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-white/50">{col.title}</h3>
-              <ul className="mt-3 space-y-2.5">
-                {col.links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-white/60 transition-colors hover:text-white"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
+              <h3 className="font-display text-sm text-foreground">{col.title}</h3>
+              <ul className="mt-4 space-y-3">
+                {col.links.map((link) => {
+                  const external = link.href.startsWith("http");
+                  return (
+                    <li key={link.label}>
+                      <Link
+                        href={link.href}
+                        target={external ? "_blank" : undefined}
+                        rel={external ? "noopener noreferrer" : undefined}
+                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}
         </div>
 
-        <div className="mt-14 border-t border-white/15 pt-5">
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-white/40">
+        <div className="mt-14 border-t border-border pt-6">
+          <p className="text-sm text-muted-foreground">
             {t("footer.copyright")}
           </p>
         </div>

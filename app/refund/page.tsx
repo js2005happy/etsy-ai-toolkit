@@ -64,7 +64,7 @@ const sections: Section[] = [
     content: (
       <p>
         Refund or cancellation requests: contact us at{" "}
-        <a href="mailto:js2005happy@gmail.com" className="text-[#ff8a52] hover:underline">
+        <a href="mailto:js2005happy@gmail.com" className="text-primary hover:underline">
           js2005happy@gmail.com
         </a>
         .
@@ -83,7 +83,7 @@ export default function RefundPage() {
           eyebrow="Legal"
           title={
             <>
-              Refund &amp; <span className="text-[#ff8a52]">Cancellation</span>
+              Refund &amp; <span className="text-primary">Cancellation</span>
             </>
           }
           subtitle="Our simple, no-nonsense refund and cancellation policy."
@@ -91,17 +91,17 @@ export default function RefundPage() {
 
         <section className="px-5 pb-28 md:pb-36">
           <div className="mx-auto max-w-3xl">
-            <p className="mb-20 text-sm text-white/60">Last updated: August 28, 2026</p>
+            <p className="mb-20 text-sm text-muted-foreground">Last updated: August 28, 2026</p>
 
             <div className="space-y-16">
               {sections.map((s) => (
                 <Reveal key={s.n}>
                   <div>
-                    <h2 className="text-2xl font-semibold tracking-tight text-white md:text-[28px]">
-                      <span className="mr-3 text-[#ff8a52]">{s.n}</span>
+                    <h2 className="text-2xl font-semibold tracking-tight text-foreground md:text-[28px]">
+                      <span className="mr-3 text-primary">{s.n}</span>
                       {s.title}
                     </h2>
-                    <div className="mt-5 space-y-4 text-[16px] leading-relaxed text-white/70">
+                    <div className="mt-5 space-y-4 text-[16px] leading-relaxed text-muted-foreground">
                       {s.content}
                     </div>
                   </div>

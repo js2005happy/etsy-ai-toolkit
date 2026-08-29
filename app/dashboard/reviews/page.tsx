@@ -77,7 +77,7 @@ export default function ReviewReplyPage() {
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
+        <Card className="mb-8 rounded-xl border-border bg-card p-6">
           <CardHeader className="p-0">
             <CardTitle>Review Details</CardTitle>
             <CardDescription>Enter the customer review and desired tone.</CardDescription>
@@ -118,18 +118,18 @@ export default function ReviewReplyPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#d9560f]">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
                 {loading ? 'Generating...' : 'Generate Replies'}
               </Button>
             </form>
-            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+            {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
           </CardContent>
         </Card>
 
         {replies.length > 0 && (
           <div className="space-y-4">
             {replies.map((reply, index) => (
-              <Card key={index} className="rounded-2xl border-white/15 bg-white/[0.04] p-4 shadow-sm">
+              <Card key={index} className="rounded-xl border-border bg-card p-4">
                 <div className="flex justify-between items-start">
                   <p className="text-sm text-foreground whitespace-pre-wrap">{reply}</p>
                   <Button variant="ghost" size="sm" onClick={() => copyToClipboard(reply)} className="ml-2">Copy</Button>

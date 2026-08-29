@@ -65,14 +65,12 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 w-full px-5 py-4">
       <nav
-        className="mx-auto flex h-14 max-w-[1200px] items-center justify-between rounded-full border border-white/20 px-4 backdrop-blur-[20px] backdrop-saturate-[160%] transition-colors duration-300"
+        className="liquid-glass mx-auto flex h-14 max-w-[1200px] items-center justify-between rounded-full px-4 transition-colors duration-300"
         style={{
-          background: scrolled ? "rgba(255,255,255,0.14)" : "rgba(255,255,255,0.08)",
-          boxShadow:
-            "0 24px 64px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.18)",
+          background: scrolled ? "rgba(40, 43, 88, 0.72)" : "rgba(40, 43, 88, 0.35)",
         }}
       >
-        <Link href="/" className="font-display text-lg font-semibold italic text-white">
+        <Link href="/" className="font-display text-xl text-foreground">
           {t("nav.brand")}
         </Link>
 
@@ -81,7 +79,7 @@ export default function Navbar() {
             <Link
               key={l.label}
               href={l.href}
-              className="text-sm text-white/70 transition-colors hover:text-white"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               {l.label}
             </Link>
@@ -97,20 +95,20 @@ export default function Navbar() {
                 type="button"
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-label={t("nav.account")}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-secondary text-sm font-semibold text-foreground transition-colors hover:bg-accent"
               >
                 {initial}
               </button>
 
               {menuOpen && (
-                <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-2xl border border-white/15 bg-neutral-900/95 p-1.5 shadow-2xl backdrop-blur-xl">
-                  <div className="truncate px-3 py-2 text-xs text-white/50">
+                <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-xl border border-border bg-card p-1.5 shadow-xl">
+                  <div className="truncate px-3 py-2 text-xs text-muted-foreground">
                     {user.email}
                   </div>
                   <Link
                     href="/dashboard"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
                   >
                     <LayoutDashboard className="h-4 w-4" />
                     {t("nav.dashboard")}
@@ -118,16 +116,16 @@ export default function Navbar() {
                   <Link
                     href="/account"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                    className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
                   >
                     <UserRound className="h-4 w-4" />
                     {t("nav.account")}
                   </Link>
-                  <div className="my-1 h-px bg-white/10" />
+                  <div className="my-1 h-px bg-border" />
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+                    className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent"
                   >
                     <LogOut className="h-4 w-4" />
                     {t("nav.signOut")}
@@ -137,12 +135,12 @@ export default function Navbar() {
             </div>
           ) : (
             <>
-              <Link href="/login" className="hidden text-sm text-white/70 transition-colors hover:text-white sm:block">
+              <Link href="/login" className="hidden text-sm text-muted-foreground transition-colors hover:text-foreground sm:block">
                 {t("nav.logIn")}
               </Link>
               <Link
                 href="/signup"
-                className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-black transition-transform duration-300 hover:scale-[1.04]"
+                className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
               >
                 {t("nav.signUp")}
               </Link>

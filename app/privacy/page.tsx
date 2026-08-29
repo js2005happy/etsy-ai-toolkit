@@ -105,7 +105,7 @@ const sections: Section[] = [
     content: (
       <p>
         Privacy questions? Contact us at{" "}
-        <a href="mailto:js2005happy@gmail.com" className="text-[#ff8a52] hover:underline">
+        <a href="mailto:js2005happy@gmail.com" className="text-primary hover:underline">
           js2005happy@gmail.com
         </a>
         .
@@ -124,7 +124,7 @@ export default function PrivacyPage() {
           eyebrow="Legal"
           title={
             <>
-              Privacy <span className="text-[#ff8a52]">Policy</span>
+              Privacy <span className="text-primary">Policy</span>
             </>
           }
           subtitle="How we handle your data, in plain language."
@@ -132,17 +132,17 @@ export default function PrivacyPage() {
 
         <section className="px-5 pb-28 md:pb-36">
           <div className="mx-auto max-w-3xl">
-            <p className="mb-20 text-sm text-white/60">Last updated: August 28, 2026</p>
+            <p className="mb-20 text-sm text-muted-foreground">Last updated: August 28, 2026</p>
 
             <div className="space-y-16">
               {sections.map((s) => (
                 <Reveal key={s.n}>
                   <div>
-                    <h2 className="text-2xl font-semibold tracking-tight text-white md:text-[28px]">
-                      <span className="mr-3 text-[#ff8a52]">{s.n}</span>
+                    <h2 className="text-2xl font-semibold tracking-tight text-foreground md:text-[28px]">
+                      <span className="mr-3 text-primary">{s.n}</span>
                       {s.title}
                     </h2>
-                    <div className="mt-5 space-y-4 text-[16px] leading-relaxed text-white/70">
+                    <div className="mt-5 space-y-4 text-[16px] leading-relaxed text-muted-foreground">
                       {s.content}
                     </div>
                   </div>

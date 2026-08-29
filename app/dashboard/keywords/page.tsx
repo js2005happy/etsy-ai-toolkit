@@ -76,7 +76,7 @@ export default function KeywordsPage() {
           )}
         </div>
 
-        <Card className="mb-8 rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
+        <Card className="mb-8 rounded-xl border-border bg-card p-6">
           <CardHeader className="p-0">
             <CardTitle>Product Details</CardTitle>
             <CardDescription>Describe your product to get relevant keywords.</CardDescription>
@@ -111,23 +111,23 @@ export default function KeywordsPage() {
                   placeholder="e.g. minimalist, boho, vintage"
                 />
               </div>
-              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-[#d9560f]">
+              <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
                 {loading ? 'Generating...' : 'Generate Keywords'}
               </Button>
             </form>
-            {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
+            {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
           </CardContent>
         </Card>
 
         {keywords.length > 0 && (
-          <Card className="rounded-2xl border-white/15 bg-white/[0.04] p-6 shadow-sm">
+          <Card className="rounded-xl border-border bg-card p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Suggested Keywords</h3>
               <Button variant="ghost" size="sm" onClick={copyAll}>Copy All</Button>
             </div>
             <ul className="space-y-2">
               {keywords.map((keyword, index) => (
-                <li key={index} className="rounded-lg bg-white/[0.04] px-3 py-2 text-sm text-foreground">{keyword}</li>
+                <li key={index} className="rounded-lg bg-secondary px-3 py-2 text-sm text-foreground">{keyword}</li>
               ))}
             </ul>
           </Card>

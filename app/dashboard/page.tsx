@@ -152,34 +152,34 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-6xl px-5 py-14 md:py-16">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
             {t('dashboard.welcomeBack')}
           </h1>
-          <p className="mt-2 text-lg text-white/60">
+          <p className="mt-2 text-lg text-muted-foreground">
             {t('dashboard.manageTools')}
           </p>
         </div>
 
         {/* Credits */}
-        <div className="mb-14 rounded-3xl border border-white/15 bg-white/[0.04] p-8 backdrop-blur-xl md:p-10">
+        <div className="mb-14 rounded-xl border border-border bg-card p-8 md:p-10">
           <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
             <div className="flex items-center gap-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/[0.06] text-white">
+              <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-secondary text-foreground">
                 <Coins className="h-7 w-7" />
               </div>
               <div>
-                <div className="text-sm font-normal text-white/60">
+                <div className="text-sm font-normal text-muted-foreground">
                   {t('dashboard.yourCredits')}
                 </div>
                 <div className="mt-1 flex items-baseline gap-2">
-                  <span className="text-4xl font-semibold tracking-tight text-white">
+                  <span className="text-4xl font-semibold tracking-tight text-foreground">
                     {credits !== null ? credits : '…'}
                   </span>
                   {quota !== null && (
-                    <span className="text-lg text-white/60">/ {quota}</span>
+                    <span className="text-lg text-muted-foreground">/ {quota}</span>
                   )}
                 </div>
-                <p className="mt-1 text-sm text-white/60">
+                <p className="mt-1 text-sm text-muted-foreground">
                   {t('dashboard.creditsRemaining')}
                 </p>
               </div>
@@ -197,15 +197,15 @@ export default function DashboardPage() {
               </Button>
             ) : (
               <div className="w-full max-w-xs">
-                <div className="mb-2 flex justify-between text-xs font-medium text-white/60">
+                <div className="mb-2 flex justify-between text-xs font-medium text-muted-foreground">
                   <span>{t('dashboard.usageThisMonth')}</span>
                   <span>
                     {credits !== null ? credits : 0} / {quota ?? '—'}
                   </span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
                   <div
-                    className="h-full rounded-full bg-[#ff8a52] transition-all duration-500"
+                    className="h-full rounded-full bg-primary transition-all duration-500"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
@@ -230,10 +230,10 @@ export default function DashboardPage() {
 
         {/* Tools */}
         <div className="mb-8 flex items-baseline justify-between">
-          <h2 className="text-2xl font-semibold tracking-tight text-white">
+          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
             {t('dashboard.yourTools')}
           </h2>
-          <span className="text-sm text-white/60">{t('dashboard.nineToolsZero')}</span>
+          <span className="text-sm text-muted-foreground">{t('dashboard.nineToolsZero')}</span>
         </div>
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
