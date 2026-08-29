@@ -101,3 +101,22 @@ export async function authenticateRequest(request: Request): Promise<AuthResult>
 
   return buildContext(supabase, user.id, profile)
 }
+
+// Brand preferences live on the profile but are read lazily (only by the tools
+// that shape on-brand copy), so a not-yet-applied `brand_tone`/`brand_keywords`
+// migration can't break the core generation path.
+export async function getBrandPrefs(
+  db: SupabaseClient,
+  userId: string
+): Promise<{ brandTone: string | null; brandKeywords: string | null }> {
+  try {
+    const { data } = await db
+      .from('profiles')
+      .select('brand_tone, brand_keywords')
+      .eq('id', userId)
+      .maybeSingle()
+    return { brandTone: data?.brand_tone ?? null, brandKeywords: data?.brand_keywords ?? null }
+  } catch {
+    return { brandTone: null, brandKeywords: null }
+  }
+}

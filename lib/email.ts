@@ -54,6 +54,28 @@ function button(href: string, label: string): string {
   return `<a href="${href}" style="display:inline-block;margin:24px 0 8px;padding:12px 24px;background:#ff8a52;color:#1a1a1a;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">${label}</a>`
 }
 
+function esc(s: string): string {
+  return s.replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string)
+  )
+}
+
+export async function sendContactEmail(
+  name: string,
+  fromEmail: string,
+  message: string
+): Promise<void> {
+  const adminTo = process.env.CONTACT_TO_EMAIL || 'js2005happy@gmail.com'
+  const html = shell(`
+    <p style="margin:0 0 8px;font-size:12px;color:#9a9aa5;">New message from the contact form</p>
+    <p style="margin:0 0 16px;font-size:15px;color:#e5e5e5;">
+      <strong style="color:#ffffff;">${esc(name)}</strong> &lt;${esc(fromEmail)}&gt;
+    </p>
+    <div style="margin:0;padding:16px;background:#0e0e14;border:1px solid #26262f;border-radius:10px;font-size:14px;line-height:1.7;color:#e5e5e5;white-space:pre-wrap;">${esc(message)}</div>
+  `)
+  await send(adminTo, `Contact form: ${name}`, html)
+}
+
 export async function sendWelcomeEmail(to: string): Promise<void> {
   const html = shell(`
     <p style="margin:0 0 16px;font-size:15px;color:#e5e5e5;">Welcome aboard — your free account is ready with <strong style="color:#ffffff;">10 credits</strong> to try every tool.</p>

@@ -22,7 +22,7 @@ export default function Navbar() {
     { label: t("nav.tools"), href: "/#tools" },
     { label: t("nav.howItWorks"), href: "/#how" },
     { label: t("nav.pricing"), href: "/pricing" },
-    { label: t("nav.support"), href: "mailto:js2005happy@gmail.com" },
+    { label: t("nav.support"), href: "/contact" },
   ];
 
   useEffect(() => {

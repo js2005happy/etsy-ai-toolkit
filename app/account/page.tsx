@@ -8,8 +8,9 @@ import { useI18n } from '@/lib/i18n/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Mail, Coins, Crown, ArrowLeft, LogOut, KeyRound } from 'lucide-react'
+import { Loader2, Mail, Coins, Crown, ArrowLeft, LogOut, KeyRound, Sparkles } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import Navbar from '@/components/shared/navbar'
 import type { User } from '@supabase/supabase-js'
@@ -28,6 +29,12 @@ export default function AccountPage() {
   const [pwError, setPwError] = useState<string | null>(null)
   const [updating, setUpdating] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
+
+  const [brandTone, setBrandTone] = useState('')
+  const [brandKeywords, setBrandKeywords] = useState('')
+  const [brandMessage, setBrandMessage] = useState<string | null>(null)
+  const [brandError, setBrandError] = useState<string | null>(null)
+  const [savingBrand, setSavingBrand] = useState(false)
 
   const isPaid = plan !== 'free' && plan != null
   const planLabel =
@@ -53,6 +60,30 @@ export default function AccountPage() {
       })
       .catch(() => {})
   }, [])
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    const supabase = createClient()
+    ;(async () => {
+      try {
+        const { data } = await supabase
+          .from('profiles')
+          .select('brand_tone, brand_keywords')
+          .eq('id', user.id)
+          .maybeSingle()
+        if (!cancelled && data) {
+          setBrandTone(data.brand_tone ?? '')
+          setBrandKeywords(data.brand_keywords ?? '')
+        }
+      } catch {
+        // ignore — column may not exist before the migration is applied
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user])
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,6 +114,27 @@ export default function AccountPage() {
       setPwError(t('auth.unexpectedError'))
     } finally {
       setUpdating(false)
+    }
+  }
+
+  const handleSaveBrand = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setBrandMessage(null)
+    setBrandError(null)
+    if (!user) return
+    setSavingBrand(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase
+        .from('profiles')
+        .update({ brand_tone: brandTone.trim() || null, brand_keywords: brandKeywords.trim() || null })
+        .eq('id', user.id)
+      if (error) setBrandError(error.message)
+      else setBrandMessage(t('account.brandSaved'))
+    } catch {
+      setBrandError(t('auth.unexpectedError'))
+    } finally {
+      setSavingBrand(false)
     }
   }
 
@@ -157,6 +209,52 @@ export default function AccountPage() {
                 <div className="mt-1 text-lg font-semibold text-foreground">{memberSince ?? '…'}</div>
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Brand preferences */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5" />
+              {t('account.brandTitle')}
+            </CardTitle>
+            <CardDescription>{t('account.brandDesc')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSaveBrand} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="brandTone">{t('account.brandTone')}</Label>
+                <Input
+                  id="brandTone"
+                  value={brandTone}
+                  onChange={(e) => setBrandTone(e.target.value)}
+                  placeholder={t('account.brandTonePlaceholder')}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="brandKeywords">{t('account.brandKeywords')}</Label>
+                <Textarea
+                  id="brandKeywords"
+                  value={brandKeywords}
+                  onChange={(e) => setBrandKeywords(e.target.value)}
+                  placeholder={t('account.brandKeywordsPlaceholder')}
+                  rows={3}
+                />
+              </div>
+              {brandError && <p className="text-sm font-medium text-destructive">{brandError}</p>}
+              {brandMessage && <p className="text-sm font-medium text-emerald-400">{brandMessage}</p>}
+              <Button type="submit" disabled={savingBrand}>
+                {savingBrand ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('dashboard.processing')}
+                  </>
+                ) : (
+                  t('account.saveBrand')
+                )}
+              </Button>
+            </form>
           </CardContent>
         </Card>
 

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { authenticateRequest } from '@/lib/auth'
+import { authenticateRequest, getBrandPrefs } from '@/lib/auth'
 import { generateSocialPost, type SocialPostInput } from '@/lib/openai'
 
 export async function POST(request: Request) {
@@ -19,7 +19,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Insufficient credits. Please upgrade your plan.' }, { status: 403 })
     }
 
-    const result = await generateSocialPost(body)
+    const { brandTone, brandKeywords } = await getBrandPrefs(db, userId)
+    const result = await generateSocialPost({ ...body, brand_tone: brandTone ?? undefined, brand_keywords: brandKeywords ?? undefined })
 
     await db.from('profiles').update({ credits_remaining: credits - 1 }).eq('id', userId)
 

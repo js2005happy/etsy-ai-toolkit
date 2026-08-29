@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { authenticateRequest } from '@/lib/auth'
+import { authenticateRequest, getBrandPrefs } from '@/lib/auth'
 import { optimizeListing } from '@/lib/openai'
 
 export async function POST(request: Request) {
@@ -21,7 +21,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Insufficient credits' }, { status: 403 })
     }
 
-    const result = await optimizeListing({ current_title, current_description, current_tags })
+    const { brandTone, brandKeywords } = await getBrandPrefs(db, userId)
+    const result = await optimizeListing({ current_title, current_description, current_tags, brand_tone: brandTone ?? undefined, brand_keywords: brandKeywords ?? undefined })
 
     await db.from('profiles').update({ credits_remaining: credits - 1 }).eq('id', userId)
 

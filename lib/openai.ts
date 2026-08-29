@@ -1,20 +1,20 @@
 import OpenAI from "openai";
 
-export interface ListingInput { product_name: string; product_type: string; material: string; style: string; }
+export interface ListingInput { product_name: string; product_type: string; material: string; style: string; brand_tone?: string; brand_keywords?: string; }
 export interface ListingOutput { title: string; description: string; tags: string[]; }
-export interface MessageReplyInput { customer_message: string; product_info?: string; tone: string; }
+export interface MessageReplyInput { customer_message: string; product_info?: string; tone: string; brand_tone?: string; brand_keywords?: string; }
 export interface MessageReplyOutput { replies: string[]; }
-export interface SocialPostInput { product_description: string; platform: string; }
+export interface SocialPostInput { product_description: string; platform: string; brand_tone?: string; brand_keywords?: string; }
 export interface SocialPostOutput { caption: string; hashtags: string[]; }
-export interface ReviewReplyInput { review_text: string; rating: number; tone: string; }
+export interface ReviewReplyInput { review_text: string; rating: number; tone: string; brand_tone?: string; brand_keywords?: string; }
 export interface ReviewReplyOutput { replies: string[]; }
-export interface AnnouncementInput { shop_type: string; announcement_type: string; tone: string; }
+export interface AnnouncementInput { shop_type: string; announcement_type: string; tone: string; brand_tone?: string; brand_keywords?: string; }
 export interface AnnouncementOutput { announcement: string; }
 export interface KeywordsInput { product_type: string; market?: string; style?: string; }
 export interface KeywordsOutput { keywords: string[]; }
 export interface TranslateInput { text: string; target_language: string; }
 export interface TranslateOutput { translated_text: string; }
-export interface OptimizeListingInput { current_title?: string; current_description?: string; current_tags?: string; }
+export interface OptimizeListingInput { current_title?: string; current_description?: string; current_tags?: string; brand_tone?: string; brand_keywords?: string; }
 export interface OptimizeListingOutput { title: string; description: string; tags: string[]; suggestions: string; }
 export interface PricingInput { material_cost: number; labor_cost: number; shipping_cost: number; competitor_price_min?: number; competitor_price_max?: number; desired_profit_margin?: number; }
 export interface PricingOutput { suggested_price: number; estimated_profit: number; pricing_strategy: string; }
@@ -56,6 +56,14 @@ async function chat(user: string, opts: { system?: string; json?: boolean } = {}
   }
 }
 
+function brandContext(tone?: string, keywords?: string): string {
+  if (!tone && !keywords) return ''
+  const parts: string[] = []
+  if (tone) parts.push(`Brand tone: ${tone}`)
+  if (keywords) parts.push(`Brand keywords to weave in naturally: ${keywords}`)
+  return `\n\nBrand voice — apply these to the output:\n- ${parts.join('\n- ')}`
+}
+
 export async function generateListing(input: ListingInput): Promise<ListingOutput> {
   if (process.env.USE_MOCK_AI === "true") {
     return {
@@ -64,7 +72,7 @@ export async function generateListing(input: ListingInput): Promise<ListingOutpu
       tags: ["handmade","etsyseller","giftidea","custom","unique","artisan","home","decor","style","material","quality","premium","sale"]
     };
   }
-  const prompt = "You are an Etsy SEO expert. Create a high-converting product listing for:\n- Product Name: " + input.product_name + "\n- Product Type: " + input.product_type + "\n- Material: " + input.material + "\n- Style: " + input.style + "\n\nReturn JSON with exactly three fields:\n1. \"title\": optimized Etsy title (max 140 chars)\n2. \"description\": detailed product description (use emojis and line breaks)\n3. \"tags\": array of 13 Etsy tags (each max 20 chars, lowercase, no duplicates)";
+  const prompt = "You are an Etsy SEO expert. Create a high-converting product listing for:\n- Product Name: " + input.product_name + "\n- Product Type: " + input.product_type + "\n- Material: " + input.material + "\n- Style: " + input.style + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly three fields:\n1. \"title\": optimized Etsy title (max 140 chars)\n2. \"description\": detailed product description (use emojis and line breaks)\n3. \"tags\": array of 13 Etsy tags (each max 20 chars, lowercase, no duplicates)";
   const content = await chat(prompt, { system: "You are an Etsy SEO expert. Always return valid JSON.", json: true });
   return JSON.parse(content) as ListingOutput;
 }
@@ -73,7 +81,7 @@ export async function generateMessageReply(input: MessageReplyInput): Promise<Me
   if (process.env.USE_MOCK_AI === "true") {
     return { replies: ["Thank you for reaching out! We're sorry to hear about the issue and would love to make it right. Could you please share more details?", "We appreciate your patience and we are here to help. Please let us know how we can resolve this for you.", "We're so sorry for the inconvenience. We will do our best to fix this promptly."] };
   }
-  const prompt = "You are a customer service assistant for an Etsy shop. Write three professional and " + input.tone + " replies to the following customer message.\n\nCustomer message: " + input.customer_message + (input.product_info ? "\nProduct info: " + input.product_info : "") + "\n\nReturn JSON with exactly one field:\n\"replies\": array of three strings";
+  const prompt = "You are a customer service assistant for an Etsy shop. Write three professional and " + input.tone + " replies to the following customer message.\n\nCustomer message: " + input.customer_message + (input.product_info ? "\nProduct info: " + input.product_info : "") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly one field:\n\"replies\": array of three strings";
   const content = await chat(prompt, { system: "You are a helpful Etsy customer service assistant. Always return valid JSON.", json: true });
   return JSON.parse(content) as MessageReplyOutput;
 }
@@ -82,7 +90,7 @@ export async function generateSocialPost(input: SocialPostInput): Promise<Social
   if (process.env.USE_MOCK_AI === "true") {
     return { caption: "Check out this amazing product! Perfect for any occasion. #handmade #giftideas", hashtags: ["handmade","giftideas","smallbusiness","shopsmall","etsyfinds","homedecor","unique","supportsmallbusiness"] };
   }
-  const prompt = "You are a social media expert. Create a high-converting social media post for the following product description, specifically for " + input.platform + ".\n\nProduct description: " + input.product_description + "\n\nReturn JSON with exactly two fields:\n1. \"caption\": a short, engaging caption (include emojis)\n2. \"hashtags\": an array of 8-10 relevant hashtags (without # symbol)";
+  const prompt = "You are a social media expert. Create a high-converting social media post for the following product description, specifically for " + input.platform + ".\n\nProduct description: " + input.product_description + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly two fields:\n1. \"caption\": a short, engaging caption (include emojis)\n2. \"hashtags\": an array of 8-10 relevant hashtags (without # symbol)";
   const content = await chat(prompt, { system: "You are a social media expert. Always return valid JSON.", json: true });
   return JSON.parse(content) as SocialPostOutput;
 }
@@ -91,7 +99,7 @@ export async function generateReviewReply(input: ReviewReplyInput): Promise<Revi
   if (process.env.USE_MOCK_AI === "true") {
     return { replies: ["Thank you so much for your kind words! We're thrilled you love your order.", "We're sorry to hear that. We'd love to make things right. Please send us a message.", "Thank you for your feedback. We're always improving our products and service."] };
   }
-  const prompt = "You are an Etsy shop owner replying to a customer review. The review rating is " + input.rating + " stars. Tone should be " + input.tone + ".\n\nReview text: " + input.review_text + "\n\nWrite two or three replies that are professional, polite, and appropriate for the rating.\n\nReturn JSON with exactly one field:\n\"replies\": array of strings";
+  const prompt = "You are an Etsy shop owner replying to a customer review. The review rating is " + input.rating + " stars. Tone should be " + input.tone + ".\n\nReview text: " + input.review_text + brandContext(input.brand_tone, input.brand_keywords) + "\n\nWrite two or three replies that are professional, polite, and appropriate for the rating.\n\nReturn JSON with exactly one field:\n\"replies\": array of strings";
   const content = await chat(prompt, { system: "You are a helpful Etsy seller. Always return valid JSON.", json: true });
   return JSON.parse(content) as ReviewReplyOutput;
 }
@@ -100,7 +108,7 @@ export async function generateAnnouncement(input: AnnouncementInput): Promise<An
   if (process.env.USE_MOCK_AI === "true") {
     return { announcement: "Welcome to our shop! We specialize in beautiful " + input.shop_type + " items. Thank you for visiting, and feel free to reach out with any questions!" };
   }
-  const prompt = "You are an Etsy shop owner. Write a " + input.announcement_type + " announcement for a shop that sells " + input.shop_type + ". Tone should be " + input.tone + ".\n\nReturn JSON with exactly one field:\n\"announcement\": a string of the announcement text";
+  const prompt = "You are an Etsy shop owner. Write a " + input.announcement_type + " announcement for a shop that sells " + input.shop_type + ". Tone should be " + input.tone + brandContext(input.brand_tone, input.brand_keywords) + ".\n\nReturn JSON with exactly one field:\n\"announcement\": a string of the announcement text";
   const content = await chat(prompt, { system: "You are a helpful Etsy shop owner. Always return valid JSON.", json: true });
   return JSON.parse(content) as AnnouncementOutput;
 }
@@ -132,7 +140,7 @@ export async function optimizeListing(input: OptimizeListingInput): Promise<Opti
       suggestions: "Add more long-tail keywords and use all 13 tags."
     };
   }
-  const prompt = "You are an Etsy SEO expert. Analyze the following existing listing and provide an improved version.\n\nCurrent title: " + (input.current_title || "N/A") + "\nCurrent description: " + (input.current_description || "N/A") + "\nCurrent tags: " + (input.current_tags || "N/A") + "\n\nReturn JSON with these fields:\n1. \"title\": optimized title\n2. \"description\": optimized description\n3. \"tags\": array of 13 optimized tags\n4. \"suggestions\": a short paragraph explaining what was improved";
+  const prompt = "You are an Etsy SEO expert. Analyze the following existing listing and provide an improved version.\n\nCurrent title: " + (input.current_title || "N/A") + "\nCurrent description: " + (input.current_description || "N/A") + "\nCurrent tags: " + (input.current_tags || "N/A") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with these fields:\n1. \"title\": optimized title\n2. \"description\": optimized description\n3. \"tags\": array of 13 optimized tags\n4. \"suggestions\": a short paragraph explaining what was improved";
   const content = await chat(prompt, { system: "You are an Etsy SEO expert. Always return valid JSON.", json: true });
   return JSON.parse(content) as OptimizeListingOutput;
 }

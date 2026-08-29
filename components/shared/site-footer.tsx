@@ -26,13 +26,14 @@ export default function SiteFooter() {
         { label: t("footer.howItWorks"), href: "/#how" },
         { label: t("footer.pricing"), href: "/pricing" },
         { label: t("footer.dashboard"), href: "/dashboard" },
+        { label: "FAQ", href: "/faq" },
       ],
     },
     {
       title: t("footer.company"),
       links: [
         { label: "GitHub", href: "https://github.com/js2005happy/etsy-ai-toolkit" },
-        { label: t("footer.contact"), href: "mailto:js2005happy@gmail.com" },
+        { label: t("footer.contact"), href: "/contact" },
       ],
     },
     {
