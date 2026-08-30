@@ -592,14 +592,45 @@ export default function AurevonLanding() {
             ))}
           </div>
 
-          <div className="mt-14 flex flex-col items-start justify-between gap-6 border-t border-white/10 pt-6 sm:flex-row sm:items-center">
-            <p className="text-sm text-white/40">{t('footer.copyright')}</p>
+          <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-white/10 pt-6">
+            <a
+              href="https://dang.ai"
+              target="_blank"
+              rel="dofollow noopener"
+              aria-label="Verified on DANG!"
+              className="inline-block transition-opacity hover:opacity-80"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://assets.dang.ai/badges/dang-verified-dark.png"
+                alt="Verified on DANG!"
+                width={180}
+                height={65}
+                className="h-auto w-[180px] max-w-full"
+              />
+            </a>
+            <a
+              href="https://www.toolpilot.ai"
+              target="_blank"
+              rel="dofollow noopener"
+              aria-label="ToolPilot AI"
+              className="inline-block transition-opacity hover:opacity-80"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://www.toolpilot.ai/cdn/shop/files/f-w_690x151_crop_center.png"
+                alt="ToolPilot AI"
+                width={180}
+                height={39}
+                className="h-auto w-[180px] max-w-full"
+              />
+            </a>
             <a
               href="https://www.producthunt.com/products/etsy-ai-toolkit?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-etsy-ai-toolkit"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Etsy AI Toolkit on Product Hunt"
-              className="transition-opacity hover:opacity-80"
+              className="inline-block transition-opacity hover:opacity-80"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -611,6 +642,8 @@ export default function AurevonLanding() {
               />
             </a>
           </div>
+
+          <p className="mt-6 text-sm text-white/40">{t('footer.copyright')}</p>
         </div>
       </footer>
     </div>
