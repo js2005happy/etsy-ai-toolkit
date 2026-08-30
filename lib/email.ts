@@ -60,6 +60,36 @@ function esc(s: string): string {
   )
 }
 
+// Paddle amounts are in the lowest denomination (cents). $9.00 → "900".
+function formatMoney(amount: string, currency: string): string {
+  const n = Number(amount)
+  if (Number.isNaN(n)) return `${currency} ${amount}`
+  const sym: Record<string, string> = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$' }
+  const prefix = sym[currency] ?? `${currency} `
+  return `${prefix}${(n / 100).toFixed(2)}`
+}
+
+export async function sendNewSaleEmail(opts: {
+  buyerEmail?: string
+  amount: string
+  currency: string
+  tier: string
+}): Promise<void> {
+  const adminTo = process.env.CONTACT_TO_EMAIL || '2857243938@qq.com'
+  const amountStr = formatMoney(opts.amount, opts.currency)
+  const label = opts.tier.charAt(0).toUpperCase() + opts.tier.slice(1)
+  const buyerLine = opts.buyerEmail
+    ? `<p style="margin:0;font-size:14px;color:#9a9aa5;">Buyer: ${esc(opts.buyerEmail)}</p>`
+    : ''
+  const html = shell(`
+    <p style="margin:0 0 8px;font-size:12px;color:#9a9aa5;">New payment on craftly.world</p>
+    <p style="margin:0 0 16px;font-size:24px;font-weight:700;color:#ffffff;">${amountStr}</p>
+    <p style="margin:0 0 8px;font-size:14px;color:#e5e5e5;">Plan: <strong style="color:#ffffff;">${esc(label)}</strong></p>
+    ${buyerLine}
+  `)
+  await send(adminTo, `New sale: ${amountStr} (${label})`, html)
+}
+
 export async function sendContactEmail(
   name: string,
   fromEmail: string,

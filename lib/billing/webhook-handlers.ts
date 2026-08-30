@@ -1,7 +1,11 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { hasPaidAccess } from './access'
 import { PRICE_TO_TIER, tierQuota, type TierName } from '@/lib/pricing'
-import { sendSubscriptionActiveEmail, sendSubscriptionCanceledEmail } from '@/lib/email'
+import {
+  sendNewSaleEmail,
+  sendSubscriptionActiveEmail,
+  sendSubscriptionCanceledEmail,
+} from '@/lib/email'
 import type {
   CustomerNotification,
   SubscriptionNotification,
@@ -118,6 +122,20 @@ export async function handleTransactionCompleted(
   const priceId = data.items?.[0]?.price?.id
   if (priceId) {
     await syncUserPlan(userId, priceId, 'active')
+  }
+
+  if (data.status === 'completed') {
+    const total = data.details?.totals?.total
+    if (total) {
+      const tier = resolveTier(priceId, 'active')
+      const buyerEmail = await resolveEmail(userId)
+      await sendNewSaleEmail({
+        buyerEmail,
+        amount: total,
+        currency: data.currencyCode,
+        tier,
+      })
+    }
   }
 }
 
