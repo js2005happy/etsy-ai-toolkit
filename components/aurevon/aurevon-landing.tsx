@@ -592,8 +592,24 @@ export default function AurevonLanding() {
             ))}
           </div>
 
-          <div className="mt-14 border-t border-white/10 pt-6">
+          <div className="mt-14 flex flex-col items-start justify-between gap-6 border-t border-white/10 pt-6 sm:flex-row sm:items-center">
             <p className="text-sm text-white/40">{t('footer.copyright')}</p>
+            <a
+              href="https://www.producthunt.com/products/etsy-ai-toolkit?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-etsy-ai-toolkit"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Etsy AI Toolkit on Product Hunt"
+              className="transition-opacity hover:opacity-80"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1236192&theme=light"
+                alt="Etsy AI Toolkit - Made by you. Written by AI. | Product Hunt"
+                width={250}
+                height={54}
+                className="h-[54px] w-auto"
+              />
+            </a>
           </div>
         </div>
       </footer>
