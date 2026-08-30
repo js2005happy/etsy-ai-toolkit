@@ -1,17 +1,38 @@
 {
   "name": "etsy-ai-toolkit-mcp",
   "version": "1.0.0",
-  "description": "MCP server for the Etsy Seller AI Toolkit",
+  "description": "Model Context Protocol (MCP) server for Etsy AI Toolkit — 10 AI tools for Etsy sellers (stdio + Streamable HTTP)",
+  "license": "MIT",
   "type": "module",
   "bin": {
-    "etsy-ai-toolkit-mcp": "dist/index.js"
+    "etsy-ai-toolkit-mcp": "dist/index.js",
+    "etsy-ai-toolkit-mcp-http": "dist/http.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18"
   },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "start:http": "node dist/http.js",
     "dev": "tsx src/index.ts",
-    "dev:http": "tsx src/http.ts"
+    "dev:http": "tsx src/http.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "etsy",
+    "ai",
+    "ecommerce",
+    "listing"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/js2005happy/etsy-ai-toolkit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.0",
