@@ -32,7 +32,8 @@ Etsy AI Toolkit is a production SaaS (live at **[craftly.world](https://craftly.
 - **4-tier billing** — powered by Paddle (checkout, customer portal, webhooks).
 - **Multi-provider AI** — a primary chat relay with automatic fallback, a vision model for image translation, and a dedicated image-generation model for posters.
 - **MCP server** — a Model Context Protocol server exposes the toolkit to Claude and other MCP clients.
-- **7 languages** — the entire UI is localized.
+- **Batch image generation** — poster variants, per-platform sizes, or a bulk product list, all generated in one run.
+- **One-click language switcher** — flip the entire UI between 7 languages (en / de / fr / es / zh / ja / it) instantly.
 
 <p align="center">
   <img src="public/dashboard.webp" alt="Dashboard — ten tools and credits" width="1280" />
