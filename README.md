@@ -1,38 +1,124 @@
-# Etsy AI Toolkit
+<p align="center">
+  <img src="public/banner.webp" alt="Etsy AI Toolkit" width="1280" />
+</p>
 
-An AI-powered toolkit for Etsy sellers — generate listings, reply to messages & reviews, write social posts, optimize SEO, and price your products, all from one dashboard.
+<h1 align="center">Etsy AI Toolkit</h1>
 
-## Features
+<p align="center">
+  <strong>The AI copilot for Etsy sellers.</strong><br />
+  Write listings, reply to buyers, generate product posters, and price to profit — from one dashboard.
+</p>
+
+<p align="center">
+  <a href="https://craftly.world"><img src="https://img.shields.io/badge/website-craftly.world-0ea5e9" alt="website" /></a>
+  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-14-000000?logo=nextdotjs&logoColor=white" alt="Next.js 14" /></a>
+  <img src="https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38bdf8?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <a href="https://supabase.com"><img src="https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white" alt="Supabase" /></a>
+  <a href="https://paddle.com"><img src="https://img.shields.io/badge/Paddle-billing-6633ee" alt="Paddle" /></a>
+  <a href="https://vercel.com"><img src="https://img.shields.io/badge/Vercel-deployed-000000?logo=vercel&logoColor=white" alt="Vercel" /></a>
+  <img src="https://img.shields.io/badge/MCP-server-ED8106" alt="MCP server" />
+  <img src="https://img.shields.io/badge/i18n-7_languages-16a34a" alt="7 languages" />
+</p>
+
+<p align="center">
+  <img src="public/feature.webp" alt="Product poster generation" width="1280" />
+</p>
+
+---
+
+## What it is
+
+Etsy AI Toolkit is a production SaaS (live at **[craftly.world](https://craftly.world)**) that removes the busywork from running an Etsy shop. Ten AI tools cover the full listing lifecycle — from first draft, through buyer conversation and reviews, to SEO, translation, and product photography. Free tier gives you **10 credits + 3 generated images** with no card, so you can try everything before paying.
+
+- **OTP sign-in** — passwordless email login via Supabase Auth (6-digit code).
+- **Credit + image quotas** — every generation is metered; tiers unlock more.
+- **4-tier billing** — powered by Paddle (checkout, customer portal, webhooks).
+- **Multi-provider AI** — a primary chat relay with an automatic Groq fallback, a vision model for image translation, and a dedicated image-generation model for posters.
+- **MCP server** — a Model Context Protocol server exposes the toolkit to Claude and other MCP clients.
+- **7 languages** — the entire UI is localized.
+
+## The 10 tools
 
 | Tool | What it does |
 | --- | --- |
-| Listing Generator | Create SEO-optimized titles, descriptions, and 13 tags |
-| Message Reply | Draft professional replies to buyer messages |
-| Review Reply | Respond to customer reviews in the right tone |
-| Social Post | Generate captions + hashtags for social media |
-| Shop Announcement | Write shop announcements |
-| Keyword Generator | Get high-volume, long-tail keywords |
-| Listing Optimizer | Improve existing listings |
-| Pricing Advisor | Suggest prices and profit margins |
-| Translate | Translate listings while keeping SEO keywords |
+| **Listing Generator** | SEO-optimized title, description, and 13 Etsy tags from your product details |
+| **Message Reply** | Three professional replies to any buyer message, in your brand voice |
+| **Review Reply** | Rating-aware review responses that keep your 5-star reputation intact |
+| **Social Post** | Captions + hashtags tuned for Instagram, Pinterest, TikTok, Facebook, and X |
+| **Shop Announcement** | Sales, restocks, or holiday notices written in your tone |
+| **Keyword Generator** | 15 high-volume, long-tail keywords for search and ads |
+| **Listing Optimizer** | Rewrites an existing listing and explains exactly what it improved |
+| **Pricing Advisor** | Suggested price and profit margin from your costs and competitors |
+| **Translate** | Translates listing text **or images** (vision OCR) while preserving SEO keywords |
+| **Product Image Generator** | AI-generated product posters and banners (see below) |
 
-Plus email/password authentication and a credits system for tracking generations.
+### Product image generator
 
-## Tech Stack
+Three batch modes share one backend (`POST /api/generate-images`), so you never wait for one poster at a time:
 
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS + shadcn/ui
-- **Auth & DB:** Supabase (SSR)
-- **AI:** LLM API
+- **Variants** — 2–4 different-styled posters of the same product (Etsy listings want multiple images).
+- **Multi-platform** — one poster per platform size (Etsy / Instagram / Pinterest / TikTok / YouTube / Facebook).
+- **Bulk** — paste a list of products, get one poster each.
 
-## Getting Started
+Each poster consumes 1 image credit, deducted per generated image.
+
+## Pricing
+
+| Tier | Monthly | Yearly | Credits | Images |
+| --- | --- | --- | --- | --- |
+| **Free** | — | — | 10 | 3 |
+| **Basic** | $9 | $79 | 100 | 20 |
+| **Pro** | $19 | $179 | 300 | 60 |
+| **Scale** | $39 | $349 | 1000 | 300 |
+
+## MCP server
+
+A Model Context Protocol server (`mcp-server/`) exposes the toolkit to any MCP client (Claude, Cursor, etc.). It ships with **dual transport** — stdio and Streamable HTTP — and a dedicated service-account auth (`x-mcp-key`).
+
+| Tool | Purpose |
+| --- | --- |
+| `generate_listing` | Create a listing (title / description / tags) |
+| `generate_message_reply` | Draft buyer message replies |
+| `generate_review_reply` | Respond to reviews |
+| `generate_social_post` | Write social captions + hashtags |
+| `generate_announcement` | Write shop announcements |
+| `generate_keywords` | Generate keywords |
+| `translate_listing` | Translate listing text |
+| `optimize_listing` | Improve an existing listing |
+| `generate_pricing_advice` | Suggest pricing and margins |
+| `get_credits` | Check remaining credits |
+
+```bash
+cd mcp-server
+npm install
+npm run build
+npm start          # stdio
+npm run start:http # Streamable HTTP
+```
+
+## Tech stack
+
+| Layer | Choice |
+| --- | --- |
+| Framework | Next.js 14 (App Router), TypeScript |
+| Styling | Tailwind CSS, shadcn/ui + Radix UI, Framer Motion |
+| Auth | Supabase Auth (OTP, SSR) |
+| Database | Supabase (Postgres + RLS) |
+| Billing | Paddle (checkout, portal, webhooks) |
+| Email | Resend (welcome, subscription lifecycle) |
+| AI | gpt-4o-mini (primary relay) → Groq llama-3.3-70b (fallback) · qwen/qwen3.7-plus (vision) · gpt-image-2-all (images) |
+| i18n | Lightweight custom framework, 7 locales (en / de / fr / es / zh / ja / it) |
+| MCP | @modelcontextprotocol/sdk, 10 tools |
+
+## Getting started
 
 ### Prerequisites
 
 - Node.js 18+
 - A [Supabase](https://supabase.com) project
-- An LLM provider API key
+- An LLM provider API key (OpenAI-compatible)
+- (Optional) Paddle + Resend keys for billing and email
 
 ### 1. Install
 
@@ -42,7 +128,7 @@ npm install
 
 ### 2. Configure environment variables
 
-Create a `.env.local` file in the project root:
+Create a `.env.local` in the project root:
 
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
@@ -50,13 +136,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 OPENAI_API_KEY=your_llm_api_key
 # Optional: override the LLM base URL (custom gateway/proxy)
 OPENAI_BASE_URL=
-# Optional: set to "true" to run without calling the LLM API
-USE_MOCK_AI=false
+# Optional: Groq fallback when the primary relay fails
+GROQ_API_KEY=
 ```
 
 ### 3. Set up the database
 
-Run the migration in `supabase/migrations/0001_init.sql` (SQL Editor or `supabase db push`).
+Apply the migrations in `supabase/migrations/` (SQL Editor or `supabase db push`). They cover the schema, Row Level Security, the signup trigger, and the pricing/image-quota gradient.
 
 ### 4. Run
 
@@ -66,37 +152,47 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-## Environment Variables
+## Environment variables
 
 | Variable | Required | Description |
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
-| `OPENAI_API_KEY` | Yes | LLM API key |
+| `OPENAI_API_KEY` | Yes | Primary LLM API key |
 | `OPENAI_BASE_URL` | No | Override the LLM base URL (custom gateway/proxy) |
-| `USE_MOCK_AI` | No | Set `true` to use mock responses instead of the LLM API |
+| `GROQ_API_KEY` | No | Fallback LLM provider key |
+| `GROQ_CHAT_MODEL` | No | Fallback model (default `llama-3.3-70b-versatile`) |
+| `MOMA_VISION_API_KEY` | No | Vision model key for image translation |
+| `USE_MOCK_AI` | No | Set `true` to run without calling any LLM API |
 
-> The API key is used **server-side only** and is never exposed to the browser. Never commit `.env.local`.
+> API keys are used **server-side only** and never reach the browser. Never commit `.env.local`.
 
 ## Database
 
-The schema lives in [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql):
+Schema lives in `supabase/migrations/`:
 
-- `profiles` — one row per user, tracks `credits_remaining`
+- `profiles` — one row per user; tracks `credits_remaining`, `images_remaining`, subscription status, and brand prefs
 - `generations` — a log of every AI generation
-- `handle_new_user()` trigger — auto-creates a profile row on signup
-- Row Level Security policies on both tables
+- `handle_new_user()` trigger — auto-creates a profile row on signup (with the Free quota)
+- Row Level Security policies on all tables
 
-## Project Structure
+## Project structure
 
 ```
 app/
-  (auth)/           # login / signup
-  api/              # AI generation + credits API routes
-  dashboard/        # tool pages
+  (auth)/             # OTP login / signup
+  api/                # AI generation, billing, image routes
+  dashboard/          # the 10 tool pages
+components/
+  dashboard/images/   # image generator (hook, panels, result grid)
+  ui/                 # shadcn/ui primitives
 lib/
-  openai.ts         # LLM integration
-  supabase/         # Supabase clients (browser / server / middleware)
+  auth.ts             # request auth + tier/image access
+  openai.ts           # multi-provider AI + image generation
+  pricing.ts          # tier/price definitions
+  email.ts            # Resend email helpers
+  i18n/               # lightweight i18n framework
+mcp-server/           # MCP server (stdio + Streamable HTTP)
 supabase/
-  migrations/       # SQL schema migrations
+  migrations/         # SQL schema migrations
 ```
