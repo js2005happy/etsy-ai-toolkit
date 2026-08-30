@@ -235,6 +235,23 @@ export async function generateProductImage(input: ProductImageInput): Promise<Pr
   throw new Error("Image generation returned no image");
 }
 
+// Generate a batch of product images. Reuses the single-image path but
+// fans out with bounded concurrency (3 at a time) so the relay gateway
+// isn't hammered. The gpt-image relay doesn't support `n > 1`, so batch
+// means multiple independent generate calls.
+export async function generateProductImages(
+  inputs: ProductImageInput[]
+): Promise<ProductImageOutput[]> {
+  const results: ProductImageOutput[] = []
+  const CONCURRENCY = 3
+  for (let i = 0; i < inputs.length; i += CONCURRENCY) {
+    const batch = inputs.slice(i, i + CONCURRENCY)
+    const out = await Promise.all(batch.map(generateProductImage))
+    results.push(...out)
+  }
+  return results
+}
+
 export async function generatePricingAdvice(input: PricingInput): Promise<PricingOutput> {
   if (process.env.USE_MOCK_AI === "true") {
     const totalCost = input.material_cost + input.labor_cost + input.shipping_cost;

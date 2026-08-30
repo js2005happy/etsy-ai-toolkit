@@ -1,137 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Coins } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Coins, Download, ExternalLink, Image as ImageIcon } from 'lucide-react'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
-
-const PLATFORMS = [
-  { label: 'Etsy Listing (1:1)', size: '1024x1024' },
-  { label: 'Instagram Post (1:1)', size: '1024x1024' },
-  { label: 'Pinterest Pin (2:3)', size: '1024x1536' },
-  { label: 'TikTok / Reels Cover (9:16)', size: '1024x1536' },
-  { label: 'YouTube Thumbnail (16:9)', size: '1536x1024' },
-  { label: 'Facebook Ad (4:5)', size: '1024x1536' },
-]
-
-const STYLES = [
-  'Studio product photography',
-  'Lifestyle scene',
-  'Minimalist',
-  'Vintage',
-  'Bold & colorful',
-]
-
-const LANGUAGES = [
-  'English',
-  'Spanish',
-  'French',
-  'German',
-  'Italian',
-  'Portuguese',
-  'Dutch',
-  'Japanese',
-  'Korean',
-  'Chinese (Simplified)',
-  'Chinese (Traditional)',
-  'Russian',
-  'Arabic',
-  'Turkish',
-  'Polish',
-  'Vietnamese',
-  'Thai',
-  'No text',
-]
-
-interface ProductImageOutput {
-  imageUrl: string
-  revised_prompt?: string | null
-}
+import { useImageGeneration } from '@/components/dashboard/images/use-image-generation'
+import VariantsPanel from '@/components/dashboard/images/variants-panel'
+import PlatformsPanel from '@/components/dashboard/images/platforms-panel'
+import BulkPanel from '@/components/dashboard/images/bulk-panel'
+import ImageResultGrid from '@/components/dashboard/images/image-result-grid'
 
 export default function ImagesPage() {
-  const [loading, setLoading] = useState(false)
-  const [credits, setCredits] = useState<number | null>(null)
-  const [result, setResult] = useState<ProductImageOutput | null>(null)
-  const [error, setError] = useState<string | null>(null)
-
-  const [formData, setFormData] = useState({
-    product_name: '',
-    product_description: '',
-    platform: PLATFORMS[0].label,
-    style: STYLES[0],
-    language: LANGUAGES[0],
-  })
-
-  useEffect(() => {
-    async function fetchCredits() {
-      try {
-        const res = await fetch('/api/user/credits')
-        if (res.ok) {
-          const data = await res.json()
-          setCredits(data.credits)
-        }
-      } catch (e) {
-        console.error('Failed to fetch credits', e)
-      }
-    }
-    fetchCredits()
-  }, [])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-    setResult(null)
-
-    const platformObj = PLATFORMS.find((p) => p.label === formData.platform)
-
-    try {
-      const response = await fetch('/api/generate-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          product_name: formData.product_name,
-          product_description: formData.product_description,
-          platform: formData.platform,
-          style: formData.style,
-          language: formData.language,
-          size: platformObj?.size ?? '1024x1024',
-        }),
-      })
-
-      if (response.status === 401) {
-        setError('Please log in to use this tool.')
-        return
-      }
-      if (response.status === 403) {
-        setError('Insufficient credits. Please upgrade your plan to generate more images.')
-        return
-      }
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Something went wrong')
-      }
-
-      const data = await response.json()
-      setResult(data)
-
-      const res = await fetch('/api/user/credits')
-      if (res.ok) {
-        const creditData = await res.json()
-        setCredits(creditData.credits)
-      }
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { loading, images, error, credits, generate } = useImageGeneration()
 
   return (
     <div className="container mx-auto py-10 px-4 max-w-6xl">
@@ -144,7 +24,7 @@ export default function ImagesPage() {
         {credits !== null && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20">
             <Coins className="h-4 w-4" />
-            <span>{credits} Credits Left</span>
+            <span>{credits} Images Left</span>
           </div>
         )}
       </div>
@@ -153,172 +33,30 @@ export default function ImagesPage() {
         <Card>
           <CardHeader>
             <CardTitle className="font-display">Poster Details</CardTitle>
-            <CardDescription>Describe your product and pick a platform and style.</CardDescription>
+            <CardDescription>Pick a generation mode and describe your product.</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="product_name">Product Name</Label>
-                <Input
-                  id="product_name"
-                  placeholder="e.g. Handmade blue ceramic vase"
-                  value={formData.product_name}
-                  onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="product_description">Product Description</Label>
-                <Textarea
-                  id="product_description"
-                  placeholder="e.g. A minimalist ceramic vase with floral patterns, glazed in deep blue, perfect for home decor..."
-                  value={formData.product_description}
-                  onChange={(e) => setFormData({ ...formData, product_description: e.target.value })}
-                  required
-                  className="min-h-[120px]"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Platform</Label>
-                <Select
-                  value={formData.platform}
-                  onValueChange={(value) => setFormData({ ...formData, platform: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select platform" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PLATFORMS.map((p) => (
-                      <SelectItem key={p.label} value={p.label}>
-                        {p.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Visual Style</Label>
-                <Select
-                  value={formData.style}
-                  onValueChange={(value) => setFormData({ ...formData, style: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select style" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STYLES.map((s) => (
-                      <SelectItem key={s} value={s}>
-                        {s}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Poster Text Language</Label>
-                <Select
-                  value={formData.language}
-                  onValueChange={(value) => setFormData({ ...formData, language: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {LANGUAGES.map((l) => (
-                      <SelectItem key={l} value={l}>
-                        {l}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Image...
-                  </>
-                ) : (
-                  'Generate Image'
-                )}
-              </Button>
-            </form>
+            <Tabs defaultValue="variants">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="variants">Variants</TabsTrigger>
+                <TabsTrigger value="platforms">Multi-Platform</TabsTrigger>
+                <TabsTrigger value="bulk">Bulk</TabsTrigger>
+              </TabsList>
+              <TabsContent value="variants" className="mt-4">
+                <VariantsPanel onGenerate={generate} loading={loading} />
+              </TabsContent>
+              <TabsContent value="platforms" className="mt-4">
+                <PlatformsPanel onGenerate={generate} loading={loading} />
+              </TabsContent>
+              <TabsContent value="bulk" className="mt-4">
+                <BulkPanel onGenerate={generate} loading={loading} />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
 
         <div className="space-y-6">
-          {error && (
-            <Card className="border-destructive bg-destructive/10">
-              <CardContent className="pt-6">
-                <p className="text-destructive font-medium">{error}</p>
-                {error.includes('credits') && (
-                  <Button variant="link" className="p-0 h-auto text-destructive mt-2" asChild>
-                    <Link href="/pricing">Upgrade Plan &rarr;</Link>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {!result && !loading && !error && (
-            <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
-              <ImageIcon className="h-12 w-12 mb-4" />
-              <p>Describe your product and click generate to get a marketing poster.</p>
-            </div>
-          )}
-
-          {loading && (
-            <div className="h-full flex flex-col items-center justify-center p-12 text-center text-foreground">
-              <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-lg font-medium">AI is painting your poster...</p>
-            </div>
-          )}
-
-          {result && (
-            <Card className="overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium font-display">Generated Poster</CardTitle>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => window.open(result.imageUrl, '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      const a = document.createElement('a')
-                      a.href = result.imageUrl
-                      a.download = 'product-poster.png'
-                      a.target = '_blank'
-                      a.rel = 'noopener'
-                      a.click()
-                    }}
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="rounded-xl overflow-hidden border border-border bg-secondary">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={result.imageUrl}
-                    alt="Generated product poster"
-                    className="w-full h-auto"
-                  />
-                </div>
-                {result.revised_prompt && (
-                  <p className="text-xs text-muted-foreground whitespace-pre-wrap">
-                    {result.revised_prompt}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          <ImageResultGrid images={images} loading={loading} error={error} />
         </div>
       </div>
     </div>
