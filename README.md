@@ -93,6 +93,16 @@ A Model Context Protocol server (`mcp-server/`) exposes the toolkit to any MCP c
 | `generate_pricing_advice` | Suggest pricing and margins |
 | `get_credits` | Check remaining credits |
 
+Published to npm as [`etsy-ai-toolkit-mcp`](https://www.npmjs.com/package/etsy-ai-toolkit-mcp):
+
+```bash
+npm install -g etsy-ai-toolkit-mcp
+etsy-ai-toolkit-mcp          # stdio
+etsy-ai-toolkit-mcp-http     # Streamable HTTP
+```
+
+Or run from source:
+
 ```bash
 cd mcp-server
 npm install
