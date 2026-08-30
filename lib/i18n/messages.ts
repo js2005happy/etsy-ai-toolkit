@@ -94,6 +94,7 @@ export const messages: Record<string, NestedDict> = {
         description: 'For trying it out — no card required.',
         features: [
           '10 AI credits per month',
+          '3 free AI product images',
           'Listing generator',
           'Message & review replies',
           'Social media posts',
@@ -107,14 +108,14 @@ export const messages: Record<string, NestedDict> = {
           'Everything in Free',
           'Listing translation & optimizer',
           'Pricing advisor',
-          'No image generation',
+          '20 AI product images per month',
         ],
       },
       Pro: {
         description: 'For growing shops that need product imagery.',
         features: [
           '300 AI credits per month',
-          '30 AI product images per month',
+          '60 AI product images per month',
           'Everything in Basic',
           'Image generator unlocked',
           'Priority AI processing',
@@ -124,7 +125,7 @@ export const messages: Record<string, NestedDict> = {
         description: 'For established shops and power sellers.',
         features: [
           '1000 AI credits per month',
-          '100 AI product images per month',
+          '300 AI product images per month',
           'Everything in Pro',
           'Bulk generation',
           'Dedicated support',
@@ -315,6 +316,7 @@ export const messages: Record<string, NestedDict> = {
         description: 'Zum Ausprobieren — keine Karte nötig.',
         features: [
           '10 KI-Credits pro Monat',
+          '3 kostenlose KI-Produktbilder',
           'Listing-Generator',
           'Nachrichten- & Bewertungsantworten',
           'Social-Media-Posts',
@@ -328,14 +330,14 @@ export const messages: Record<string, NestedDict> = {
           'Alles aus Free',
           'Listing-Übersetzung & -Optimierung',
           'Preisberater',
-          'Keine Bilderzeugung',
+          '20 KI-Produktbilder pro Monat',
         ],
       },
       Pro: {
         description: 'Für wachsende Shops, die Produktbilder brauchen.',
         features: [
           '300 KI-Credits pro Monat',
-          '30 KI-Produktbilder pro Monat',
+          '60 KI-Produktbilder pro Monat',
           'Alles aus Basic',
           'Bildgenerator freigeschaltet',
           'Priorisierte KI-Verarbeitung',
@@ -345,7 +347,7 @@ export const messages: Record<string, NestedDict> = {
         description: 'Für etablierte Shops und Power-Seller.',
         features: [
           '1000 KI-Credits pro Monat',
-          '100 KI-Produktbilder pro Monat',
+          '300 KI-Produktbilder pro Monat',
           'Alles aus Pro',
           'Massen-Erstellung',
           'Dedizierter Support',
@@ -528,6 +530,7 @@ export const messages: Record<string, NestedDict> = {
         description: 'Pour essayer — aucune carte requise.',
         features: [
           '10 crédits IA par mois',
+          '3 images produit IA gratuites',
           "Générateur d'annonces",
           'Réponses aux messages et avis',
           'Posts sur les réseaux sociaux',
@@ -541,14 +544,14 @@ export const messages: Record<string, NestedDict> = {
           'Tout ce qui est dans Free',
           "Traduction et optimisation d'annonces",
           'Conseiller tarifaire',
-          "Pas de génération d'images",
+          '20 images produit IA par mois',
         ],
       },
       Pro: {
         description: "Pour les boutiques en croissance qui ont besoin d'images.",
         features: [
           '300 crédits IA par mois',
-          '30 images produit IA par mois',
+          '60 images produit IA par mois',
           'Tout ce qui est dans Basic',
           "Générateur d'images débloqué",
           'Traitement IA prioritaire',
@@ -558,7 +561,7 @@ export const messages: Record<string, NestedDict> = {
         description: 'Pour les boutiques établies et les gros vendeurs.',
         features: [
           '1000 crédits IA par mois',
-          '100 images produit IA par mois',
+          '300 images produit IA par mois',
           'Tout ce qui est dans Pro',
           'Génération en masse',
           'Assistance dédiée',
@@ -746,6 +749,7 @@ export const messages: Record<string, NestedDict> = {
         description: 'Para probarlo — sin tarjeta.',
         features: [
           '10 créditos de IA al mes',
+          '3 imágenes de producto IA gratis',
           'Generador de anuncios',
           'Respuestas a mensajes y reseñas',
           'Publicaciones en redes sociales',
@@ -759,14 +763,14 @@ export const messages: Record<string, NestedDict> = {
           'Todo lo de Free',
           'Traducción y optimización de anuncios',
           'Asesor de precios',
-          'Sin generación de imágenes',
+          '20 imágenes de producto IA al mes',
         ],
       },
       Pro: {
         description: 'Para tiendas en crecimiento que necesitan imágenes.',
         features: [
           '300 créditos de IA al mes',
-          '30 imágenes de producto IA al mes',
+          '60 imágenes de producto IA al mes',
           'Todo lo de Basic',
           'Generador de imágenes desbloqueado',
           'Procesamiento de IA prioritario',
@@ -776,7 +780,7 @@ export const messages: Record<string, NestedDict> = {
         description: 'Para tiendas consolidadas y vendedores avanzados.',
         features: [
           '1000 créditos de IA al mes',
-          '100 imágenes de producto IA al mes',
+          '300 imágenes de producto IA al mes',
           'Todo lo de Pro',
           'Generación masiva',
           'Soporte dedicado',
@@ -956,6 +960,7 @@ export const messages: Record<string, NestedDict> = {
         description: '免费试用，无需绑卡。',
         features: [
           '每月 10 积分',
+          '3 张免费 AI 商品图',
           '商品文案生成器',
           '消息与评价回复',
           '社交媒体帖子',
@@ -969,14 +974,14 @@ export const messages: Record<string, NestedDict> = {
           '含 Free 全部功能',
           '商品翻译与优化',
           '定价顾问',
-          '不含图片生成',
+          '每月 20 张 AI 商品图',
         ],
       },
       Pro: {
         description: '适合需要商品图的成长型店铺。',
         features: [
           '每月 300 积分',
-          '每月 30 张 AI 商品图',
+          '每月 60 张 AI 商品图',
           '含 Basic 全部功能',
           '解锁图片生成',
           '优先 AI 处理',
@@ -986,7 +991,7 @@ export const messages: Record<string, NestedDict> = {
         description: '适合成熟店铺与高阶卖家。',
         features: [
           '每月 1000 积分',
-          '每月 100 张 AI 商品图',
+          '每月 300 张 AI 商品图',
           '含 Pro 全部功能',
           '批量生成',
           '专属支持',
@@ -1175,6 +1180,7 @@ export const messages: Record<string, NestedDict> = {
         description: 'お試し用 — カード不要。',
         features: [
           '毎月 10 クレジット',
+          '無料の AI 商品画像 3 枚',
           'リスティング生成',
           'メッセージ・レビュー返信',
           'SNS 投稿',
@@ -1188,14 +1194,14 @@ export const messages: Record<string, NestedDict> = {
           'Free の全機能',
           'リスティング翻訳・最適化',
           '価格アドバイザー',
-          '画像生成なし',
+          '毎月 20 枚の AI 商品画像',
         ],
       },
       Pro: {
         description: '商品画像が必要な成長中のショップ向け。',
         features: [
           '毎月 300 クレジット',
-          '毎月 30 枚の AI 商品画像',
+          '毎月 60 枚の AI 商品画像',
           'Basic の全機能',
           '画像生成を解除',
           '優先 AI 処理',
@@ -1205,7 +1211,7 @@ export const messages: Record<string, NestedDict> = {
         description: '確立したショップとパワーセラー向け。',
         features: [
           '毎月 1000 クレジット',
-          '毎月 100 枚の AI 商品画像',
+          '毎月 300 枚の AI 商品画像',
           'Pro の全機能',
           '一括生成',
           '専任サポート',
@@ -1388,6 +1394,7 @@ export const messages: Record<string, NestedDict> = {
         description: 'Per provare — nessuna carta richiesta.',
         features: [
           '10 crediti AI al mese',
+          '3 immagini prodotto AI gratuite',
           'Generatore di annunci',
           'Risposte a messaggi e recensioni',
           'Post sui social media',
@@ -1401,14 +1408,14 @@ export const messages: Record<string, NestedDict> = {
           'Tutto ciò che è in Free',
           'Traduzione e ottimizzazione annunci',
           'Consulente prezzi',
-          'Nessuna generazione di immagini',
+          '20 immagini prodotto AI al mese',
         ],
       },
       Pro: {
         description: 'Per negozi in crescita che hanno bisogno di immagini.',
         features: [
           '300 crediti AI al mese',
-          '30 immagini prodotto AI al mese',
+          '60 immagini prodotto AI al mese',
           'Tutto ciò che è in Basic',
           'Generatore di immagini sbloccato',
           'Elaborazione AI prioritaria',
@@ -1418,7 +1425,7 @@ export const messages: Record<string, NestedDict> = {
         description: 'Per negozi consolidati e power seller.',
         features: [
           '1000 crediti AI al mese',
-          '100 immagini prodotto AI al mese',
+          '300 immagini prodotto AI al mese',
           'Tutto ciò che è in Pro',
           'Generazione in blocco',
           'Supporto dedicato',

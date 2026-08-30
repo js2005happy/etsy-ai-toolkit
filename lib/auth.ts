@@ -43,7 +43,9 @@ function buildContext(
     plan: tier.toLowerCase(),
     credits: profile.credits_remaining ?? 0,
     imageCredits: profile.images_remaining ?? 0,
-    hasImageAccess: tier === 'Pro' || tier === 'Scale',
+    // Quota-driven, not tier-driven: Free carries a small trial allotment and
+    // any plan with 0 images simply has no access.
+    hasImageAccess: (profile.images_remaining ?? 0) > 0,
   }
 }
 
