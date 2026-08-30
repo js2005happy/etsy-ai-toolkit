@@ -90,7 +90,42 @@ export default function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-14 border-t border-border pt-6">
+        <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-border pt-6">
+          <a
+            href="https://dang.ai"
+            target="_blank"
+            rel="dofollow noopener"
+            aria-label="Verified on DANG!"
+            className="inline-block"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://assets.dang.ai/badges/dang-verified-dark.png"
+              alt="Verified on DANG!"
+              width={180}
+              height={65}
+              className="h-auto w-[180px] max-w-full"
+            />
+          </a>
+          <a
+            href="https://www.toolpilot.ai"
+            target="_blank"
+            rel="dofollow noopener"
+            aria-label="ToolPilot AI"
+            className="inline-block"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://www.toolpilot.ai/cdn/shop/files/f-w_690x151_crop_center.png"
+              alt="ToolPilot AI"
+              width={180}
+              height={39}
+              className="h-auto w-[180px] max-w-full"
+            />
+          </a>
+        </div>
+
+        <div className="mt-6 border-t border-border pt-6">
           <p className="text-sm text-muted-foreground">
             {t("footer.copyright")}
           </p>
