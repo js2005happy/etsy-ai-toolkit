@@ -21,10 +21,6 @@
   <img src="https://img.shields.io/badge/i18n-7_languages-16a34a" alt="7 languages" />
 </p>
 
-<p align="center">
-  <img src="public/feature.webp" alt="Product poster generation" width="1280" />
-</p>
-
 ---
 
 ## What it is
@@ -37,6 +33,10 @@ Etsy AI Toolkit is a production SaaS (live at **[craftly.world](https://craftly.
 - **Multi-provider AI** — a primary chat relay with an automatic Groq fallback, a vision model for image translation, and a dedicated image-generation model for posters.
 - **MCP server** — a Model Context Protocol server exposes the toolkit to Claude and other MCP clients.
 - **7 languages** — the entire UI is localized.
+
+<p align="center">
+  <img src="public/dashboard.webp" alt="Dashboard — ten tools and credits" width="1280" />
+</p>
 
 ## The 10 tools
 
@@ -62,6 +62,10 @@ Three batch modes share one backend (`POST /api/generate-images`), so you never 
 - **Bulk** — paste a list of products, get one poster each.
 
 Each poster consumes 1 image credit, deducted per generated image.
+
+<p align="center">
+  <img src="public/images-page.webp" alt="Product image generator — variants, multi-platform, bulk" width="1280" />
+</p>
 
 ## Pricing
 
