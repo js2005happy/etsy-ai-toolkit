@@ -30,7 +30,7 @@ Etsy AI Toolkit is a production SaaS (live at **[craftly.world](https://craftly.
 - **OTP sign-in** — passwordless email login via Supabase Auth (6-digit code).
 - **Credit + image quotas** — every generation is metered; tiers unlock more.
 - **4-tier billing** — powered by Paddle (checkout, customer portal, webhooks).
-- **Multi-provider AI** — a primary chat relay with an automatic Groq fallback, a vision model for image translation, and a dedicated image-generation model for posters.
+- **Multi-provider AI** — a primary chat relay with automatic fallback, a vision model for image translation, and a dedicated image-generation model for posters.
 - **MCP server** — a Model Context Protocol server exposes the toolkit to Claude and other MCP clients.
 - **7 languages** — the entire UI is localized.
 
@@ -111,7 +111,7 @@ npm run start:http # Streamable HTTP
 | Database | Supabase (Postgres + RLS) |
 | Billing | Paddle (checkout, portal, webhooks) |
 | Email | Resend (welcome, subscription lifecycle) |
-| AI | gpt-4o-mini (primary relay) → Groq llama-3.3-70b (fallback) · qwen/qwen3.7-plus (vision) · gpt-image-2-all (images) |
+| AI | Multi-provider — primary chat relay with automatic fallback · vision model · image-generation model |
 | i18n | Lightweight custom framework, 7 locales (en / de / fr / es / zh / ja / it) |
 | MCP | @modelcontextprotocol/sdk, 10 tools |
 
@@ -140,8 +140,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 OPENAI_API_KEY=your_llm_api_key
 # Optional: override the LLM base URL (custom gateway/proxy)
 OPENAI_BASE_URL=
-# Optional: Groq fallback when the primary relay fails
-GROQ_API_KEY=
 ```
 
 ### 3. Set up the database
@@ -164,9 +162,6 @@ Open [http://localhost:3000](http://localhost:3000).
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
 | `OPENAI_API_KEY` | Yes | Primary LLM API key |
 | `OPENAI_BASE_URL` | No | Override the LLM base URL (custom gateway/proxy) |
-| `GROQ_API_KEY` | No | Fallback LLM provider key |
-| `GROQ_CHAT_MODEL` | No | Fallback model (default `llama-3.3-70b-versatile`) |
-| `MOMA_VISION_API_KEY` | No | Vision model key for image translation |
 | `USE_MOCK_AI` | No | Set `true` to run without calling any LLM API |
 
 > API keys are used **server-side only** and never reach the browser. Never commit `.env.local`.
