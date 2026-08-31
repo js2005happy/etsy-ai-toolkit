@@ -187,26 +187,232 @@ export async function optimizeListing(input: OptimizeListingInput): Promise<Opti
   return JSON.parse(content) as OptimizeListingOutput;
 }
 
-export interface ProductImageInput { product_name: string; product_description: string; platform: string; size: string; style: string; language?: string; }
+export interface ProductImageInput { product_name: string; product_description: string; platform: string; size: string; style: string; language?: string; category?: string; }
 export interface ProductImageOutput { imageUrl: string; revised_prompt?: string | null; }
+
+// Per-category "tuning" presets. Each category carries a different working
+// logic (how to stage/compose the shot and sell the product) plus a prompt
+// vocabulary (lighting/material/mood) and a hard list of things to avoid.
+// This is what makes a jewelry poster look like jewelry and a digital
+// printable look like a flat mockup instead of a hallucinated physical object.
+export interface CategoryPreset {
+  label: string
+  logic: string
+  promptHints: string
+  avoid: string
+}
+
+export const CATEGORY_PRESETS: Record<string, CategoryPreset> = {
+  jewelry: {
+    label: 'Jewelry & Accessories',
+    logic: 'Extreme macro close-up that makes gem facets and metal details the hero. Stage on dark velvet or silk; use a single dramatic key light to pull specular highlights and a shallow depth of field to melt the background away. Optionally show the piece worn on a hand, ear or neck for scale.',
+    promptHints: 'macro detail, specular highlights, dark velvet or silk backdrop, shallow depth of field, single dramatic key light, reflective polished metal, fine craftsmanship',
+    avoid: 'No full-body mid shots, no cluttered multi-item piles, no cheap plastic look, no flat dull lighting',
+  },
+  clothing: {
+    label: 'Clothing & Apparel',
+    logic: 'Show the garment on a model to sell fit and drape, or a clean flat-lay. Use soft natural or studio light. Make fabric texture (cotton, linen, silk, knit) readable.',
+    promptHints: 'on-model lifestyle or clean flat-lay, fabric drape and weave texture, soft natural light, flattering fit, styled wardrobe',
+    avoid: 'No stiff mannequin plastic look, no cropped faces that read like stock, no wrinkled/creased fabric, no harsh flash',
+  },
+  accessories: {
+    label: 'Bags & Accessories',
+    logic: 'Product-hero close-up plus a lifestyle carry shot (bag on shoulder, hat on head, scarf draped). Emphasize leather/canvas grain and hardware (zippers, buckles, stitching).',
+    promptHints: 'product hero close-up, leather or canvas texture, brushed hardware detail, lifestyle carry shot, structured silhouette',
+    avoid: 'No ignored hardware or stitching detail, no busy background stealing focus, no muddy material',
+  },
+  shoes: {
+    label: 'Shoes',
+    logic: 'Three-quarter profile or top-down to reveal the last/silhouette. Emphasize sole and upper material. Add a floating or dynamic pose for energy, on a clean backdrop.',
+    promptHints: '3/4 profile shot, sole and upper texture, floating or dynamic pose, clean seamless backdrop, crisp edges',
+    avoid: 'No dead-on symmetric composition, no flat lighting without dimension, no scuffed/dirty look',
+  },
+  home_decor: {
+    label: 'Home & Living Decor',
+    logic: 'Place the piece in a real lived-in scene (shelf, bedside, dining table) so buyers see it in use. Warm natural light, cozy mood, soft shadows.',
+    promptHints: 'styled interior scene, cozy warm natural light, lifestyle placement, soft shadows, lived-in warmth',
+    avoid: 'No sterile white studio shot, no isolated object floating in void, no cold clinical tone',
+  },
+  furniture: {
+    label: 'Furniture',
+    logic: 'Single product-hero shot of the furniture piece against a clean wall or a minimal styled corner — NOT a fully furnished room. Keep the composition simple so the piece\'s structure reads perfectly. Emphasize wood grain or upholstery texture. Include exactly ONE subtle size reference (a floor plant, a throw, a rug edge) without cluttering the frame.',
+    promptHints: 'single hero piece, clean wall or minimal corner, visible structural joinery, even straight legs touching the floor, correct proportions, natural window light, one subtle scale reference',
+    avoid: 'No fully-furnished busy room, no melted or merged parts, no vanishing or uneven legs, no impossibly thin or asymmetrical frame, no repeating fake wood texture, no distorted proportions',
+  },
+  art_prints: {
+    label: 'Art Prints & Wall Decor',
+    logic: 'Show the artwork framed and hung on a styled wall, or propped in a gallery/living room. Keep print colors accurate and show frame/matting detail.',
+    promptHints: 'framed artwork on styled wall, gallery or living room, faithful print color, matting and frame detail, natural side light',
+    avoid: 'No bare image with zero wall reference, no color distortion, no washed-out print',
+  },
+  digital: {
+    label: 'Digital Products & Printables',
+    logic: 'Present as a FLAT mockup: the design on a tablet screen or printed page, with clean typography and crisp layout. This is a digital file, NOT a physical product — never render a real object.',
+    promptHints: 'flat digital mockup, tablet screen or printed page presentation, clean typography, crisp layout, paper texture',
+    avoid: 'NEVER render a physical 3D object, no fake shadows implying a real product, no mushy text, no skewed perspective',
+  },
+  craft_supplies: {
+    label: 'Craft Supplies & Tools',
+    logic: 'Arrange raw materials or tools to emphasize texture and DIY potential. Artisan workbench scene, organized flat-lay, tactile material feel.',
+    promptHints: 'raw materials arranged, artisan workbench, tactile texture, organized craft flat-lay, hands-on maker mood',
+    avoid: 'No finished-product look (these are supplies), no chaotic unfocused pile, no sterile packaging-only shot',
+  },
+  paper_party: {
+    label: 'Paper & Party Supplies',
+    logic: 'Flat-lay of invitations, cards or party decor with a bright festive palette. Show printed pattern and cut detail clearly.',
+    promptHints: 'flat-lay stationery, bright festive palette, printed pattern detail, celebration theme, crisp paper edges',
+    avoid: 'No dark muted tones, no fake 3D pop-up objects, no blurry print',
+  },
+  wedding: {
+    label: 'Weddings',
+    logic: 'Romantic soft light with a blush/ivory/gold palette. Emphasize delicate detail (florals, lace, ribbon) and an elegant ceremony mood.',
+    promptHints: 'romantic soft light, blush and ivory palette, delicate florals and lace, elegant ceremony mood, airy',
+    avoid: 'No garish loud colors, no cold clinical tone, no cluttered prop overload',
+  },
+  toys: {
+    label: 'Toys & Games',
+    logic: 'Bright playful scene with the toy as hero and fun props. Cheerful saturated but tasteful colors that spark play desire.',
+    promptHints: 'bright playful scene, cheerful saturated colors, product hero with fun props, inviting and fun',
+    avoid: 'No adult dark mood, no busy background stealing focus, no washed-out color',
+  },
+  baby: {
+    label: 'Baby & Kids',
+    logic: 'Soft gentle mood with low-saturation pastels and diffused light. Communicate safety and coziness; emphasize plush/soft materials.',
+    promptHints: 'soft pastel palette, gentle diffused light, cozy safe mood, plush fabric texture, tender',
+    avoid: 'No sharp or unsafe elements, no cold hard tone, no cluttered space',
+  },
+  pet: {
+    label: 'Pet Supplies',
+    logic: 'Show an adorable pet actually using the product, warm natural light, playful interaction in a cozy home setting. Keep product clearly visible.',
+    promptHints: 'adorable pet in scene, warm natural light, playful interaction, cozy home setting, endearing',
+    avoid: 'No distressed pet expression, no product upstaged by pet, no dim lighting',
+  },
+  beauty: {
+    label: 'Beauty & Bath',
+    logic: 'Clean fresh look with water splash, foam or cream texture. Minimal spa or bathroom backdrop; emphasize product consistency.',
+    promptHints: 'clean minimal background, water splash or cream texture, spa mood, fresh dewy feel, soft even light',
+    avoid: 'No greasy messy look, no over-airbrushed plastic feel, no harsh reflections',
+  },
+  food: {
+    label: 'Food & Drink',
+    logic: 'Appetizing close-up with warm backlight, visible steam or glaze, shallow depth of field and styled plating that makes you hungry.',
+    promptHints: 'appetizing close-up, warm backlight, steam and glaze, shallow depth of field, styled plating, mouth-watering',
+    avoid: 'No cold color grade, no dry grey food, no clutter ruining the plate',
+  },
+  vintage: {
+    label: 'Vintage & Antiques',
+    logic: 'Evoke age with warm sepia tones and patina. Stage on wood, old books or lace; emphasize time-worn character and nostalgic mood.',
+    promptHints: 'warm sepia tones, aged patina, antique setting, nostalgic mood, soft faded light, time-worn character',
+    avoid: 'No brand-new modern look, no cold white studio, no erased wear that kills authenticity',
+  },
+  handmade_crafts: {
+    label: 'Handmade Crafts & Sculpture',
+    logic: 'Celebrate the handmade, one-of-a-kind character. Show the material honestly (clay, wood grain, blown glass, woven fiber) on a simple display surface or workbench. Soft warm light to bring out craft warmth and the small imperfections that prove it is human-made.',
+    promptHints: 'handmade artisan detail, tactile material (clay, wood grain, glass, woven fiber), soft warm light, craftsmanship, charming unique imperfections',
+    avoid: 'No mass-produced factory look, no plastic-clean perfection, no harsh clinical light, no generic 3D render feel',
+  },
+  collectibles: {
+    label: 'Collectibles & Figurines',
+    logic: 'Make it feel rare and valuable. Stage on a display pedestal, shelf or clean dark backdrop with a single spotlight. Use a macro or eye-level angle to reveal fine sculpt detail and surface sheen.',
+    promptHints: 'display case or clean pedestal, dramatic spot lighting, fine sculpt detail, collectible sheen, museum mood',
+    avoid: 'No cheap toy look, no busy background, no soft focus, no flat lighting',
+  },
+  candles_fragrance: {
+    label: 'Candles & Fragrance',
+    logic: 'Evoke relaxation. Warm candlelight glow, wax texture and glass vessel detail, cozy home setting with soft ambient light. Sell the scent mood, not just the object.',
+    promptHints: 'warm candlelight glow, cozy home setting, wax texture and glass vessel, soft ambient light, relaxing mood',
+    avoid: 'No cold color grade, no dangerous open-flame drama, no empty blank backdrop',
+  },
+  stationery: {
+    label: 'Stationery & Office',
+    logic: 'Clean tidy desk flat-lay or a hand-using-it scene. Emphasize paper texture, printing quality and finishing. Bright soft light, minimal and organized.',
+    promptHints: 'clean desk flat-lay, paper texture, tidy arrangement, bright soft light, minimal organized',
+    avoid: 'No messy desk, no cheap plastic office clutter, no harsh overhead light',
+  },
+  plants_garden: {
+    label: 'Plants & Garden',
+    logic: 'Lush and alive. Natural daylight, thriving greenery, the planter or tool shown in use with soil and texture. Fresh airy feel.',
+    promptHints: 'natural daylight, lush greenery, terracotta or ceramic planter, fresh airy feel, organic soil texture',
+    avoid: 'No fake plastic plant look, no lifeless withered plants, no cold sterile light',
+  },
+  electronics: {
+    label: 'Electronics & Accessories',
+    logic: 'Tech-forward hero shot. Clean specular light, brushed metal / glass / silicone detail on a minimal or gradient backdrop. Precision and finish matter.',
+    promptHints: 'tech product hero, clean specular light, brushed metal or glass, minimal gradient backdrop, precise detail',
+    avoid: 'No cheap plastic look, no cluttered reflections, no overexposed highlights',
+  },
+  sports_outdoors: {
+    label: 'Sports & Outdoors',
+    logic: 'Show it in action or in a rugged outdoor scene under natural light. Emphasize durable materials and function, energetic mood.',
+    promptHints: 'outdoor natural light, dynamic action or rugged scene, durable material, energetic mood',
+    avoid: 'No indoor studio look, no flimsy feel, no disconnected from its environment',
+  },
+  musical_instruments: {
+    label: 'Musical Instruments',
+    logic: 'Highlight craftsmanship: warm wood grain, polished metal hardware, sound holes or strings. Warm light on a performance scene or clean backdrop.',
+    promptHints: 'warm wood grain, polished metal hardware, soft warm light, performance or clean backdrop, fine craftsmanship',
+    avoid: 'No cheap plastic instrument, no harsh glare, no out-of-focus detail',
+  },
+  books_media: {
+    label: 'Books, Movies & Music',
+    logic: 'Vintage or literary mood. Stacked or shelved arrangement that shows cover and paper texture, under warm library light.',
+    promptHints: 'stacked or shelved arrangement, paper and cover texture, warm library light, vintage or literary mood',
+    avoid: 'No cold white light, no cluttered pile, no modern plastic feel (unless the product is modern)',
+  },
+  photography: {
+    label: 'Photography Gear',
+    logic: 'Show lens glass reflection and matte metal body against a dark clean backdrop under a studio spot. Professional precision feel.',
+    promptHints: 'lens glass reflection, matte metal body, dark clean backdrop, studio spot light, professional',
+    avoid: 'No overexposure, no cheap plastic body, no stray reflections',
+  },
+  generic: {
+    label: 'Other / General',
+    logic: 'Standard product photography: hero the product, its material and selling points on a clean background or a simple lifestyle scene.',
+    promptHints: 'clean product photography, clear subject, good lighting, professional, balanced composition',
+    avoid: 'No clutter, no ambiguous subject, no unflattering light',
+  },
+}
+
+export function getCategoryPreset(category?: string): CategoryPreset {
+  return (category && CATEGORY_PRESETS[category]) || CATEGORY_PRESETS.generic
+}
 
 export async function generateImagePrompt(input: ProductImageInput): Promise<string> {
   if (process.env.USE_MOCK_AI === "true") {
     return "professional product photography of " + input.product_name + ", " + input.style + ", high detail";
   }
-  const language = input.language && input.language !== "No text" ? input.language : "no text";
+  const preset = getCategoryPreset(input.category)
+  const wantText = input.language && input.language !== "No text";
+  const language = wantText ? input.language : "no text";
   const prompt =
-    "You are an expert prompt engineer for AI product photography. " +
+    "You are an expert prompt engineer for AI product photography and marketing visuals. " +
     "Write a single, detailed English prompt for an image generation model that renders a product marketing poster.\n\n" +
     "Product name: " + input.product_name + "\n" +
     "Product description: " + input.product_description + "\n" +
+    "Product category: " + preset.label + "\n" +
     "Target platform: " + input.platform + "\n" +
     "Visual style: " + input.style + "\n" +
     "On-image text language: " + language + "\n\n" +
+    "Category-specific brief — follow this closely:\n" +
+    "- Composition & staging: " + preset.logic + "\n" +
+    "- Lighting/material/mood vocabulary to weave in: " + preset.promptHints + "\n" +
+    "- Avoid at all costs: " + preset.avoid + "\n\n" +
+    "Global realism / anti-AI directives — apply to EVERY category:\n" +
+    "- Render as a genuine photograph, not a 3D render, illustration or digital painting.\n" +
+    "- Kill the 'AI look': no oversaturated candy colors, no plastic-smooth surfaces, no over-sharpened edges, no unnatural HDR glow, no unnaturally mirror-perfect symmetry (real structural symmetry — like four even chair legs — is required, not forbidden).\n" +
+    "- Preserve structural integrity: every leg, handle, edge, hinge and joint must be geometrically correct and physically plausible — no melted, merged, floating, vanishing, or asymmetrically-warped parts.\n" +
+    "- Prefer natural, slightly imperfect lighting (soft window light, real soft shadows) over dramatic fake studio rim-light.\n" +
+    "- Include believable micro-texture and small imperfections: fabric weave, wood grain, metal patina, subtle dust, gentle focus falloff.\n" +
+    "- Use shallow depth of field with real camera-lens bokeh, never a fake uniform blur.\n" +
+    "- Avoid sterile studio-perfect cleanliness: let light fall off naturally, let shadows be soft and slightly uneven, and leave a hint of real atmosphere (a gentle wall-shadow gradient, varied wood grain) so the scene feels lived-in, not clinically staged.\n" +
+    "- Never use hype words like '8k', 'hyper-detailed', 'masterpiece', 'award-winning' in the final prompt; describe a real photo instead.\n" +
+    "- Any on-image text must look like real printed or on-screen typography, never warped or garbled AI lettering.\n\n" +
     "Requirements:\n" +
     "- Vividly describe the product, its material, colors, and key details.\n" +
-    "- Specify composition, lighting, background, and mood.\n" +
-    "- If a real language is given, require any on-image text to be written in that language and keep it minimal; if 'no text', require no text or lettering at all.\n" +
+    "- Apply the category-specific brief above to composition, lighting, background and mood.\n" +
+    (wantText
+      ? "- On-image text: write ONE short marketing tagline (3-6 words, " + language + ") that sells this product (e.g. \"Handcrafted · Free Shipping\") and state it verbatim in the final prompt as 'The on-image text reads exactly: \"<your tagline>\"'. Require that exact tagline to appear as clean printed typography near the top or bottom edge, never warped, garbled or misspelled lettering.\n"
+      : "- No text or lettering at all.\n") +
     "- Output ONLY the prompt text, with no quotes, labels, or explanations.";
   const content = await chat(prompt);
   const cleaned = content.trim().replace(/^["']+|["']+$/g, "");

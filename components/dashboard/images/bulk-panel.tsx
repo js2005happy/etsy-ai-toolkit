@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2 } from 'lucide-react'
-import { STYLES, LANGUAGES, PLATFORMS } from './image-constants'
+import { STYLES, LANGUAGES, PLATFORMS, CATEGORIES } from './image-constants'
 import type { ProductImageInput, ProductImageOutput } from './use-image-generation'
 
 interface Props {
@@ -40,6 +40,7 @@ export default function BulkPanel({ onGenerate, loading }: Props) {
   const [raw, setRaw] = useState('')
   const [style, setStyle] = useState(STYLES[0])
   const [platform, setPlatform] = useState(PLATFORMS[0].label)
+  const [category, setCategory] = useState(CATEGORIES[CATEGORIES.length - 1].value)
 
   const products = parseProducts(raw)
 
@@ -49,6 +50,7 @@ export default function BulkPanel({ onGenerate, loading }: Props) {
     const items: ProductImageInput[] = products.map((p) => ({
       product_name: p.name,
       product_description: p.description,
+      category,
       style,
       platform,
       size: platformObj?.size ?? '1024x1024',
@@ -73,6 +75,24 @@ export default function BulkPanel({ onGenerate, loading }: Props) {
           {products.length === 0
             ? 'Paste one product per line.'
             : `${products.length} product${products.length > 1 ? 's' : ''} detected.`}
+        </p>
+      </div>
+      <div className="space-y-2">
+        <Label>Product Category</Label>
+        <Select value={category} onValueChange={setCategory}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            {CATEGORIES.map((c) => (
+              <SelectItem key={c.value} value={c.value}>
+                {c.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Applies the same category tuning to every product in the list.
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

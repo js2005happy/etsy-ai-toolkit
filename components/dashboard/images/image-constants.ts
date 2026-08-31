@@ -37,3 +37,34 @@ export const LANGUAGES = [
 ]
 
 export const VARIANT_COUNTS = [2, 3, 4]
+
+export const CATEGORIES = [
+  { value: 'jewelry', label: 'Jewelry & Accessories' },
+  { value: 'clothing', label: 'Clothing & Apparel' },
+  { value: 'accessories', label: 'Bags & Accessories' },
+  { value: 'shoes', label: 'Shoes' },
+  { value: 'home_decor', label: 'Home & Living Decor' },
+  { value: 'furniture', label: 'Furniture' },
+  { value: 'art_prints', label: 'Art Prints & Wall Decor' },
+  { value: 'digital', label: 'Digital Products & Printables' },
+  { value: 'craft_supplies', label: 'Craft Supplies & Tools' },
+  { value: 'paper_party', label: 'Paper & Party Supplies' },
+  { value: 'wedding', label: 'Weddings' },
+  { value: 'toys', label: 'Toys & Games' },
+  { value: 'baby', label: 'Baby & Kids' },
+  { value: 'pet', label: 'Pet Supplies' },
+  { value: 'beauty', label: 'Beauty & Bath' },
+  { value: 'food', label: 'Food & Drink' },
+  { value: 'vintage', label: 'Vintage & Antiques' },
+  { value: 'handmade_crafts', label: 'Handmade Crafts & Sculpture' },
+  { value: 'collectibles', label: 'Collectibles & Figurines' },
+  { value: 'candles_fragrance', label: 'Candles & Fragrance' },
+  { value: 'stationery', label: 'Stationery & Office' },
+  { value: 'plants_garden', label: 'Plants & Garden' },
+  { value: 'electronics', label: 'Electronics & Accessories' },
+  { value: 'sports_outdoors', label: 'Sports & Outdoors' },
+  { value: 'musical_instruments', label: 'Musical Instruments' },
+  { value: 'books_media', label: 'Books, Movies & Music' },
+  { value: 'photography', label: 'Photography Gear' },
+  { value: 'generic', label: 'Other / General' },
+]

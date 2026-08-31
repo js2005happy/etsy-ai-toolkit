@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2 } from 'lucide-react'
-import { STYLES, LANGUAGES, PLATFORMS, VARIANT_COUNTS } from './image-constants'
+import { STYLES, LANGUAGES, PLATFORMS, VARIANT_COUNTS, CATEGORIES } from './image-constants'
 import type { ProductImageInput, ProductImageOutput } from './use-image-generation'
 
 interface Props {
@@ -18,6 +18,7 @@ interface Props {
 export default function VariantsPanel({ onGenerate, loading }: Props) {
   const [productName, setProductName] = useState('')
   const [description, setDescription] = useState('')
+  const [category, setCategory] = useState(CATEGORIES[CATEGORIES.length - 1].value)
   const [language, setLanguage] = useState(LANGUAGES[0])
   const [count, setCount] = useState(2)
 
@@ -26,6 +27,7 @@ export default function VariantsPanel({ onGenerate, loading }: Props) {
     const items: ProductImageInput[] = STYLES.slice(0, count).map((style) => ({
       product_name: productName,
       product_description: description,
+      category,
       style,
       platform: PLATFORMS[0].label,
       size: PLATFORMS[0].size,
@@ -56,6 +58,24 @@ export default function VariantsPanel({ onGenerate, loading }: Props) {
           required
           className="min-h-[110px]"
         />
+      </div>
+      <div className="space-y-2">
+        <Label>Product Category</Label>
+        <Select value={category} onValueChange={setCategory}>
+          <SelectTrigger>
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            {CATEGORIES.map((c) => (
+              <SelectItem key={c.value} value={c.value}>
+                {c.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Tunes lighting, composition and staging for this product type.
+        </p>
       </div>
       <div className="space-y-2">
         <Label>Number of Variants</Label>
