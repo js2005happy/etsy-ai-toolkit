@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, Copy, Check, Coins } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
+import PlatformSelect from '@/components/dashboard/platform-select'
 
 interface MessageReplyOutput {
   replies: string[]
@@ -26,6 +27,7 @@ export default function MessagesPage() {
     customer_message: '',
     product_info: '',
     tone: 'friendly',
+    platform: 'etsy',
   })
 
   useEffect(() => {
@@ -150,6 +152,7 @@ export default function MessagesPage() {
                   </SelectContent>
                 </Select>
               </div>
+              <PlatformSelect value={formData.platform} onChange={(v) => setFormData({ ...formData, platform: v })} />
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>

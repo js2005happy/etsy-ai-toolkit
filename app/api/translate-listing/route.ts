@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const { db, userId, credits } = auth
 
     const body = await request.json()
-    const { text, target_language } = body
+    const { text, target_language, platform } = body
 
     if (!text || !target_language) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Insufficient credits' }, { status: 403 })
     }
 
-    const result = await translateListing({ text, target_language })
+    const result = await translateListing({ text, target_language, platform })
 
     await db.from('profiles').update({ credits_remaining: credits - 1 }).eq('id', userId)
 

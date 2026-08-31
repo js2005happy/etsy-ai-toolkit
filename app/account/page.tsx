@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Mail, Coins, Crown, ArrowLeft, LogOut, KeyRound, Sparkles, Upload, Terminal, Copy, Check, RefreshCw } from 'lucide-react'
+import { Loader2, Mail, Coins, Crown, ArrowLeft, LogOut, KeyRound, Sparkles, Upload, Terminal, Copy, Check, RefreshCw, Link2 } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import Navbar from '@/components/shared/navbar'
 import type { User } from '@supabase/supabase-js'
@@ -53,6 +53,13 @@ export default function AccountPage() {
   const [mcpError, setMcpError] = useState<string | null>(null)
   const [mcpMessage, setMcpMessage] = useState<string | null>(null)
   const [mcpResetting, setMcpResetting] = useState(false)
+
+  const [referralLink, setReferralLink] = useState<string | null>(null)
+  const [referralEarned, setReferralEarned] = useState<number>(0)
+  const [referralSignups, setReferralSignups] = useState<number>(0)
+  const [referralLoading, setReferralLoading] = useState(true)
+  const [referralCopied, setReferralCopied] = useState(false)
+  const [referralError, setReferralError] = useState<string | null>(null)
 
   const isPaid = plan !== 'free' && plan != null
   const planLabel =
@@ -122,6 +129,38 @@ export default function AccountPage() {
       cancelled = true
     }
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/user/referral')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data) {
+          setReferralLink(data.referral_link ?? null)
+          setReferralEarned(data.commission_earned ?? 0)
+          setReferralSignups(data.signups ?? 0)
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setReferralLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const handleCopyReferral = async () => {
+    if (!referralLink) return
+    setReferralError(null)
+    try {
+      await navigator.clipboard.writeText(referralLink)
+      setReferralCopied(true)
+      setTimeout(() => setReferralCopied(false), 2000)
+    } catch {
+      setReferralError(t('account.mcpCopyFailed'))
+    }
+  }
 
   const handleCopyMcpKey = async () => {
     if (!mcpKey) return
@@ -525,6 +564,61 @@ export default function AccountPage() {
     }
   }
 }`}</pre>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Referral program */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5" />
+              {t('account.referralTitle')}
+            </CardTitle>
+            <CardDescription>{t('account.referralDesc')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t('account.referralLinkLabel')}</Label>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="flex min-w-0 flex-1 items-center rounded-md border border-border bg-secondary px-3 py-2 font-mono text-xs text-foreground">
+                  {referralLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : referralLink ? (
+                    <span className="truncate">{referralLink}</span>
+                  ) : (
+                    <span className="text-muted-foreground">…</span>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyReferral}
+                  disabled={!referralLink || referralCopied}
+                >
+                  {referralCopied ? (
+                    <Check className="mr-2 h-4 w-4 text-emerald-400" />
+                  ) : (
+                    <Copy className="mr-2 h-4 w-4" />
+                  )}
+                  {referralCopied ? t('account.referralCopied') : t('account.referralCopyLink')}
+                </Button>
+              </div>
+              {referralError && <p className="text-sm font-medium text-destructive">{referralError}</p>}
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border border-border bg-secondary p-4">
+                <div className="text-xs text-muted-foreground">{t('account.referralEarned')}</div>
+                <div className="mt-1 text-lg font-semibold text-foreground">
+                  ${referralEarned.toFixed(2)}
+                </div>
+              </div>
+              <div className="rounded-lg border border-border bg-secondary p-4">
+                <div className="text-xs text-muted-foreground">{t('account.referralSignups')}</div>
+                <div className="mt-1 text-lg font-semibold text-foreground">{referralSignups}</div>
+              </div>
             </div>
           </CardContent>
         </Card>

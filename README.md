@@ -77,6 +77,16 @@ Each poster consumes 1 image credit, deducted per generated image.
 | **Pro** | $19 | $179 | 300 | 60 |
 | **Scale** | $39 | $349 | 1000 | 300 |
 
+## Affiliate program
+
+Earn **30% of every paid plan** you refer. The program is for creators, bloggers, and newsletter authors with an audience of Etsy sellers or handmade-shop owners.
+
+- **30% commission** on the first month of every paid plan you refer.
+- **Free tier** makes it easy for your audience to try before they buy.
+- **Ready-made assets** — tracking links, banners, and copy.
+
+Apply at **[craftly.world/affiliates](https://craftly.world/affiliates)**.
+
 ## MCP server
 
 A Model Context Protocol server (`mcp-server/`) exposes the toolkit to any MCP client (Claude Code, Codex, Cursor, etc.). It ships with **dual transport** — stdio and Streamable HTTP — and **per-user API keys** (`x-mcp-key` header). Every account gets its own key, so credits and image quota are tracked per user, not shared.

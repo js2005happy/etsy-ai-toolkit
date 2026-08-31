@@ -8,12 +8,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CinematicBackground from '@/components/cinematic/cinematic-background';
+import PlatformSelect from '@/components/dashboard/platform-select';
 
 export default function AnnouncementPage() {
   const router = useRouter();
   const [shopType, setShopType] = useState('');
   const [announcementType, setAnnouncementType] = useState('welcome');
   const [tone, setTone] = useState('friendly');
+  const [platform, setPlatform] = useState('etsy');
   const [announcement, setAnnouncement] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -42,7 +44,7 @@ export default function AnnouncementPage() {
       const res = await fetch('/api/generate-announcement', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ shop_type: shopType, announcement_type: announcementType, tone }),
+        body: JSON.stringify({ shop_type: shopType, announcement_type: announcementType, tone, platform }),
       });
       if (res.status === 401) { router.push('/login'); return; }
       if (res.status === 403) { setError('You have insufficient credits. Please upgrade.'); return; }
@@ -116,6 +118,7 @@ export default function AnnouncementPage() {
                   </SelectContent>
                 </Select>
               </div>
+              <PlatformSelect value={platform} onChange={setPlatform} />
               <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
                 {loading ? 'Generating...' : 'Generate Announcement'}
               </Button>

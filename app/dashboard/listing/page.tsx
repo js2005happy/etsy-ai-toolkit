@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, Copy, Check, Coins } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
+import PlatformSelect from '@/components/dashboard/platform-select'
 
 interface ListingResult {
   title: string
@@ -29,6 +30,7 @@ export default function ListingPage() {
     product_type: '',
     material: '',
     style: '',
+    platform: 'etsy',
   })
 
   useEffect(() => {
@@ -157,6 +159,7 @@ export default function ListingPage() {
                   required
                 />
               </div>
+              <PlatformSelect value={formData.platform} onChange={(v) => setFormData({ ...formData, platform: v })} />
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>

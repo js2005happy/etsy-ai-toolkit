@@ -8,12 +8,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CinematicBackground from '@/components/cinematic/cinematic-background';
+import PlatformSelect from '@/components/dashboard/platform-select';
 
 export default function OptimizerPage() {
   const router = useRouter();
   const [currentTitle, setCurrentTitle] = useState('');
   const [currentDescription, setCurrentDescription] = useState('');
   const [currentTags, setCurrentTags] = useState('');
+  const [platform, setPlatform] = useState('etsy');
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -42,7 +44,7 @@ export default function OptimizerPage() {
       const res = await fetch('/api/optimize-listing', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ current_title: currentTitle, current_description: currentDescription, current_tags: currentTags }),
+        body: JSON.stringify({ current_title: currentTitle, current_description: currentDescription, current_tags: currentTags, platform }),
       });
       if (res.status === 401) { router.push('/login'); return; }
       if (res.status === 403) { setError('You have insufficient credits. Please upgrade.'); return; }
@@ -111,6 +113,7 @@ export default function OptimizerPage() {
                   placeholder="e.g. handmade, mug, ceramic, coffee, gift"
                 />
               </div>
+              <PlatformSelect value={platform} onChange={setPlatform} />
               <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
                 {loading ? 'Optimizing...' : 'Optimize Listing'}
               </Button>

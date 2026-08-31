@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const { db, userId, credits } = auth
 
     const body = await request.json()
-    const { material_cost, labor_cost, shipping_cost, competitor_price_min, competitor_price_max, desired_profit_margin } = body
+    const { material_cost, labor_cost, shipping_cost, competitor_price_min, competitor_price_max, desired_profit_margin, platform } = body
 
     if (!material_cost || !labor_cost || !shipping_cost) {
       return NextResponse.json({ error: 'Material, labor, and shipping costs are required' }, { status: 400 })
@@ -22,6 +22,7 @@ export async function POST(request: Request) {
     }
 
     const result = await generatePricingAdvice({
+      platform,
       material_cost: Number(material_cost),
       labor_cost: Number(labor_cost),
       shipping_cost: Number(shipping_cost),

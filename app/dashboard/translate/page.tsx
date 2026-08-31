@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CinematicBackground from '@/components/cinematic/cinematic-background';
+import PlatformSelect from '@/components/dashboard/platform-select';
 
 const LANGUAGES = ['German', 'French', 'Spanish', 'Italian', 'Japanese', 'Dutch', 'Portuguese'];
 
@@ -46,6 +47,7 @@ export default function TranslatePage() {
   const [image, setImage] = useState('');
   const [imagePreview, setImagePreview] = useState('');
   const [targetLanguage, setTargetLanguage] = useState('German');
+  const [platform, setPlatform] = useState('etsy');
   const [translatedText, setTranslatedText] = useState('');
   const [extractedText, setExtractedText] = useState('');
   const [loading, setLoading] = useState(false);
@@ -89,7 +91,7 @@ export default function TranslatePage() {
     try {
       const payload = mode === 'image'
         ? { image, target_language: targetLanguage }
-        : { text, target_language: targetLanguage };
+        : { text, target_language: targetLanguage, platform };
       const endpoint = mode === 'image' ? '/api/translate-image' : '/api/translate-listing';
       const res = await fetch(endpoint, {
         method: 'POST',
@@ -184,6 +186,7 @@ export default function TranslatePage() {
                 </div>
               )}
 
+              {mode === 'text' && <PlatformSelect value={platform} onChange={setPlatform} />}
               <div>
                 <Label htmlFor="target_language">Target Language</Label>
                 <Select value={targetLanguage} onValueChange={setTargetLanguage}>

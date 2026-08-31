@@ -8,12 +8,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CinematicBackground from '@/components/cinematic/cinematic-background';
+import PlatformSelect from '@/components/dashboard/platform-select';
 
 export default function ReviewReplyPage() {
   const router = useRouter();
   const [reviewText, setReviewText] = useState('');
   const [rating, setRating] = useState('5');
   const [tone, setTone] = useState('friendly');
+  const [platform, setPlatform] = useState('etsy');
   const [replies, setReplies] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -42,7 +44,7 @@ export default function ReviewReplyPage() {
       const res = await fetch('/api/generate-review-reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ review_text: reviewText, rating: parseInt(rating), tone }),
+        body: JSON.stringify({ review_text: reviewText, rating: parseInt(rating), tone, platform }),
       });
       if (res.status === 401) { router.push('/login'); return; }
       if (res.status === 403) { setError('You have insufficient credits. Please upgrade.'); return; }
@@ -118,6 +120,7 @@ export default function ReviewReplyPage() {
                   </SelectContent>
                 </Select>
               </div>
+              <PlatformSelect value={platform} onChange={setPlatform} />
               <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
                 {loading ? 'Generating...' : 'Generate Replies'}
               </Button>

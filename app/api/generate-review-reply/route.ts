@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const { db, userId, credits } = auth
 
     const body = await request.json()
-    const { review_text, rating, tone } = body
+    const { review_text, rating, tone, platform } = body
 
     if (!review_text || !rating || !tone) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     const { brandTone, brandKeywords } = await getBrandPrefs(db, userId)
-    const result = await generateReviewReply({ review_text, rating, tone, brand_tone: brandTone ?? undefined, brand_keywords: brandKeywords ?? undefined })
+    const result = await generateReviewReply({ review_text, rating, tone, platform, brand_tone: brandTone ?? undefined, brand_keywords: brandKeywords ?? undefined })
 
     await db.from('profiles').update({ credits_remaining: credits - 1 }).eq('id', userId)
 

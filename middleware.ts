@@ -6,6 +6,19 @@ export async function middleware(request: NextRequest) {
   const { response, user } = await updateSession(request)
 
   const url = new URL(request.url)
+
+  // Capture ?ref=CODE into a 30-day cookie so referral attribution survives
+  // the signup flow (which may span several page loads).
+  const ref = url.searchParams.get('ref')
+  if (ref) {
+    response.cookies.set('referral_code', ref, {
+      httpOnly: true,
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30,
+      path: '/',
+    })
+  }
+
   const isAuthRoute = url.pathname === '/login' || url.pathname === '/signup'
   const isProtectedRoute =
     url.pathname.startsWith('/dashboard') || url.pathname === '/account'

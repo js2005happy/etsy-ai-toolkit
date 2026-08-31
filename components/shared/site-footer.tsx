@@ -40,6 +40,7 @@ export default function SiteFooter() {
       links: [
         { label: "GitHub", href: "https://github.com/js2005happy/etsy-ai-toolkit" },
         { label: t("footer.contact"), href: "/contact" },
+        { label: "Affiliates", href: "/affiliates" },
       ],
     },
     {

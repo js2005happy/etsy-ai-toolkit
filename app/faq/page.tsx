@@ -32,6 +32,10 @@ const faqs: Faq[] = [
     a: "Yes. The toolkit ships an MCP server with all 10 tools. Grab your personal MCP key in Account → MCP connection, then add the etsy-ai-toolkit-mcp server to your client. Credits and image quota are tracked against your own account.",
   },
   {
+    q: "Do you have an affiliate program?",
+    a: "Yes. Recommend Etsy AI Toolkit to your audience and earn 30% of every paid plan you refer (paid on their first month). There's a free tier to make it easy to try. See the Affiliates page to apply.",
+  },
+  {
     q: "What happens to my credits at the end of the month?",
     a: "Credits reset at the start of each billing month. Unused credits do not roll over.",
   },

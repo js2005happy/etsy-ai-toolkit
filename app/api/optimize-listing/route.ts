@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     const { db, userId, credits } = auth
 
     const body = await request.json()
-    const { current_title, current_description, current_tags } = body
+    const { current_title, current_description, current_tags, platform } = body
 
     if (!current_title && !current_description && !current_tags) {
       return NextResponse.json({ error: 'At least one field is required' }, { status: 400 })
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     const { brandTone, brandKeywords } = await getBrandPrefs(db, userId)
-    const result = await optimizeListing({ current_title, current_description, current_tags, brand_tone: brandTone ?? undefined, brand_keywords: brandKeywords ?? undefined })
+    const result = await optimizeListing({ current_title, current_description, current_tags, platform, brand_tone: brandTone ?? undefined, brand_keywords: brandKeywords ?? undefined })
 
     await db.from('profiles').update({ credits_remaining: credits - 1 }).eq('id', userId)
 

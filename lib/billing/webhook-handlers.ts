@@ -1,6 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { hasPaidAccess } from './access'
 import { PRICE_TO_TIER, tierQuota, isYearlyPrice, type TierName } from '@/lib/pricing'
+import { commissionForTier } from '@/lib/referral'
 import {
   sendNewSaleEmail,
   sendSubscriptionActiveEmail,
@@ -54,6 +55,49 @@ async function resolveEmail(userId: string): Promise<string | undefined> {
 }
 
 /**
+ * Credit the referrer 30% of the referred user's first-month price when the
+ * referred user upgrades to a paid plan. Idempotent: the unique constraint on
+ * `referred_user_id` (upsert ignoreDuplicates) guarantees one payout per
+ * referred user, so a re-fired webhook can't double-credit.
+ */
+async function maybeCreditReferral(userId: string, tier: TierName): Promise<void> {
+  if (tier === 'Free') return
+  const amount = commissionForTier(tier)
+  if (amount <= 0) return
+
+  const db = getSupabase()
+
+  const { data: profile } = await db
+    .from('profiles')
+    .select('referred_by')
+    .eq('id', userId)
+    .maybeSingle()
+
+  const code = profile?.referred_by
+  if (!code) return
+
+  const { data: referrer } = await db
+    .from('profiles')
+    .select('id')
+    .eq('referral_code', code)
+    .maybeSingle()
+
+  if (!referrer || referrer.id === userId) return
+
+  await db.from('affiliate_commissions').upsert(
+    {
+      affiliate_id: referrer.id,
+      referred_user_id: userId,
+      tier,
+      amount,
+      currency: 'USD',
+      status: 'paid',
+    },
+    { onConflict: 'referred_user_id', ignoreDuplicates: true }
+  )
+}
+
+/**
  * Persist the Paddle customer → user link directly on the profile (single
  * source of truth; the customers mirror table is gone).
  */
@@ -88,6 +132,7 @@ export async function handleSubscription(
   const tier = await syncUserPlan(userId, priceId, data.status)
 
   if (eventType === 'subscription.activated') {
+    await maybeCreditReferral(userId, tier)
     const email = await resolveEmail(userId)
     if (email) await sendSubscriptionActiveEmail(email, tier.toLowerCase())
   } else if (eventType === 'subscription.canceled') {

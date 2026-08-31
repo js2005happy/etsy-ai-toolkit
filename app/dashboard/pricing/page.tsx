@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CinematicBackground from '@/components/cinematic/cinematic-background';
+import PlatformSelect from '@/components/dashboard/platform-select';
 
 export default function PricingPage() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export default function PricingPage() {
   const [competitorMin, setCompetitorMin] = useState('');
   const [competitorMax, setCompetitorMax] = useState('');
   const [profitMargin, setProfitMargin] = useState('');
+  const [platform, setPlatform] = useState('etsy');
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -51,6 +53,7 @@ export default function PricingPage() {
           competitor_price_min: competitorMin,
           competitor_price_max: competitorMax,
           desired_profit_margin: profitMargin,
+          platform,
         }),
       });
       if (res.status === 401) { router.push('/login'); return; }
@@ -160,6 +163,7 @@ export default function PricingPage() {
                   placeholder="e.g. 40"
                 />
               </div>
+              <PlatformSelect value={platform} onChange={setPlatform} />
               <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
                 {loading ? 'Calculating...' : 'Get Pricing Advice'}
               </Button>

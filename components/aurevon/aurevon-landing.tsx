@@ -7,6 +7,7 @@ import { Flower2, Globe, LayoutDashboard, UserRound, LogOut } from 'lucide-react
 import { useI18n } from '@/lib/i18n/client'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import { createClient } from '@/lib/supabase/client'
+import { PLATFORMS } from '@/lib/platforms'
 import Reveal from '@/components/shared/reveal'
 import type { User } from '@supabase/supabase-js'
 
@@ -64,6 +65,11 @@ export default function AurevonLanding() {
     { n: '08', title: t('dashboard.toolOptimizerTitle'), desc: t('dashboard.toolOptimizerDesc'), href: '/dashboard/optimizer' },
     { n: '09', title: t('dashboard.toolPricingTitle'), desc: t('dashboard.toolPricingDesc'), href: '/dashboard/pricing' },
     { n: '10', title: t('dashboard.toolImagesTitle'), desc: t('dashboard.toolImagesDesc'), href: '/dashboard/images' },
+    { n: '11', title: t('dashboard.toolBulletsTitle'), desc: t('dashboard.toolBulletsDesc'), href: '/dashboard/bullets' },
+    { n: '12', title: t('dashboard.toolAdCopyTitle'), desc: t('dashboard.toolAdCopyDesc'), href: '/dashboard/ad-copy' },
+    { n: '13', title: t('dashboard.toolEmailTitle'), desc: t('dashboard.toolEmailDesc'), href: '/dashboard/email' },
+    { n: '14', title: t('dashboard.toolCompetitorTitle'), desc: t('dashboard.toolCompetitorDesc'), href: '/dashboard/competitor-analysis' },
+    { n: '15', title: t('dashboard.toolBrandStoryTitle'), desc: t('dashboard.toolBrandStoryDesc'), href: '/dashboard/brand-story' },
   ]
 
   const steps = [
@@ -416,6 +422,29 @@ export default function AurevonLanding() {
               {t('home.learnMore')}
             </a>
           </div>
+        </div>
+      </section>
+
+      {/* Platform strip */}
+      <section className="border-t border-white/10 px-6 py-12 md:py-16">
+        <div className="mx-auto max-w-[1200px]">
+          <Reveal>
+            <p className="text-center text-xs font-medium uppercase tracking-[0.22em] text-white/40">
+              {t('home.platformsLabel')}
+            </p>
+          </Reveal>
+          <Reveal delay={80}>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-5 md:gap-x-14">
+              {PLATFORMS.map((p) => (
+                <span
+                  key={p.id}
+                  className="font-instrument text-xl text-white/45 transition-colors hover:text-white/80 md:text-2xl"
+                >
+                  {p.label}
+                </span>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 

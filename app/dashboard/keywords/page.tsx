@@ -7,12 +7,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CinematicBackground from '@/components/cinematic/cinematic-background';
+import PlatformSelect from '@/components/dashboard/platform-select';
 
 export default function KeywordsPage() {
   const router = useRouter();
   const [productType, setProductType] = useState('');
   const [market, setMarket] = useState('');
   const [style, setStyle] = useState('');
+  const [platform, setPlatform] = useState('etsy');
   const [keywords, setKeywords] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -41,7 +43,7 @@ export default function KeywordsPage() {
       const res = await fetch('/api/generate-keywords', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_type: productType, market, style }),
+        body: JSON.stringify({ product_type: productType, market, style, platform }),
       });
       if (res.status === 401) { router.push('/login'); return; }
       if (res.status === 403) { setError('You have insufficient credits. Please upgrade.'); return; }
@@ -111,6 +113,7 @@ export default function KeywordsPage() {
                   placeholder="e.g. minimalist, boho, vintage"
                 />
               </div>
+              <PlatformSelect value={platform} onChange={setPlatform} />
               <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
                 {loading ? 'Generating...' : 'Generate Keywords'}
               </Button>

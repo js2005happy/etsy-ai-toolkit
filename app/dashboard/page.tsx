@@ -18,6 +18,11 @@ import {
   ImageIcon,
   Coins,
   Loader2,
+  ListChecks,
+  Mail,
+  Target,
+  Crosshair,
+  BookOpen,
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -90,6 +95,36 @@ export default function DashboardPage() {
       title: t('dashboard.toolImagesTitle'),
       description: t('dashboard.toolImagesDesc'),
       href: '/dashboard/images',
+    },
+    {
+      icon: ListChecks,
+      title: t('dashboard.toolBulletsTitle'),
+      description: t('dashboard.toolBulletsDesc'),
+      href: '/dashboard/bullets',
+    },
+    {
+      icon: Target,
+      title: t('dashboard.toolAdCopyTitle'),
+      description: t('dashboard.toolAdCopyDesc'),
+      href: '/dashboard/ad-copy',
+    },
+    {
+      icon: Mail,
+      title: t('dashboard.toolEmailTitle'),
+      description: t('dashboard.toolEmailDesc'),
+      href: '/dashboard/email',
+    },
+    {
+      icon: Crosshair,
+      title: t('dashboard.toolCompetitorTitle'),
+      description: t('dashboard.toolCompetitorDesc'),
+      href: '/dashboard/competitor-analysis',
+    },
+    {
+      icon: BookOpen,
+      title: t('dashboard.toolBrandStoryTitle'),
+      description: t('dashboard.toolBrandStoryDesc'),
+      href: '/dashboard/brand-story',
     },
   ]
 

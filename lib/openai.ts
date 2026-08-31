@@ -1,25 +1,38 @@
 import OpenAI from "openai";
+import { getPlatform } from "@/lib/platforms";
 
-export interface ListingInput { product_name: string; product_type: string; material: string; style: string; brand_tone?: string; brand_keywords?: string; }
+export interface ListingInput { product_name: string; product_type: string; material: string; style: string; platform?: string; brand_tone?: string; brand_keywords?: string; }
 export interface ListingOutput { title: string; description: string; tags: string[]; }
-export interface MessageReplyInput { customer_message: string; product_info?: string; tone: string; brand_tone?: string; brand_keywords?: string; }
+export interface MessageReplyInput { customer_message: string; product_info?: string; tone: string; platform?: string; brand_tone?: string; brand_keywords?: string; }
 export interface MessageReplyOutput { replies: string[]; }
 export interface SocialPostInput { product_description: string; platform: string; brand_tone?: string; brand_keywords?: string; }
 export interface SocialPostOutput { caption: string; hashtags: string[]; }
-export interface ReviewReplyInput { review_text: string; rating: number; tone: string; brand_tone?: string; brand_keywords?: string; }
+export interface ReviewReplyInput { review_text: string; rating: number; tone: string; platform?: string; brand_tone?: string; brand_keywords?: string; }
 export interface ReviewReplyOutput { replies: string[]; }
-export interface AnnouncementInput { shop_type: string; announcement_type: string; tone: string; brand_tone?: string; brand_keywords?: string; }
+export interface AnnouncementInput { shop_type: string; announcement_type: string; tone: string; platform?: string; brand_tone?: string; brand_keywords?: string; }
 export interface AnnouncementOutput { announcement: string; }
-export interface KeywordsInput { product_type: string; market?: string; style?: string; }
+export interface KeywordsInput { product_type: string; market?: string; style?: string; platform?: string; }
 export interface KeywordsOutput { keywords: string[]; }
-export interface TranslateInput { text: string; target_language: string; }
+export interface TranslateInput { text: string; target_language: string; platform?: string; }
 export interface TranslateOutput { translated_text: string; }
 export interface TranslateImageInput { image: string; target_language: string; }
 export interface TranslateImageOutput { translated_text: string; extracted_text?: string; }
-export interface OptimizeListingInput { current_title?: string; current_description?: string; current_tags?: string; brand_tone?: string; brand_keywords?: string; }
+export interface OptimizeListingInput { current_title?: string; current_description?: string; current_tags?: string; platform?: string; brand_tone?: string; brand_keywords?: string; }
 export interface OptimizeListingOutput { title: string; description: string; tags: string[]; suggestions: string; }
-export interface PricingInput { material_cost: number; labor_cost: number; shipping_cost: number; competitor_price_min?: number; competitor_price_max?: number; desired_profit_margin?: number; }
+export interface PricingInput { material_cost: number; labor_cost: number; shipping_cost: number; competitor_price_min?: number; competitor_price_max?: number; desired_profit_margin?: number; platform?: string; }
 export interface PricingOutput { suggested_price: number; estimated_profit: number; pricing_strategy: string; }
+
+// New e-commerce tool inputs/outputs
+export interface BulletPointsInput { product_name: string; product_description: string; platform?: string; count?: number; brand_tone?: string; brand_keywords?: string; }
+export interface BulletPointsOutput { bullets: string[]; }
+export interface AdCopyInput { product_name: string; product_description: string; platform?: string; goal: string; audience?: string; brand_tone?: string; brand_keywords?: string; }
+export interface AdCopyOutput { headlines: string[]; primary_text: string; description: string; cta: string; }
+export interface EmailInput { email_type: string; product_name: string; product_description: string; audience?: string; brand_tone?: string; brand_keywords?: string; }
+export interface EmailOutput { subject: string; preview_text: string; body: string; }
+export interface CompetitorAnalysisInput { product_name: string; product_description: string; competitor_name?: string; competitor_description?: string; platform?: string; }
+export interface CompetitorAnalysisOutput { strengths: string[]; weaknesses: string[]; opportunities: string[]; threats: string[]; differentiation: string; }
+export interface BrandStoryInput { brand_name: string; product_type: string; origin_story?: string; values?: string; audience?: string; }
+export interface BrandStoryOutput { story: string; mission: string; tagline: string; }
 
 const PRIMARY_CHAT_MODEL = "gpt-4o-mini";
 const GROQ_BASE_URL = "https://api.groq.com/openai/v1";
@@ -72,6 +85,20 @@ function brandContext(tone?: string, keywords?: string): string {
   return `\n\nBrand voice — apply these to the output:\n- ${parts.join('\n- ')}`
 }
 
+// Single source of marketplace SEO rules, injected into every prompt so the
+// same tool "tunes" itself per marketplace (Etsy tags vs Amazon bullets, etc.)
+function platformContext(id?: string): string {
+  const p = getPlatform(id)
+  return [
+    `Marketplace: ${p.label}`,
+    `Title rule: ${p.titleRule}`,
+    `Description rule: ${p.descriptionRule}`,
+    `Bullets/highlights rule: ${p.bulletsRule}`,
+    `Keyword rule: ${p.keywordRule}`,
+    `Tone: ${p.tone}`,
+  ].join('\n')
+}
+
 export async function generateListing(input: ListingInput): Promise<ListingOutput> {
   if (process.env.USE_MOCK_AI === "true") {
     return {
@@ -80,8 +107,9 @@ export async function generateListing(input: ListingInput): Promise<ListingOutpu
       tags: ["handmade","etsyseller","giftidea","custom","unique","artisan","home","decor","style","material","quality","premium","sale"]
     };
   }
-  const prompt = "You are an Etsy SEO expert. Create a high-converting product listing for:\n- Product Name: " + input.product_name + "\n- Product Type: " + input.product_type + "\n- Material: " + input.material + "\n- Style: " + input.style + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly three fields:\n1. \"title\": optimized Etsy title (max 140 chars)\n2. \"description\": detailed product description (use emojis and line breaks)\n3. \"tags\": array of 13 Etsy tags (each max 20 chars, lowercase, no duplicates)";
-  const content = await chat(prompt, { system: "You are an Etsy SEO expert. Always return valid JSON.", json: true });
+  const p = getPlatform(input.platform);
+  const prompt = "You are an expert e-commerce listing writer for " + p.label + ". Create a high-converting product listing.\n\nMarketplace rules to follow:\n" + platformContext(input.platform) + "\n\nProduct details:\n- Product Name: " + input.product_name + "\n- Product Type: " + input.product_type + "\n- Material: " + input.material + "\n- Style: " + input.style + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly three fields:\n1. \"title\": optimized title (max " + p.titleMax + " chars)\n2. \"description\": detailed product description (follow the description rule above; use emojis and line breaks where the tone allows)\n3. \"tags\": array of search keywords/tags following the keyword rule above";
+  const content = await chat(prompt, { system: "You are an expert e-commerce listing writer for " + p.label + ". Always return valid JSON.", json: true });
   return JSON.parse(content) as ListingOutput;
 }
 
@@ -89,8 +117,9 @@ export async function generateMessageReply(input: MessageReplyInput): Promise<Me
   if (process.env.USE_MOCK_AI === "true") {
     return { replies: ["Thank you for reaching out! We're sorry to hear about the issue and would love to make it right. Could you please share more details?", "We appreciate your patience and we are here to help. Please let us know how we can resolve this for you.", "We're so sorry for the inconvenience. We will do our best to fix this promptly."] };
   }
-  const prompt = "You are a customer service assistant for an Etsy shop. Write three professional and " + input.tone + " replies to the following customer message.\n\nCustomer message: " + input.customer_message + (input.product_info ? "\nProduct info: " + input.product_info : "") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly one field:\n\"replies\": array of three strings";
-  const content = await chat(prompt, { system: "You are a helpful Etsy customer service assistant. Always return valid JSON.", json: true });
+  const p = getPlatform(input.platform);
+  const prompt = "You are a customer service assistant for a " + p.label + " seller. Write three professional and " + input.tone + " replies to the following customer message.\n\nCustomer message: " + input.customer_message + (input.product_info ? "\nProduct info: " + input.product_info : "") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly one field:\n\"replies\": array of three strings";
+  const content = await chat(prompt, { system: "You are a helpful e-commerce customer service assistant. Always return valid JSON.", json: true });
   return JSON.parse(content) as MessageReplyOutput;
 }
 
@@ -107,8 +136,9 @@ export async function generateReviewReply(input: ReviewReplyInput): Promise<Revi
   if (process.env.USE_MOCK_AI === "true") {
     return { replies: ["Thank you so much for your kind words! We're thrilled you love your order.", "We're sorry to hear that. We'd love to make things right. Please send us a message.", "Thank you for your feedback. We're always improving our products and service."] };
   }
-  const prompt = "You are an Etsy shop owner replying to a customer review. The review rating is " + input.rating + " stars. Tone should be " + input.tone + ".\n\nReview text: " + input.review_text + brandContext(input.brand_tone, input.brand_keywords) + "\n\nWrite two or three replies that are professional, polite, and appropriate for the rating.\n\nReturn JSON with exactly one field:\n\"replies\": array of strings";
-  const content = await chat(prompt, { system: "You are a helpful Etsy seller. Always return valid JSON.", json: true });
+  const p = getPlatform(input.platform);
+  const prompt = "You are a " + p.label + " seller replying to a customer review. The review rating is " + input.rating + " stars. Tone should be " + input.tone + ".\n\nReview text: " + input.review_text + brandContext(input.brand_tone, input.brand_keywords) + "\n\nWrite two or three replies that are professional, polite, and appropriate for the rating.\n\nReturn JSON with exactly one field:\n\"replies\": array of strings";
+  const content = await chat(prompt, { system: "You are a helpful e-commerce seller. Always return valid JSON.", json: true });
   return JSON.parse(content) as ReviewReplyOutput;
 }
 
@@ -116,8 +146,9 @@ export async function generateAnnouncement(input: AnnouncementInput): Promise<An
   if (process.env.USE_MOCK_AI === "true") {
     return { announcement: "Welcome to our shop! We specialize in beautiful " + input.shop_type + " items. Thank you for visiting, and feel free to reach out with any questions!" };
   }
-  const prompt = "You are an Etsy shop owner. Write a " + input.announcement_type + " announcement for a shop that sells " + input.shop_type + ". Tone should be " + input.tone + brandContext(input.brand_tone, input.brand_keywords) + ".\n\nReturn JSON with exactly one field:\n\"announcement\": a string of the announcement text";
-  const content = await chat(prompt, { system: "You are a helpful Etsy shop owner. Always return valid JSON.", json: true });
+  const p = getPlatform(input.platform);
+  const prompt = "You are a " + p.label + " shop owner. Write a " + input.announcement_type + " announcement for a shop that sells " + input.shop_type + ". Tone should be " + input.tone + brandContext(input.brand_tone, input.brand_keywords) + ".\n\nReturn JSON with exactly one field:\n\"announcement\": a string of the announcement text";
+  const content = await chat(prompt, { system: "You are a helpful e-commerce shop owner. Always return valid JSON.", json: true });
   return JSON.parse(content) as AnnouncementOutput;
 }
 
@@ -125,8 +156,9 @@ export async function generateKeywords(input: KeywordsInput): Promise<KeywordsOu
   if (process.env.USE_MOCK_AI === "true") {
     return { keywords: ["handmade " + input.product_type, "unique " + input.product_type, "gift " + input.product_type, "custom " + input.product_type, "small business " + input.product_type, "etsy " + input.product_type, "best " + input.product_type, "personalized " + input.product_type] };
   }
-  const prompt = "You are an Etsy SEO expert. Generate a list of 15 high-search-volume keywords for a product type: " + input.product_type + (input.market ? " targeting market: " + input.market : "") + (input.style ? " with style: " + input.style : "") + ". Include long-tail keywords.\n\nReturn JSON with exactly one field:\n\"keywords\": an array of 15 keyword strings";
-  const content = await chat(prompt, { system: "You are an Etsy SEO expert. Always return valid JSON.", json: true });
+  const p = getPlatform(input.platform);
+  const prompt = "You are an expert keyword researcher for " + p.label + ". Generate a list of 15 high-search-volume keywords for a product type: " + input.product_type + (input.market ? " targeting market: " + input.market : "") + (input.style ? " with style: " + input.style : "") + ". Include long-tail keywords.\n\nKeyword rule for " + p.label + ": " + p.keywordRule + "\n\nReturn JSON with exactly one field:\n\"keywords\": an array of 15 keyword strings";
+  const content = await chat(prompt, { system: "You are an expert e-commerce keyword researcher. Always return valid JSON.", json: true });
   return JSON.parse(content) as KeywordsOutput;
 }
 
@@ -134,7 +166,8 @@ export async function translateListing(input: TranslateInput): Promise<Translate
   if (process.env.USE_MOCK_AI === "true") {
     return { translated_text: "[MOCK Translation] " + input.text + " (translated to " + input.target_language + ")" };
   }
-  const prompt = "Translate the following Etsy listing text to " + input.target_language + ". Keep SEO-friendly keywords and formatting.\n\nText:\n" + input.text + "\n\nReturn JSON with exactly one field:\n\"translated_text\": the translated text";
+  const p = getPlatform(input.platform);
+  const prompt = "Translate the following " + p.label + " listing text to " + input.target_language + ". Keep SEO-friendly keywords and formatting.\n\nText:\n" + input.text + "\n\nReturn JSON with exactly one field:\n\"translated_text\": the translated text";
   const content = await chat(prompt, { system: "You are a professional translator. Always return valid JSON.", json: true });
   return JSON.parse(content) as TranslateOutput;
 }
@@ -182,8 +215,9 @@ export async function optimizeListing(input: OptimizeListingInput): Promise<Opti
       suggestions: "Add more long-tail keywords and use all 13 tags."
     };
   }
-  const prompt = "You are an Etsy SEO expert. Analyze the following existing listing and provide an improved version.\n\nCurrent title: " + (input.current_title || "N/A") + "\nCurrent description: " + (input.current_description || "N/A") + "\nCurrent tags: " + (input.current_tags || "N/A") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with these fields:\n1. \"title\": optimized title\n2. \"description\": optimized description\n3. \"tags\": array of 13 optimized tags\n4. \"suggestions\": a short paragraph explaining what was improved";
-  const content = await chat(prompt, { system: "You are an Etsy SEO expert. Always return valid JSON.", json: true });
+  const p = getPlatform(input.platform);
+  const prompt = "You are an expert e-commerce listing optimizer for " + p.label + ". Analyze the following existing listing and provide an improved version that follows " + p.label + "'s ranking rules.\n\nMarketplace rules:\n" + platformContext(input.platform) + "\n\nCurrent title: " + (input.current_title || "N/A") + "\nCurrent description: " + (input.current_description || "N/A") + "\nCurrent tags: " + (input.current_tags || "N/A") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with these fields:\n1. \"title\": optimized title\n2. \"description\": optimized description\n3. \"tags\": array of optimized keywords/tags\n4. \"suggestions\": a short paragraph explaining what was improved";
+  const content = await chat(prompt, { system: "You are an expert e-commerce listing optimizer. Always return valid JSON.", json: true });
   return JSON.parse(content) as OptimizeListingOutput;
 }
 
@@ -467,7 +501,60 @@ export async function generatePricingAdvice(input: PricingInput): Promise<Pricin
       pricing_strategy: "Consider a 2.5x markup to cover fees and profit."
     };
   }
-  const prompt = "You are a pricing expert for Etsy sellers. Given the following costs and optional competitor prices, suggest a price and profit.\n\nMaterial cost: " + input.material_cost + "\nLabor cost: " + input.labor_cost + "\nShipping cost: " + input.shipping_cost + "\nCompetitor price range: " + (input.competitor_price_min || "unknown") + " to " + (input.competitor_price_max || "unknown") + "\nDesired profit margin: " + (input.desired_profit_margin || "not specified") + "\n\nReturn JSON with these fields:\n1. \"suggested_price\": a number\n2. \"estimated_profit\": a number\n3. \"pricing_strategy\": a short explanation";
+  const p = getPlatform(input.platform);
+  const prompt = "You are a pricing expert for " + p.label + " sellers. Given the following costs and optional competitor prices, suggest a price and profit.\n\nMaterial cost: " + input.material_cost + "\nLabor cost: " + input.labor_cost + "\nShipping cost: " + input.shipping_cost + "\nCompetitor price range: " + (input.competitor_price_min || "unknown") + " to " + (input.competitor_price_max || "unknown") + "\nDesired profit margin: " + (input.desired_profit_margin || "not specified") + "\n\nConsider " + p.label + "'s typical commission/fee structure in your strategy.\n\nReturn JSON with these fields:\n1. \"suggested_price\": a number\n2. \"estimated_profit\": a number\n3. \"pricing_strategy\": a short explanation";
   const content = await chat(prompt, { system: "You are a pricing expert. Always return valid JSON.", json: true });
   return JSON.parse(content) as PricingOutput;
+}
+
+// ===== New e-commerce tool functions =====
+
+export async function generateBulletPoints(input: BulletPointsInput): Promise<BulletPointsOutput> {
+  if (process.env.USE_MOCK_AI === "true") {
+    return { bullets: ["Premium quality " + input.product_name, "Made from durable, long-lasting materials", "Perfect gift for any occasion", "Fast, reliable shipping", "Backed by a satisfaction guarantee"] };
+  }
+  const p = getPlatform(input.platform);
+  const count = input.count || 5;
+  const prompt = "You are an expert e-commerce copywriter for " + p.label + ". Write " + count + " benefit-led bullet points for this product.\n\nMarketplace rules:\n" + platformContext(input.platform) + "\n\nProduct: " + input.product_name + "\nDescription: " + input.product_description + brandContext(input.brand_tone, input.brand_keywords) + "\n\nEach bullet must lead with a clear benefit and answer a buyer objection (size, material, use case, warranty, what's included).\n\nReturn JSON with exactly one field:\n\"bullets\": array of " + count + " strings";
+  const content = await chat(prompt, { system: "You are an expert e-commerce copywriter. Always return valid JSON.", json: true });
+  return JSON.parse(content) as BulletPointsOutput;
+}
+
+export async function generateAdCopy(input: AdCopyInput): Promise<AdCopyOutput> {
+  if (process.env.USE_MOCK_AI === "true") {
+    return { headlines: ["Introducing " + input.product_name, "Upgrade your everyday", "The " + input.product_name + " everyone's talking about"], primary_text: "Meet " + input.product_name + ". " + input.product_description, description: "Order today and see the difference.", cta: "Shop Now" };
+  }
+  const p = getPlatform(input.platform);
+  const prompt = "You are a performance marketing copywriter writing ads for " + p.label + " and paid social (Meta, TikTok, Google). Create high-converting ad copy.\n\nGoal: " + input.goal + "\nProduct: " + input.product_name + "\nDescription: " + input.product_description + (input.audience ? "\nTarget audience: " + input.audience : "") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nMarketplace tone to respect: " + p.tone + "\n\nReturn JSON with exactly four fields:\n1. \"headlines\": array of 5 headline options\n2. \"primary_text\": the main ad body text\n3. \"description\": a short supporting description\n4. \"cta\": a strong call-to-action phrase";
+  const content = await chat(prompt, { system: "You are a performance marketing copywriter. Always return valid JSON.", json: true });
+  return JSON.parse(content) as AdCopyOutput;
+}
+
+export async function generateEmail(input: EmailInput): Promise<EmailOutput> {
+  if (process.env.USE_MOCK_AI === "true") {
+    return { subject: "A little something for you", preview_text: "Don't miss out on " + input.product_name, body: "Hi there,\n\nWe thought you'd love " + input.product_name + ".\n\n" + input.product_description + "\n\nShop now." };
+  }
+  const typeLabel = input.email_type.replace(/_/g, " ");
+  const prompt = "You are an e-commerce email marketing copywriter. Write a " + typeLabel + " email.\n\nProduct: " + input.product_name + "\nDescription: " + input.product_description + (input.audience ? "\nAudience: " + input.audience : "") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nWrite for a real customer, no spammy or clickbait language. Keep it warm, concise, and actionable.\n\nReturn JSON with exactly three fields:\n1. \"subject\": email subject line\n2. \"preview_text\": 1-sentence preview text\n3. \"body\": the email body in plain text with line breaks";
+  const content = await chat(prompt, { system: "You are an e-commerce email marketing copywriter. Always return valid JSON.", json: true });
+  return JSON.parse(content) as EmailOutput;
+}
+
+export async function generateCompetitorAnalysis(input: CompetitorAnalysisInput): Promise<CompetitorAnalysisOutput> {
+  if (process.env.USE_MOCK_AI === "true") {
+    return { strengths: ["Established brand"], weaknesses: ["Higher price point"], opportunities: ["Better product photography"], threats: ["Price competition"], differentiation: "Focus on quality and storytelling." };
+  }
+  const p = getPlatform(input.platform);
+  const prompt = "You are an e-commerce competitive analyst. Perform a SWOT analysis of a competitor on " + p.label + " to help a seller differentiate.\n\nYour product: " + input.product_name + "\nYour product description: " + input.product_description + "\nCompetitor: " + (input.competitor_name || "a comparable product") + "\nCompetitor description: " + (input.competitor_description || "not provided — infer typical weaknesses") + "\n\nReturn JSON with exactly five fields:\n1. \"strengths\": array of competitor strengths\n2. \"weaknesses\": array of competitor weaknesses\n3. \"opportunities\": array of opportunities for your product to win\n4. \"threats\": array of threats to watch\n5. \"differentiation\": a short paragraph on how to position against this competitor";
+  const content = await chat(prompt, { system: "You are an e-commerce competitive analyst. Always return valid JSON.", json: true });
+  return JSON.parse(content) as CompetitorAnalysisOutput;
+}
+
+export async function generateBrandStory(input: BrandStoryInput): Promise<BrandStoryOutput> {
+  if (process.env.USE_MOCK_AI === "true") {
+    return { story: "Every " + input.product_type + " we make starts with a simple idea: craft something worth keeping.", mission: "To make " + input.product_type + " that people love and keep.", tagline: "Made with care, made to last." };
+  }
+  const prompt = "You are a brand storyteller for an e-commerce business. Write a compelling brand story.\n\nBrand name: " + input.brand_name + "\nProduct type: " + input.product_type + (input.origin_story ? "\nOrigin story: " + input.origin_story : "") + (input.values ? "\nCore values: " + input.values : "") + (input.audience ? "\nTarget audience: " + input.audience : "") + "\n\nWrite authentically — no corporate clichés, no AI-sounding platitudes. Make it sound like a real founder telling their story.\n\nReturn JSON with exactly three fields:\n1. \"story\": the brand story (2-3 paragraphs)\n2. \"mission\": a one-sentence mission statement\n3. \"tagline\": a short memorable tagline";
+  const content = await chat(prompt, { system: "You are a brand storyteller. Always return valid JSON.", json: true });
+  return JSON.parse(content) as BrandStoryOutput;
 }
