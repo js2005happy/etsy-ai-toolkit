@@ -26,8 +26,8 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
-  title: "Etsy Seller AI Toolkit",
-  description: "AI-powered tools for Etsy sellers to create listings, reply to customers, and grow their shop.",
+  title: "Etsy AI Toolkit",
+  description: "One workspace to write listings, posts, and replies for Etsy, Amazon, Shopify, TikTok Shop, and more.",
 };
 
 export default function RootLayout({

@@ -8,8 +8,8 @@ type Faq = { q: string; a: string };
 
 const faqs: Faq[] = [
   {
-    q: "What is Etsy Seller AI Toolkit?",
-    a: "It's a set of AI-powered tools that help Etsy sellers write listings, reply to customers, research keywords, translate and optimize listings, price products, and generate product images — all from one workspace.",
+    q: "What is Etsy AI Toolkit?",
+    a: "A single workspace for marketplace sellers to write listings, reply to customers, research keywords, translate and optimize listings, price products, and generate product images — across Etsy, Amazon, Shopify, TikTok Shop, and more.",
   },
   {
     q: "How do credits work?",
@@ -29,7 +29,7 @@ const faqs: Faq[] = [
   },
   {
     q: "Can I use these tools from Claude Code or Codex?",
-    a: "Yes. The toolkit ships an MCP server with all 10 tools. Grab your personal MCP key in Account → MCP connection, then add the etsy-ai-toolkit-mcp server to your client. Credits and image quota are tracked against your own account.",
+    a: "Yes. The toolkit ships an MCP server with all 15 tools. Grab your personal MCP key in Account → MCP connection, then add the etsy-ai-toolkit-mcp server to your client. Credits and image quota are tracked against your own account.",
   },
   {
     q: "Do you have an affiliate program?",

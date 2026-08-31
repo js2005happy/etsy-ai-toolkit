@@ -27,7 +27,7 @@ const sections: Section[] = [
     content: (
       <>
         <p>
-          Etsy Seller AI Toolkit provides AI-powered tools that help Etsy sellers generate product
+          Etsy AI Toolkit provides tools that help marketplace sellers generate product
           listings, reply to customer messages and reviews, create social media posts, research
           keywords, translate listings, optimize listings, and get pricing suggestions.
         </p>

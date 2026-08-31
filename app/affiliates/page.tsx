@@ -26,7 +26,7 @@ const steps = [
 const perks = [
   {
     title: "A real, daily-use product",
-    body: "Ten AI tools that Etsy sellers actually open every day — listings, buyer replies, reviews, keywords, product images.",
+    body: "Fifteen tools that online sellers actually open every day — listings, buyer replies, reviews, keywords, product images, and more.",
   },
   {
     title: "Free tier = easy sell",
@@ -52,11 +52,11 @@ export default function AffiliatesPage() {
           eyebrow="Affiliates"
           title={
             <>
-              Earn <span className="text-primary">30%</span> recommending the AI
-              copilot for Etsy sellers
+              Earn <span className="text-primary">30%</span> recommending the
+              copilot for marketplace sellers
             </>
           }
-          subtitle="You have an audience of Etsy sellers. We have the tools they use every day. Recommend Etsy AI Toolkit and earn 30% of every paid plan your readers buy."
+          subtitle="You have an audience of online sellers. We have the tools they use every day. Recommend Etsy AI Toolkit and earn 30% of every paid plan your readers buy."
         />
 
         <section className="px-5 pb-16">

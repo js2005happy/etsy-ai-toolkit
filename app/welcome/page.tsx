@@ -17,7 +17,7 @@ export default function WelcomePage() {
             </h1>
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
               Your subscription is active. Head to your dashboard to start using
-              all your AI tools.
+              all your tools.
             </p>
             <Link href="/dashboard" className="mt-8 inline-block">
               <span className="rounded-full bg-primary px-8 py-4 text-lg font-medium text-primary-foreground transition-opacity hover:opacity-90">
