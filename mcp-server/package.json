@@ -1,6 +1,6 @@
 {
   "name": "etsy-ai-toolkit-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Model Context Protocol (MCP) server for Etsy AI Toolkit — 10 AI tools for Etsy sellers (stdio + Streamable HTTP)",
   "license": "MIT",
   "type": "module",
