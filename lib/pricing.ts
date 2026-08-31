@@ -12,7 +12,19 @@ export interface Tier {
 
 // The monthly credit / image quotas per tier. `priceId` reuses the existing
 // Paddle catalog prices (Starter/Pro/Advanced) whose amounts already match
-// $9 / $19 / $39. Free has no priceId — it's the lead-gen entry point.
+// $9 / $19 / $39 monthly. Free has no priceId — it's the lead-gen entry point.
+//
+// Image quotas are costed against the most expensive path (nano-banana-2
+// image-to-image @ $0.055/image). Monthly tiers hold ~65% margin; Scale runs
+// 300 images at ~58% (owner accepted this to keep the count high):
+//   Basic 50  -> $2.75  / $9  = 69.4% margin
+//   Pro   120 -> $6.60  / $19 = 65.3% margin
+//   Scale 300 -> $16.50 / $39 = 57.7% margin
+//
+// Scale yearly was raised to $450 (from $349) to hold ~56% margin under the
+// 12× lump quota. Basic/Pro yearly stay $79/$179 — their margin lands ~56-58%
+// once the 12× quota applies. Yearly quota is granted as a 12× lump at
+// purchase (see syncUserPlan).
 export const TIERS: Tier[] = [
   {
     name: 'Free',
@@ -23,7 +35,7 @@ export const TIERS: Tier[] = [
   {
     name: 'Basic',
     credits: 100,
-    images: 20,
+    images: 50,
     priceId: {
       month: 'pri_01m14nefyckgxfwghxaferkem9', // $9 Starter Monthly
       year: 'pri_01m14neg9t3h5z29sf6y5hpgma', // $79 Starter Yearly
@@ -32,7 +44,7 @@ export const TIERS: Tier[] = [
   {
     name: 'Pro',
     credits: 300,
-    images: 60,
+    images: 120,
     priceId: {
       month: 'pri_01m14kdhc8ksgzbzxyan895r41', // $19 Pro Monthly
       year: 'pri_01m14negn1c9xgym2jncv8bx14', // $179 Pro Yearly
@@ -44,7 +56,7 @@ export const TIERS: Tier[] = [
     images: 300,
     priceId: {
       month: 'pri_01m14neh05966mkbv7dzbf8wbw', // $39 Advanced Monthly
-      year: 'pri_01m14nehdrx1a31rh3w74cck04', // $349 Advanced Yearly
+      year: 'pri_01m1bxtb0bv7cs53jjsnhmz6jf', // $450 Advanced Yearly
     },
   },
 ]
@@ -57,10 +69,22 @@ export const PRICE_TO_TIER: Record<string, TierName> = {
   pri_01m14kdhc8ksgzbzxyan895r41: 'Pro', // $19 monthly
   pri_01m14negn1c9xgym2jncv8bx14: 'Pro', // $179 yearly
   pri_01m14neh05966mkbv7dzbf8wbw: 'Scale', // $39 monthly
-  pri_01m14nehdrx1a31rh3w74cck04: 'Scale', // $349 yearly
+  pri_01m14nehdrx1a31rh3w74cck04: 'Scale', // $349 yearly (legacy, existing subs)
+  pri_01m1bxtb0bv7cs53jjsnhmz6jf: 'Scale', // $450 yearly
 }
 
 export function tierQuota(name: TierName): { credits: number; images: number } {
   const tier = TIERS.find((t) => t.name === name)
   return { credits: tier?.credits ?? 0, images: tier?.images ?? 0 }
+}
+
+// Yearly price ids — used to grant the yearly quota as a 12× lump at purchase
+// instead of a single month's worth (monthly subs re-grant on each renew).
+const YEARLY_PRICE_IDS = new Set([
+  ...TIERS.flatMap((t) => (t.priceId ? [t.priceId.year] : [])),
+  'pri_01m14nehdrx1a31rh3w74cck04', // legacy $349 Advanced Yearly — still billed to existing subs
+])
+
+export function isYearlyPrice(priceId: string | undefined): boolean {
+  return !!priceId && YEARLY_PRICE_IDS.has(priceId)
 }

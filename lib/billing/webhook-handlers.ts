@@ -1,6 +1,6 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { hasPaidAccess } from './access'
-import { PRICE_TO_TIER, tierQuota, type TierName } from '@/lib/pricing'
+import { PRICE_TO_TIER, tierQuota, isYearlyPrice, type TierName } from '@/lib/pricing'
 import {
   sendNewSaleEmail,
   sendSubscriptionActiveEmail,
@@ -151,12 +151,17 @@ export async function syncUserPlan(
   const tier = resolveTier(priceId, status)
   const quota = tierQuota(tier)
 
+  // Yearly subs grant the monthly quota as a 12× lump at purchase (no monthly
+  // renew webhook fires), so a yearly buyer gets a full year's allowance up
+  // front. Monthly subs re-grant a single month's worth on every renew.
+  const multiplier = isYearlyPrice(priceId) ? 12 : 1
+
   await getSupabase()
     .from('profiles')
     .update({
       subscription_status: tier.toLowerCase(),
-      credits_remaining: quota.credits,
-      images_remaining: quota.images,
+      credits_remaining: quota.credits * multiplier,
+      images_remaining: quota.images * multiplier,
     })
     .eq('id', userId)
 
