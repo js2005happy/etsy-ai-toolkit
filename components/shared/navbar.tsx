@@ -61,7 +61,8 @@ export default function Navbar() {
     router.refresh();
   };
 
-  const initial = user?.email?.[0]?.toUpperCase() ?? "U";
+  const nickname = user?.user_metadata?.nickname as string | undefined;
+  const initial = (nickname?.[0] || user?.email?.[0])?.toUpperCase() ?? "U";
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined;
 
   return (
@@ -107,8 +108,9 @@ export default function Navbar() {
 
               {menuOpen && (
                 <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-xl border border-border bg-card p-1.5 shadow-xl">
-                  <div className="truncate px-3 py-2 text-xs text-muted-foreground">
-                    {user.email}
+                  <div className="px-3 py-2">
+                    <div className="truncate text-sm font-medium text-foreground">{nickname || user.email}</div>
+                    {nickname && <div className="truncate text-xs text-muted-foreground">{user.email}</div>}
                   </div>
                   <Link
                     href="/dashboard"

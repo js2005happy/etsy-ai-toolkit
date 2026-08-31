@@ -42,6 +42,11 @@ export default function AccountPage() {
   const [avatarMessage, setAvatarMessage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [nickname, setNickname] = useState('')
+  const [savingNickname, setSavingNickname] = useState(false)
+  const [nicknameError, setNicknameError] = useState<string | null>(null)
+  const [nicknameMessage, setNicknameMessage] = useState<string | null>(null)
+
   const isPaid = plan !== 'free' && plan != null
   const planLabel =
     plan === 'free'
@@ -57,6 +62,7 @@ export default function AccountPage() {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user ?? null)
       setAvatarUrl((data.user?.user_metadata?.avatar_url as string) ?? null)
+      setNickname((data.user?.user_metadata?.nickname as string) ?? '')
     })
 
     fetch('/api/user/credits')
@@ -196,6 +202,28 @@ export default function AccountPage() {
     }
   }
 
+  const handleSaveNickname = async () => {
+    setNicknameMessage(null)
+    setNicknameError(null)
+    if (!user) return
+    const trimmed = nickname.trim()
+    setSavingNickname(true)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.auth.updateUser({ data: { nickname: trimmed || null } })
+      if (error) {
+        setNicknameError(error.message)
+      } else {
+        setNickname(trimmed)
+        setNicknameMessage(t('account.nicknameUpdated'))
+      }
+    } catch {
+      setNicknameError(t('auth.unexpectedError'))
+    } finally {
+      setSavingNickname(false)
+    }
+  }
+
   const handleSignOut = async () => {
     setSigningOut(true)
     const supabase = createClient()
@@ -267,6 +295,25 @@ export default function AccountPage() {
                 {avatarError && <p className="text-sm font-medium text-destructive">{avatarError}</p>}
                 {avatarMessage && <p className="text-sm font-medium text-emerald-400">{avatarMessage}</p>}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nickname">{t('account.nickname')}</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="nickname"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  placeholder={t('account.nicknamePlaceholder')}
+                  maxLength={30}
+                />
+                <Button type="button" onClick={handleSaveNickname} disabled={savingNickname}>
+                  {savingNickname ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {t('account.saveNickname')}
+                </Button>
+              </div>
+              {nicknameError && <p className="text-sm font-medium text-destructive">{nicknameError}</p>}
+              {nicknameMessage && <p className="text-sm font-medium text-emerald-400">{nicknameMessage}</p>}
             </div>
 
             <div className="flex items-center gap-4 rounded-lg border border-border bg-secondary p-4">
