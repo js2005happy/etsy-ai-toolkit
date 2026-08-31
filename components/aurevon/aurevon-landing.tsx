@@ -3,7 +3,19 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Flower2, Globe, LayoutDashboard, UserRound, LogOut } from 'lucide-react'
+import {
+  Globe,
+  LayoutDashboard,
+  UserRound,
+  LogOut,
+  FileText,
+  Search,
+  MessageCircle,
+  TrendingUp,
+  ArrowRight,
+  Menu,
+  X,
+} from 'lucide-react'
 import { useI18n } from '@/lib/i18n/client'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import { createClient } from '@/lib/supabase/client'
@@ -11,27 +23,82 @@ import { PLATFORMS } from '@/lib/platforms'
 import Reveal from '@/components/shared/reveal'
 import type { User } from '@supabase/supabase-js'
 
-const VIDEO_URL =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260819_212700_3bb9329b-5c50-4257-a09b-ca85cf3654a3.mp4'
+const INK = '#1a1714'
+const MUTED = '#6b6560'
+const LINE = '#e9e5df'
+const PAPER = '#fbfaf8'
+const ACCENT = '#2f5d3f'
 
 function LanguageSelect() {
   const { locale, setLocale } = useI18n()
   return (
     <div className="relative flex items-center">
-      <Globe className="pointer-events-none absolute left-3 h-4 w-4 text-white/70" />
+      <Globe className="pointer-events-none absolute left-3 h-4 w-4 text-[#6b6560]" />
       <select
         value={locale}
         onChange={(e) => setLocale(e.target.value as Locale)}
         aria-label="Language"
-        className="h-9 cursor-pointer appearance-none rounded-full border border-white/20 bg-transparent pl-9 pr-7 text-sm text-white/90 outline-none transition hover:bg-white/10"
+        className="h-9 cursor-pointer appearance-none rounded-full border border-[#e9e5df] bg-transparent pl-9 pr-7 text-sm text-[#3f3a35] outline-none transition hover:bg-[#f4f1ec]"
       >
         {locales.map((l) => (
-          <option key={l.code} value={l.code} className="bg-black text-white">
+          <option key={l.code} value={l.code}>
             {l.label}
           </option>
         ))}
       </select>
-      <span className="pointer-events-none absolute right-3 text-[10px] text-white/60">▾</span>
+      <span className="pointer-events-none absolute right-3 text-[10px] text-[#9a948c]">▾</span>
+    </div>
+  )
+}
+
+function ProductMockup() {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-[#e9e5df] bg-white shadow-[0_24px_60px_-30px_rgba(26,23,20,0.25)]">
+      {/* window chrome */}
+      <div className="flex items-center gap-2 border-b border-[#e9e5df] px-5 py-3.5">
+        <span className="h-3 w-3 rounded-full bg-[#e2e0dc]" />
+        <span className="h-3 w-3 rounded-full bg-[#e2e0dc]" />
+        <span className="h-3 w-3 rounded-full bg-[#e2e0dc]" />
+        <div className="ml-3 flex-1 rounded-md bg-[#f4f1ec] px-3 py-1.5 text-xs text-[#8a857e]">
+          craftly.world/listing
+        </div>
+      </div>
+      <div className="grid divide-y divide-[#e9e5df] md:grid-cols-2 md:divide-x md:divide-y-0">
+        {/* input */}
+        <div className="p-6 md:p-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a948c]">Your notes</p>
+          <div className="mt-4 rounded-xl border border-[#e9e5df] bg-[#fbfaf8] p-5 text-sm leading-relaxed text-[#4a453f]">
+            Hand-thrown ceramic mug in speckled stoneware. Holds 12oz, glazed in matte
+            sage, microwave and dishwasher safe.
+          </div>
+          <div className="mt-4 flex h-10 items-center justify-center rounded-xl bg-[#1a1714] text-sm font-medium text-white">
+            Write the listing
+          </div>
+        </div>
+        {/* output */}
+        <div className="bg-[#fbfaf8] p-6 md:p-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a948c]">
+            Ready to publish
+          </p>
+          <p className="mt-4 font-display text-xl leading-snug text-[#1a1714] md:text-2xl">
+            Speckled Stoneware Mug — Matte Sage, 12oz
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-[#4a453f]">
+            A hand-thrown mug with a soft matte sage glaze and a warm, earthy speckle.
+            Holds 12 ounces, dishwasher and microwave safe.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {['ceramic mug', 'stoneware', 'handmade', 'sage green'].map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border border-[#e9e5df] bg-white px-3 py-1 text-xs text-[#3f3a35]"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
@@ -40,9 +107,7 @@ export default function AurevonLanding() {
   const { t } = useI18n()
   const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
-  const [overlayOpen, setOverlayOpen] = useState(false)
-  const [navMounted, setNavMounted] = useState(false)
-  const [heroMounted, setHeroMounted] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
@@ -54,22 +119,73 @@ export default function AurevonLanding() {
     { label: t('nav.support'), href: '/contact' },
   ]
 
-  const tools = [
-    { n: '01', title: t('dashboard.toolListingTitle'), desc: t('dashboard.toolListingDesc'), href: '/dashboard/listing' },
-    { n: '02', title: t('dashboard.toolMessagesTitle'), desc: t('dashboard.toolMessagesDesc'), href: '/dashboard/messages' },
-    { n: '03', title: t('dashboard.toolSocialTitle'), desc: t('dashboard.toolSocialDesc'), href: '/dashboard/social' },
-    { n: '04', title: t('dashboard.toolReviewsTitle'), desc: t('dashboard.toolReviewsDesc'), href: '/dashboard/reviews' },
-    { n: '05', title: t('dashboard.toolAnnouncementTitle'), desc: t('dashboard.toolAnnouncementDesc'), href: '/dashboard/announcement' },
-    { n: '06', title: t('dashboard.toolKeywordsTitle'), desc: t('dashboard.toolKeywordsDesc'), href: '/dashboard/keywords' },
-    { n: '07', title: t('dashboard.toolTranslateTitle'), desc: t('dashboard.toolTranslateDesc'), href: '/dashboard/translate' },
-    { n: '08', title: t('dashboard.toolOptimizerTitle'), desc: t('dashboard.toolOptimizerDesc'), href: '/dashboard/optimizer' },
-    { n: '09', title: t('dashboard.toolPricingTitle'), desc: t('dashboard.toolPricingDesc'), href: '/dashboard/pricing' },
-    { n: '10', title: t('dashboard.toolImagesTitle'), desc: t('dashboard.toolImagesDesc'), href: '/dashboard/images' },
-    { n: '11', title: t('dashboard.toolBulletsTitle'), desc: t('dashboard.toolBulletsDesc'), href: '/dashboard/bullets' },
-    { n: '12', title: t('dashboard.toolAdCopyTitle'), desc: t('dashboard.toolAdCopyDesc'), href: '/dashboard/ad-copy' },
-    { n: '13', title: t('dashboard.toolEmailTitle'), desc: t('dashboard.toolEmailDesc'), href: '/dashboard/email' },
-    { n: '14', title: t('dashboard.toolCompetitorTitle'), desc: t('dashboard.toolCompetitorDesc'), href: '/dashboard/competitor-analysis' },
-    { n: '15', title: t('dashboard.toolBrandStoryTitle'), desc: t('dashboard.toolBrandStoryDesc'), href: '/dashboard/brand-story' },
+  const goals = [
+    {
+      icon: FileText,
+      title: t('home.goalCreateTitle'),
+      desc: t('home.goalCreateDesc'),
+      href: '/dashboard/listing',
+    },
+    {
+      icon: Search,
+      title: t('home.goalOptimizeTitle'),
+      desc: t('home.goalOptimizeDesc'),
+      href: '/dashboard/optimizer',
+    },
+    {
+      icon: MessageCircle,
+      title: t('home.goalReplyTitle'),
+      desc: t('home.goalReplyDesc'),
+      href: '/dashboard/messages',
+    },
+    {
+      icon: TrendingUp,
+      title: t('home.goalGrowTitle'),
+      desc: t('home.goalGrowDesc'),
+      href: '/dashboard/pricing',
+    },
+  ]
+
+  const groups = [
+    {
+      label: t('home.groupCreate'),
+      benefit: t('home.groupCreateBenefit'),
+      tools: [
+        { title: t('dashboard.toolListingTitle'), desc: t('dashboard.toolListingDesc'), href: '/dashboard/listing' },
+        { title: t('dashboard.toolBulletsTitle'), desc: t('dashboard.toolBulletsDesc'), href: '/dashboard/bullets' },
+        { title: t('dashboard.toolBrandStoryTitle'), desc: t('dashboard.toolBrandStoryDesc'), href: '/dashboard/brand-story' },
+        { title: t('dashboard.toolImagesTitle'), desc: t('dashboard.toolImagesDesc'), href: '/dashboard/images' },
+      ],
+    },
+    {
+      label: t('home.groupOptimize'),
+      benefit: t('home.groupOptimizeBenefit'),
+      tools: [
+        { title: t('dashboard.toolOptimizerTitle'), desc: t('dashboard.toolOptimizerDesc'), href: '/dashboard/optimizer' },
+        { title: t('dashboard.toolKeywordsTitle'), desc: t('dashboard.toolKeywordsDesc'), href: '/dashboard/keywords' },
+        { title: t('dashboard.toolTranslateTitle'), desc: t('dashboard.toolTranslateDesc'), href: '/dashboard/translate' },
+        { title: t('dashboard.toolCompetitorTitle'), desc: t('dashboard.toolCompetitorDesc'), href: '/dashboard/competitor-analysis' },
+      ],
+    },
+    {
+      label: t('home.groupReply'),
+      benefit: t('home.groupReplyBenefit'),
+      tools: [
+        { title: t('dashboard.toolMessagesTitle'), desc: t('dashboard.toolMessagesDesc'), href: '/dashboard/messages' },
+        { title: t('dashboard.toolReviewsTitle'), desc: t('dashboard.toolReviewsDesc'), href: '/dashboard/reviews' },
+        { title: t('dashboard.toolEmailTitle'), desc: t('dashboard.toolEmailDesc'), href: '/dashboard/email' },
+        { title: t('dashboard.toolAnnouncementTitle'), desc: t('dashboard.toolAnnouncementDesc'), href: '/dashboard/announcement' },
+      ],
+    },
+    {
+      label: t('home.groupGrow'),
+      benefit: t('home.groupGrowBenefit'),
+      tools: [
+        { title: t('dashboard.toolSocialTitle'), desc: t('dashboard.toolSocialDesc'), href: '/dashboard/social' },
+        { title: t('dashboard.toolAdCopyTitle'), desc: t('dashboard.toolAdCopyDesc'), href: '/dashboard/ad-copy' },
+        { title: t('dashboard.toolPricingTitle'), desc: t('dashboard.toolPricingDesc'), href: '/dashboard/pricing' },
+      ],
+    },
   ]
 
   const steps = [
@@ -78,10 +194,16 @@ export default function AurevonLanding() {
     { n: '03', title: t('home.step3Title'), desc: t('home.step3Desc') },
   ]
 
+  const proof = [
+    { title: t('home.proof1Title'), desc: t('home.proof1Desc') },
+    { title: t('home.proof2Title'), desc: t('home.proof2Desc') },
+    { title: t('home.proof3Title'), desc: t('home.proof3Desc') },
+  ]
+
   const footerColumns = [
     {
       title: t('footer.product'),
-      links: tools.map((tool) => ({ label: tool.title, href: tool.href })),
+      links: groups.flatMap((g) => g.tools.map((tool) => ({ label: tool.title, href: tool.href }))),
     },
     {
       title: t('footer.resources'),
@@ -117,27 +239,18 @@ export default function AurevonLanding() {
   ]
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40)
+    const onScroll = () => setScrolled(window.scrollY > 24)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   useEffect(() => {
-    const navTimer = setTimeout(() => setNavMounted(true), 100)
-    const heroTimer = setTimeout(() => setHeroMounted(true), 300)
-    return () => {
-      clearTimeout(navTimer)
-      clearTimeout(heroTimer)
-    }
-  }, [])
-
-  useEffect(() => {
-    document.body.style.overflow = overlayOpen ? 'hidden' : ''
+    document.body.style.overflow = mobileOpen ? 'hidden' : ''
     return () => {
       document.body.style.overflow = ''
     }
-  }, [overlayOpen])
+  }, [mobileOpen])
 
   useEffect(() => {
     const supabase = createClient()
@@ -160,9 +273,6 @@ export default function AurevonLanding() {
     return () => document.removeEventListener('mousedown', onClick)
   }, [])
 
-  const toggleOverlay = () => setOverlayOpen((v) => !v)
-  const closeOverlay = () => setOverlayOpen(false)
-
   const handleSignOut = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -175,53 +285,39 @@ export default function AurevonLanding() {
   const avatarUrl = user?.user_metadata?.avatar_url as string | undefined
 
   return (
-    <div className="relative min-h-screen bg-black">
+    <div className="relative min-h-screen bg-[#fbfaf8] text-[#1a1714]" style={{ fontFeatureSettings: '"ss01" on' }}>
       {/* Navbar */}
       <header
-        className={`fixed top-0 left-0 z-50 w-full transition-all duration-500 ${
-          scrolled ? 'bg-black/80 backdrop-blur-md' : 'bg-transparent'
+        className={`fixed top-0 left-0 z-50 w-full transition-all duration-300 ${
+          scrolled ? 'border-b border-[#e9e5df] bg-[#fbfaf8]/90 backdrop-blur-md' : 'bg-transparent'
         }`}
       >
-        <div className="mx-auto flex h-16 max-w-[1440px] items-center justify-between px-6 md:h-20 md:px-10">
-          {/* Logo */}
-          <a
-            href="#"
-            className={`z-50 text-xl font-semibold tracking-tight text-white transition-all duration-700 ease-entrance md:text-2xl ${
-              navMounted ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
-            }`}
-            style={{ transitionDelay: '0ms' }}
-          >
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+          <a href="#" className="text-lg font-semibold tracking-tight text-[#1a1714]">
             {t('nav.brand')}
           </a>
 
-          {/* Center pill (desktop) */}
-          <button
-            type="button"
-            onClick={toggleOverlay}
-            className={`hidden items-center gap-2 rounded-full border border-white/20 px-5 py-2 text-sm text-white/90 transition-all duration-700 ease-entrance hover:bg-white/10 md:flex ${
-              navMounted ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
-            }`}
-            style={{ transitionDelay: '200ms' }}
-          >
-            {overlayOpen ? 'Close' : 'Navigate'}
-          </button>
+          <nav className="hidden items-center gap-8 md:flex">
+            {links.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="text-sm text-[#4a453f] transition-colors hover:text-[#1a1714]"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
 
-          {/* Right: language + auth + flower (desktop) */}
-          <div
-            className={`hidden items-center gap-5 transition-all duration-700 ease-entrance md:flex ${
-              navMounted ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
-            }`}
-            style={{ transitionDelay: '400ms' }}
-          >
+          <div className="hidden items-center gap-4 md:flex">
             <LanguageSelect />
-
             {user ? (
               <div ref={userMenuRef} className="relative">
                 <button
                   type="button"
                   onClick={() => setUserMenuOpen((v) => !v)}
                   aria-label={t('nav.account')}
-                  className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-white/20 text-sm font-semibold text-white transition hover:bg-white/10"
+                  className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-[#e9e5df] text-sm font-semibold text-[#1a1714] transition hover:bg-[#f4f1ec]"
                 >
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -230,14 +326,13 @@ export default function AurevonLanding() {
                     initial
                   )}
                 </button>
-
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-xl border border-white/15 bg-black/90 p-1.5 shadow-xl backdrop-blur-md">
-                    <div className="truncate px-3 py-2 text-xs text-white/60">{user.email}</div>
+                  <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-xl border border-[#e9e5df] bg-white p-1.5 shadow-lg">
+                    <div className="truncate px-3 py-2 text-xs text-[#8a857e]">{user.email}</div>
                     <Link
                       href="/dashboard"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-white transition hover:bg-white/10"
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-[#1a1714] transition hover:bg-[#f4f1ec]"
                     >
                       <LayoutDashboard className="h-4 w-4" />
                       {t('nav.dashboard')}
@@ -245,16 +340,16 @@ export default function AurevonLanding() {
                     <Link
                       href="/account"
                       onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-white transition hover:bg-white/10"
+                      className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-[#1a1714] transition hover:bg-[#f4f1ec]"
                     >
                       <UserRound className="h-4 w-4" />
                       {t('nav.account')}
                     </Link>
-                    <div className="my-1 h-px bg-white/10" />
+                    <div className="my-1 h-px bg-[#e9e5df]" />
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-white transition hover:bg-white/10"
+                      className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-[#1a1714] transition hover:bg-[#f4f1ec]"
                     >
                       <LogOut className="h-4 w-4" />
                       {t('nav.signOut')}
@@ -264,270 +359,162 @@ export default function AurevonLanding() {
               </div>
             ) : (
               <>
-                <a href="/login" className="text-sm text-white/80 transition hover:text-white">
+                <a href="/login" className="text-sm text-[#4a453f] transition-colors hover:text-[#1a1714]">
                   {t('nav.logIn')}
                 </a>
                 <a
                   href="/signup"
-                  className="rounded-full border border-white/20 px-5 py-2 text-sm text-white transition hover:bg-white/10"
+                  className="rounded-full bg-[#1a1714] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#33302c]"
                 >
-                  {t('nav.signUp')}
+                  {t('pricing.startFree')}
                 </a>
               </>
             )}
-
-            <Flower2 className="h-7 w-7 text-white/90" />
           </div>
 
-          {/* Right: hamburger (mobile) */}
+          {/* Mobile toggle */}
           <button
             type="button"
             aria-label="Toggle menu"
-            onClick={toggleOverlay}
-            className={`flex h-8 w-8 flex-col items-center justify-center gap-1.5 transition-all duration-700 ease-entrance md:hidden ${
-              navMounted ? 'translate-y-0 opacity-100' : '-translate-y-4 opacity-0'
-            }`}
-            style={{ transitionDelay: '200ms' }}
+            onClick={() => setMobileOpen((v) => !v)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg border border-[#e9e5df] text-[#1a1714] md:hidden"
           >
-            <span
-              className={`h-[2px] w-6 bg-white transition-all duration-500 ease-overlay ${
-                overlayOpen ? 'translate-y-[4px] rotate-45' : ''
-              }`}
-            />
-            <span
-              className={`h-[2px] w-6 bg-white transition-all duration-500 ease-overlay ${
-                overlayOpen ? '-translate-y-[4px] -rotate-45' : ''
-              }`}
-            />
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </header>
 
-      {/* Overlay menu */}
-      <div
-        className={`fixed inset-0 z-40 flex flex-col items-center justify-center bg-black transition-all duration-700 ease-overlay ${
-          overlayOpen ? 'visible opacity-100' : 'invisible opacity-0'
-        }`}
-      >
-        <div className="flex flex-col items-center gap-8">
-          {links.map((link, i) => (
-            <a
-              key={link.label}
-              href={link.href}
-              onClick={closeOverlay}
-              className={`font-instrument text-4xl text-white transition-all duration-[600ms] ease-overlay hover:opacity-60 md:text-6xl ${
-                overlayOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
-              }`}
-              style={{ transitionDelay: overlayOpen ? `${150 + i * 80}ms` : '0ms' }}
-            >
-              {link.label}
-            </a>
-          ))}
-
-          <div
-            className={`mt-4 flex flex-col items-center gap-6 transition-all duration-[600ms] ease-overlay ${
-              overlayOpen ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
-            }`}
-            style={{ transitionDelay: overlayOpen ? `${150 + links.length * 80}ms` : '0ms' }}
-          >
-            <LanguageSelect />
-
-            {user ? (
-              <Link
-                href="/dashboard"
-                onClick={closeOverlay}
-                className="rounded-full border border-white/30 px-6 py-2 text-lg text-white transition hover:bg-white/10 md:text-xl"
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-40 bg-[#fbfaf8] pt-16 md:hidden">
+          <nav className="flex flex-col gap-1 px-6 py-6">
+            {links.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={() => setMobileOpen(false)}
+                className="rounded-lg px-3 py-3 text-lg text-[#1a1714] transition hover:bg-[#f4f1ec]"
               >
-                {t('nav.dashboard')}
-              </Link>
-            ) : (
-              <div className="flex items-center gap-8">
+                {link.label}
+              </a>
+            ))}
+            <div className="my-3 h-px bg-[#e9e5df]" />
+            <div className="flex items-center justify-between px-3">
+              <LanguageSelect />
+              {user ? (
                 <a
-                  href="/login"
-                  onClick={closeOverlay}
-                  className="text-lg text-white/70 transition hover:text-white md:text-xl"
+                  href="/dashboard"
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-full bg-[#1a1714] px-5 py-2 text-sm font-medium text-white"
                 >
-                  {t('nav.logIn')}
+                  {t('nav.dashboard')}
                 </a>
+              ) : (
                 <a
                   href="/signup"
-                  onClick={closeOverlay}
-                  className="rounded-full border border-white/30 px-6 py-2 text-lg text-white transition hover:bg-white/10 md:text-xl"
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-full bg-[#1a1714] px-5 py-2 text-sm font-medium text-white"
                 >
-                  {t('nav.signUp')}
+                  {t('pricing.startFree')}
                 </a>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          </nav>
         </div>
-      </div>
+      )}
 
       {/* Hero */}
-      <section className="relative flex h-screen w-full items-end justify-center overflow-hidden">
-        {/* Background video */}
-        <div
-          className={`absolute inset-0 transition-all duration-[1400ms] ease-entrance ${
-            heroMounted ? 'scale-100 opacity-100' : 'scale-105 opacity-0'
-          }`}
-        >
-          <video
-            src={VIDEO_URL}
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="h-full w-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black" />
-        </div>
-
-        {/* Foreground */}
-        <div className="relative z-10 mx-auto max-w-4xl px-6 pb-16 text-center md:pb-24">
-          <h1
-            className={`font-instrument mb-5 text-[2.5rem] leading-[0.95] text-white transition-all duration-[900ms] ease-entrance sm:text-5xl md:mb-6 md:text-6xl lg:text-7xl ${
-              heroMounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-            }`}
-            style={{ transitionDelay: '400ms' }}
-          >
-            {t('home.heroTitleA')}
-            <br className="hidden sm:block" />
-            <span className="italic text-[#e0b379]">{t('home.heroTitleB')}</span>
-          </h1>
-
-          <p
-            className={`mx-auto mb-8 max-w-md text-base text-white/70 transition-all duration-[900ms] ease-entrance md:mb-10 md:text-lg ${
-              heroMounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-            }`}
-            style={{ transitionDelay: '600ms' }}
-          >
-            {t('home.heroSub')}
-          </p>
-
-          <div
-            className={`flex flex-col items-center justify-center gap-4 transition-all duration-[900ms] ease-entrance sm:flex-row sm:gap-8 ${
-              heroMounted ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-            }`}
-            style={{ transitionDelay: '800ms' }}
-          >
-            <Link
-              href="/signup"
-              className="inline-block rounded-full bg-[#e0b379] px-8 py-3.5 text-sm font-medium text-black transition hover:bg-[#e0b379]/90 md:text-base"
-            >
-              {t('home.startFree')}
-            </Link>
-            <a
-              href="#tools"
-              className="text-sm text-white/80 transition hover:text-white md:text-base"
-            >
-              {t('home.learnMore')}
-            </a>
+      <section className="px-6 pb-20 pt-32 md:pb-28 md:pt-44">
+        <div className="mx-auto max-w-6xl">
+          <div className="mx-auto max-w-3xl text-center">
+            <Reveal>
+              <p className="text-sm font-medium text-[#2f5d3f]">{t('home.platformsLabel')}</p>
+            </Reveal>
+            <Reveal delay={60}>
+              <h1 className="mt-5 font-display text-5xl leading-[1.02] tracking-tight text-[#1a1714] sm:text-6xl md:text-7xl">
+                {t('home.heroTitleA')}
+                <br className="hidden sm:block" />
+                {t('home.heroTitleB')}
+              </h1>
+            </Reveal>
+            <Reveal delay={120}>
+              <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-[#6b6560]">
+                {t('home.heroSub')}
+              </p>
+            </Reveal>
+            <Reveal delay={180}>
+              <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+                <Link
+                  href="/signup"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-[#1a1714] px-8 text-sm font-medium text-white transition hover:bg-[#33302c]"
+                >
+                  {t('pricing.startFree')}
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+                <a
+                  href="#how"
+                  className="inline-flex h-12 items-center justify-center px-4 text-sm font-medium text-[#4a453f] transition hover:text-[#1a1714]"
+                >
+                  {t('nav.howItWorks')}
+                </a>
+              </div>
+            </Reveal>
           </div>
+
+          <Reveal delay={240} className="mt-16 md:mt-20">
+            <div className="mx-auto max-w-4xl">
+              <ProductMockup />
+            </div>
+          </Reveal>
         </div>
       </section>
 
       {/* Platform strip */}
-      <section className="border-t border-white/10 px-6 py-12 md:py-16">
-        <div className="mx-auto max-w-[1200px]">
-          <Reveal>
-            <p className="text-center text-xs font-medium uppercase tracking-[0.22em] text-white/40">
-              {t('home.platformsLabel')}
-            </p>
-          </Reveal>
-          <Reveal delay={80}>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-10 gap-y-5 md:gap-x-14">
-              {PLATFORMS.map((p) => (
-                <span
-                  key={p.id}
-                  className="font-instrument text-xl text-white/45 transition-colors hover:text-white/80 md:text-2xl"
-                >
-                  {p.label}
-                </span>
-              ))}
-            </div>
-          </Reveal>
+      <section className="border-y border-[#e9e5df] bg-white px-6 py-12">
+        <div className="mx-auto max-w-6xl">
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 md:gap-x-14">
+            {PLATFORMS.map((p) => (
+              <span key={p.id} className="text-lg font-medium text-[#b6b0a8] md:text-xl">
+                {p.label}
+              </span>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Tools showcase */}
-      <section id="tools" className="px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-[1200px]">
+      {/* Goal picker */}
+      <section className="px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl">
           <Reveal>
-            <p className="text-center text-sm font-semibold uppercase tracking-[0.18em] text-[#e0b379]">
-              {t('home.listingGenerator')}
+            <p className="text-center text-sm font-semibold uppercase tracking-[0.16em] text-[#2f5d3f]">
+              {t('home.goalLabel')}
             </p>
           </Reveal>
-          <Reveal delay={80}>
-            <h2 className="font-instrument mx-auto mt-5 max-w-3xl text-center text-[2.5rem] leading-[1.02] text-white md:text-6xl">
-              {t('home.writeListingTitle')}
+          <Reveal delay={60}>
+            <h2 className="mx-auto mt-4 max-w-2xl text-center font-display text-4xl leading-[1.05] tracking-tight text-[#1a1714] md:text-5xl">
+              {t('home.goalTitle')}
             </h2>
           </Reveal>
-          <Reveal delay={160}>
-            <p className="mx-auto mt-6 max-w-2xl text-center text-base text-white/60 md:text-lg">
-              {t('home.writeListingSub')}
-            </p>
-          </Reveal>
-          <Reveal delay={240} className="mt-14 md:mt-20">
-            <div className="mx-auto max-w-[820px] overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-12">
-              <div className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
-                <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[#e0b379]/60" />
-              </div>
-              <div className="mt-8 space-y-5">
-                <div className="h-3 w-2/3 rounded-full bg-white/15" />
-                <div className="h-3 w-1/2 rounded-full bg-white/10" />
-                <div className="space-y-2 pt-4">
-                  <div className="h-2 w-full rounded-full bg-white/5" />
-                  <div className="h-2 w-full rounded-full bg-white/5" />
-                  <div className="h-2 w-2/3 rounded-full bg-white/5" />
-                </div>
-                <div className="flex flex-wrap gap-2 pt-4">
-                  {[0, 1, 2, 3].map((i) => (
-                    <span
-                      key={i}
-                      className="rounded-full border border-[#e0b379]/30 px-4 py-1.5 text-xs text-[#e0b379]"
-                    >
-                      #{i + 1}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* Feature grid */}
-      <section className="border-t border-white/10 px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-[1200px]">
-          <Reveal>
-            <p className="text-center text-sm font-semibold uppercase tracking-[0.18em] text-[#e0b379]">
-              {t('home.nineTools')}
-            </p>
-          </Reveal>
-          <Reveal delay={80}>
-            <h2 className="font-instrument mx-auto mt-5 max-w-3xl text-center text-[2.5rem] leading-[1.02] text-white md:text-6xl">
-              {t('home.everythingTitle')}
-            </h2>
-          </Reveal>
-          <Reveal delay={160}>
-            <p className="mx-auto mt-6 max-w-2xl text-center text-base text-white/60 md:text-lg">
-              {t('home.everythingSub')}
+          <Reveal delay={120}>
+            <p className="mx-auto mt-5 max-w-xl text-center text-base text-[#6b6560] md:text-lg">
+              {t('home.goalSub')}
             </p>
           </Reveal>
 
-          <div className="mt-14 grid gap-4 md:grid-cols-2">
-            {tools.map((tool, i) => (
-              <Reveal key={tool.href} delay={(i % 2) * 80} className="h-full">
+          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {goals.map((goal, i) => (
+              <Reveal key={goal.href} delay={i * 60} className="h-full">
                 <Link
-                  href={tool.href}
-                  className="group flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.03] p-8 transition-colors hover:border-[#e0b379]/40 hover:bg-white/[0.05] md:p-10"
+                  href={goal.href}
+                  className="group flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-white p-7 transition hover:border-[#1a1714]/30 hover:shadow-[0_16px_40px_-24px_rgba(26,23,20,0.25)]"
                 >
-                  <span className="font-instrument text-sm text-[#e0b379]">{tool.n}</span>
-                  <h3 className="font-instrument mt-4 text-2xl text-white md:text-3xl">
-                    {tool.title}
-                  </h3>
-                  <p className="mt-3 text-base leading-relaxed text-white/60">{tool.desc}</p>
+                  <goal.icon className="h-6 w-6 text-[#2f5d3f]" />
+                  <h3 className="mt-5 font-display text-xl text-[#1a1714]">{goal.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#6b6560]">{goal.desc}</p>
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-[#1a1714]">
+                    {t('nav.dashboard')}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </span>
                 </Link>
               </Reveal>
             ))}
@@ -535,27 +522,112 @@ export default function AurevonLanding() {
         </div>
       </section>
 
-      {/* How it works */}
-      <section id="how" className="border-t border-white/10 px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-[1200px]">
+      {/* Tools grouped by goal */}
+      <section id="tools" className="border-t border-[#e9e5df] bg-white px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl">
           <Reveal>
-            <p className="text-center text-sm font-semibold uppercase tracking-[0.18em] text-[#e0b379]">
+            <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#2f5d3f]">
+              {t('home.nineTools')}
+            </p>
+          </Reveal>
+          <Reveal delay={60}>
+            <h2 className="mt-4 max-w-2xl font-display text-4xl leading-[1.05] tracking-tight text-[#1a1714] md:text-5xl">
+              {t('home.everythingTitle')}
+            </h2>
+          </Reveal>
+          <Reveal delay={120}>
+            <p className="mt-5 max-w-xl text-base text-[#6b6560] md:text-lg">
+              {t('home.everythingSub')}
+            </p>
+          </Reveal>
+
+          <div className="mt-16 grid gap-12 md:grid-cols-2">
+            {groups.map((group, gi) => (
+              <Reveal key={group.label} delay={gi * 60}>
+                <div className="flex items-baseline justify-between border-b border-[#e9e5df] pb-4">
+                  <h3 className="font-display text-2xl text-[#1a1714]">{group.label}</h3>
+                </div>
+                <p className="mt-3 text-sm text-[#6b6560]">{group.benefit}</p>
+                <ul className="mt-5 divide-y divide-[#f4f1ec]">
+                  {group.tools.map((tool) => (
+                    <li key={tool.href}>
+                      <Link
+                        href={tool.href}
+                        className="group flex items-center justify-between gap-4 py-4"
+                      >
+                        <div className="min-w-0">
+                          <p className="font-medium text-[#1a1714] transition group-hover:text-[#2f5d3f]">
+                            {tool.title}
+                          </p>
+                          <p className="mt-0.5 truncate text-sm text-[#8a857e]">{tool.desc}</p>
+                        </div>
+                        <ArrowRight className="h-4 w-4 shrink-0 text-[#c4beb5] transition group-hover:translate-x-0.5 group-hover:text-[#1a1714]" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how" className="border-t border-[#e9e5df] px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl">
+          <Reveal>
+            <p className="text-center text-sm font-semibold uppercase tracking-[0.16em] text-[#2f5d3f]">
               {t('home.howItWorks')}
             </p>
           </Reveal>
-          <Reveal delay={80}>
-            <h2 className="font-instrument mx-auto mt-5 max-w-3xl text-center text-[2.5rem] leading-[1.02] text-white md:text-6xl">
+          <Reveal delay={60}>
+            <h2 className="mx-auto mt-4 max-w-2xl text-center font-display text-4xl leading-[1.05] tracking-tight text-[#1a1714] md:text-5xl">
               {t('home.threeStepsTitle')}
             </h2>
           </Reveal>
 
           <div className="mt-14 grid gap-4 md:grid-cols-3">
             {steps.map((s, i) => (
-              <Reveal key={s.n} delay={i * 80} className="h-full">
-                <div className="flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.03] p-8">
-                  <span className="font-instrument text-sm text-[#e0b379]">{s.n}</span>
-                  <h3 className="font-instrument mt-4 text-2xl text-white">{s.title}</h3>
-                  <p className="mt-3 text-base leading-relaxed text-white/60">{s.desc}</p>
+              <Reveal key={s.n} delay={i * 60} className="h-full">
+                <div className="flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-white p-8">
+                  <span className="font-display text-sm text-[#2f5d3f]">{s.n}</span>
+                  <h3 className="mt-4 font-display text-2xl text-[#1a1714]">{s.title}</h3>
+                  <p className="mt-3 text-base leading-relaxed text-[#6b6560]">{s.desc}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Proof / trust */}
+      <section className="border-t border-[#e9e5df] bg-white px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl">
+          <Reveal>
+            <p className="text-center text-sm font-semibold uppercase tracking-[0.16em] text-[#2f5d3f]">
+              {t('home.proofLabel')}
+            </p>
+          </Reveal>
+          <Reveal delay={60}>
+            <h2 className="mx-auto mt-4 max-w-2xl text-center font-display text-4xl leading-[1.05] tracking-tight text-[#1a1714] md:text-5xl">
+              {t('home.proofTitle')}
+            </h2>
+          </Reveal>
+          <Reveal delay={120}>
+            <p className="mx-auto mt-5 max-w-xl text-center text-base text-[#6b6560] md:text-lg">
+              {t('home.proofSub')}
+            </p>
+          </Reveal>
+
+          <div className="mt-14 grid gap-4 md:grid-cols-3">
+            {proof.map((item, i) => (
+              <Reveal key={item.title} delay={i * 60} className="h-full">
+                <div className="flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-[#fbfaf8] p-8">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2f5d3f]/10 text-sm font-semibold text-[#2f5d3f]">
+                    {i + 1}
+                  </span>
+                  <h3 className="mt-5 font-display text-xl text-[#1a1714]">{item.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-[#6b6560]">{item.desc}</p>
                 </div>
               </Reveal>
             ))}
@@ -564,42 +636,40 @@ export default function AurevonLanding() {
       </section>
 
       {/* Final CTA */}
-      <section className="border-t border-white/10 px-6 py-28 text-center md:py-40">
+      <section className="border-t border-[#e9e5df] px-6 py-28 text-center md:py-36">
         <div className="mx-auto max-w-3xl">
           <Reveal>
-            <h2 className="font-instrument text-[2.5rem] leading-[1.02] text-white md:text-6xl">
+            <h2 className="font-display text-4xl leading-[1.05] tracking-tight text-[#1a1714] md:text-6xl">
               {t('home.finalTitle')}
             </h2>
           </Reveal>
           <Reveal delay={100}>
-            <p className="mx-auto mt-6 max-w-md text-base text-white/60 md:text-lg">
+            <p className="mx-auto mt-6 max-w-md text-base text-[#6b6560] md:text-lg">
               {t('home.finalSub')}
             </p>
           </Reveal>
           <Reveal delay={200}>
             <Link
               href="/signup"
-              className="mt-10 inline-block rounded-full bg-[#e0b379] px-8 py-3.5 text-sm font-medium text-black transition hover:bg-[#e0b379]/90 md:text-base"
+              className="mt-10 inline-flex h-12 items-center justify-center rounded-full bg-[#1a1714] px-8 text-sm font-medium text-white transition hover:bg-[#33302c]"
             >
-              {t('home.startFree')}
+              {t('pricing.startFree')}
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Reveal>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 px-6 pb-12 pt-20">
-        <div className="mx-auto max-w-[1200px]">
-          <div className="mb-12 flex items-center gap-2.5">
-            <Flower2 className="h-5 w-5 text-[#e0b379]" />
-            <span className="font-instrument text-xl text-white">{t('nav.brand')}</span>
+      <footer className="border-t border-[#e9e5df] bg-white px-6 pb-12 pt-20">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-12">
+            <span className="text-xl font-semibold tracking-tight text-[#1a1714]">{t('nav.brand')}</span>
           </div>
           <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-5">
             {footerColumns.map((col) => (
               <div key={col.title}>
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-white/80">
-                  {col.title}
-                </h3>
+                <h3 className="text-sm font-semibold text-[#1a1714]">{col.title}</h3>
                 <ul className="mt-4 space-y-3">
                   {col.links.map((link) => {
                     const external = link.href.startsWith('http')
@@ -609,7 +679,7 @@ export default function AurevonLanding() {
                           href={link.href}
                           target={external ? '_blank' : undefined}
                           rel={external ? 'noopener noreferrer' : undefined}
-                          className="text-sm text-white/50 transition-colors hover:text-white"
+                          className="text-sm text-[#6b6560] transition-colors hover:text-[#1a1714]"
                         >
                           {link.label}
                         </Link>
@@ -621,7 +691,7 @@ export default function AurevonLanding() {
             ))}
           </div>
 
-          <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-white/10 pt-6">
+          <div className="mt-14 flex flex-wrap items-center gap-x-8 gap-y-4 border-t border-[#e9e5df] pt-6">
             <a
               href="https://dang.ai"
               target="_blank"
@@ -635,22 +705,6 @@ export default function AurevonLanding() {
                 alt="Verified on DANG!"
                 width={180}
                 height={65}
-                className="h-auto w-[180px] max-w-full"
-              />
-            </a>
-            <a
-              href="https://www.toolpilot.ai"
-              target="_blank"
-              rel="dofollow noopener"
-              aria-label="ToolPilot AI"
-              className="inline-block transition-opacity hover:opacity-80"
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="https://www.toolpilot.ai/cdn/shop/files/f-w_690x151_crop_center.png"
-                alt="ToolPilot AI"
-                width={180}
-                height={39}
                 className="h-auto w-[180px] max-w-full"
               />
             </a>
@@ -672,7 +726,7 @@ export default function AurevonLanding() {
             </a>
           </div>
 
-          <p className="mt-6 text-sm text-white/40">{t('footer.copyright')}</p>
+          <p className="mt-6 text-sm text-[#9a948c]">{t('footer.copyright')}</p>
         </div>
       </footer>
     </div>
