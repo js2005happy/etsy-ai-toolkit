@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Mail, Coins, Crown, ArrowLeft, LogOut, KeyRound, Sparkles, Upload } from 'lucide-react'
+import { Loader2, Mail, Coins, Crown, ArrowLeft, LogOut, KeyRound, Sparkles, Upload, Terminal, Copy, Check, RefreshCw } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import Navbar from '@/components/shared/navbar'
 import type { User } from '@supabase/supabase-js'
@@ -46,6 +46,13 @@ export default function AccountPage() {
   const [savingNickname, setSavingNickname] = useState(false)
   const [nicknameError, setNicknameError] = useState<string | null>(null)
   const [nicknameMessage, setNicknameMessage] = useState<string | null>(null)
+
+  const [mcpKey, setMcpKey] = useState<string | null>(null)
+  const [mcpLoading, setMcpLoading] = useState(true)
+  const [mcpCopied, setMcpCopied] = useState(false)
+  const [mcpError, setMcpError] = useState<string | null>(null)
+  const [mcpMessage, setMcpMessage] = useState<string | null>(null)
+  const [mcpResetting, setMcpResetting] = useState(false)
 
   const isPaid = plan !== 'free' && plan != null
   const planLabel =
@@ -99,6 +106,55 @@ export default function AccountPage() {
       cancelled = true
     }
   }, [user])
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/user/mcp-key')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data) setMcpKey(data.mcp_api_key ?? null)
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setMcpLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const handleCopyMcpKey = async () => {
+    if (!mcpKey) return
+    setMcpError(null)
+    try {
+      await navigator.clipboard.writeText(mcpKey)
+      setMcpCopied(true)
+      setTimeout(() => setMcpCopied(false), 2000)
+    } catch {
+      setMcpError(t('account.mcpCopyFailed'))
+    }
+  }
+
+  const handleResetMcpKey = async () => {
+    if (!window.confirm(t('account.mcpResetConfirm'))) return
+    setMcpResetting(true)
+    setMcpError(null)
+    setMcpMessage(null)
+    try {
+      const res = await fetch('/api/user/mcp-key', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok && data.mcp_api_key) {
+        setMcpKey(data.mcp_api_key)
+        setMcpMessage(t('account.mcpResetDone'))
+      } else {
+        setMcpError(data?.error || t('auth.unexpectedError'))
+      }
+    } catch {
+      setMcpError(t('auth.unexpectedError'))
+    } finally {
+      setMcpResetting(false)
+    }
+  }
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -398,6 +454,78 @@ export default function AccountPage() {
                 )}
               </Button>
             </form>
+          </CardContent>
+        </Card>
+
+        {/* MCP connection */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Terminal className="h-5 w-5" />
+              {t('account.mcpTitle')}
+            </CardTitle>
+            <CardDescription>{t('account.mcpDesc')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label>{t('account.mcpKeyLabel')}</Label>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <div className="flex min-w-0 flex-1 items-center rounded-md border border-border bg-secondary px-3 py-2 font-mono text-xs text-foreground">
+                  {mcpLoading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : mcpKey ? (
+                    <span className="truncate">{mcpKey}</span>
+                  ) : (
+                    <span className="text-muted-foreground">…</span>
+                  )}
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyMcpKey}
+                  disabled={!mcpKey || mcpCopied}
+                >
+                  {mcpCopied ? (
+                    <Check className="mr-2 h-4 w-4 text-emerald-400" />
+                  ) : (
+                    <Copy className="mr-2 h-4 w-4" />
+                  )}
+                  {mcpCopied ? t('account.mcpCopied') : t('account.mcpCopy')}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetMcpKey}
+                  disabled={mcpResetting}
+                >
+                  {mcpResetting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                  )}
+                  {t('account.mcpReset')}
+                </Button>
+              </div>
+              {mcpError && <p className="text-sm font-medium text-destructive">{mcpError}</p>}
+              {mcpMessage && <p className="text-sm font-medium text-emerald-400">{mcpMessage}</p>}
+            </div>
+
+            <div className="rounded-lg border border-border bg-secondary p-4">
+              <div className="mb-2 text-xs font-medium text-muted-foreground">
+                Claude Code / Codex
+              </div>
+              <pre className="overflow-x-auto text-xs leading-relaxed text-foreground">{`{
+  "mcpServers": {
+    "etsy": {
+      "command": "npx",
+      "args": ["-y", "etsy-ai-toolkit-mcp"],
+      "env": { "MCP_API_KEY": "${mcpKey ?? 'YOUR_KEY'}" }
+    }
+  }
+}`}</pre>
+            </div>
           </CardContent>
         </Card>
 

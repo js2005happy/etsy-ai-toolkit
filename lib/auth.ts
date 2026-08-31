@@ -51,34 +51,26 @@ function buildContext(
 
 /**
  * Resolves the caller identity for API routes. Two paths:
- *  - `x-mcp-key` header matching MCP_API_KEY → service-role client acting as the
- *    MCP service account (MCP_USER_ID), bypassing RLS.
+ *  - `x-mcp-key` header matching a user's `profiles.mcp_api_key` → that user's
+ *    quota, via a service-role client (MCP requests carry no browser session).
  *  - otherwise → the browser's Supabase session cookie.
  */
 export async function authenticateRequest(request: Request): Promise<AuthResult> {
   const mcpKey = request.headers.get('x-mcp-key')
 
   if (mcpKey) {
-    if (mcpKey !== process.env.MCP_API_KEY) {
-      return { error: 'Invalid MCP key', status: 401 }
-    }
-    const mcpUserId = process.env.MCP_USER_ID
-    if (!mcpUserId) {
-      return { error: 'MCP user not configured', status: 500 }
-    }
-
     const db = createServiceClient()
     const { data: profile } = await db
       .from('profiles')
-      .select('credits_remaining, images_remaining, subscription_status')
-      .eq('id', mcpUserId)
-      .single()
+      .select('id, credits_remaining, images_remaining, subscription_status')
+      .eq('mcp_api_key', mcpKey)
+      .maybeSingle()
 
     if (!profile) {
-      return { error: 'MCP user profile not found', status: 404 }
+      return { error: 'Invalid MCP key', status: 401 }
     }
 
-    return buildContext(db, mcpUserId, profile)
+    return buildContext(db, profile.id, profile)
   }
 
   const supabase = createClient()

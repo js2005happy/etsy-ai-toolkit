@@ -116,7 +116,7 @@ export function registerTools(server: McpServer): void {
 
   server.tool(
     'get_credits',
-    'Query the service account\'s remaining credits and plan.',
+    'Query your remaining credits, image quota, and current plan.',
     {},
     async () => textResult(await callApi('/api/user/credits', 'GET'))
   )

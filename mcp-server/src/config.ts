@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path'
 // (e.g. set in the MCP client config) win — dotenv never overrides them.
 config({ path: join(dirname(fileURLToPath(import.meta.url)), '..', '.env'), quiet: true })
 
-export const BASE_URL = process.env.BASE_URL ?? 'https://etsy-ai-toolkit.vercel.app'
+export const BASE_URL = process.env.BASE_URL ?? 'https://craftly.world'
 
 export const MCP_API_KEY = process.env.MCP_API_KEY ?? ''
 
