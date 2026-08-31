@@ -206,7 +206,7 @@ export default function AccountPage() {
     setNicknameMessage(null)
     setNicknameError(null)
     if (!user) return
-    const trimmed = nickname.trim()
+    const trimmed = nickname.trim().slice(0, 8)
     setSavingNickname(true)
     try {
       const supabase = createClient()
@@ -305,7 +305,7 @@ export default function AccountPage() {
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   placeholder={t('account.nicknamePlaceholder')}
-                  maxLength={30}
+                  maxLength={8}
                 />
                 <Button type="button" onClick={handleSaveNickname} disabled={savingNickname}>
                   {savingNickname ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
