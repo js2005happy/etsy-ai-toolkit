@@ -79,7 +79,7 @@ Each poster consumes 1 image credit, deducted per generated image.
 
 ## MCP server
 
-A Model Context Protocol server (`mcp-server/`) exposes the toolkit to any MCP client (Claude, Cursor, etc.). It ships with **dual transport** — stdio and Streamable HTTP — and a dedicated service-account auth (`x-mcp-key`).
+A Model Context Protocol server (`mcp-server/`) exposes the toolkit to any MCP client (Claude Code, Codex, Cursor, etc.). It ships with **dual transport** — stdio and Streamable HTTP — and **per-user API keys** (`x-mcp-key` header). Every account gets its own key, so credits and image quota are tracked per user, not shared.
 
 | Tool | Purpose |
 | --- | --- |
@@ -111,6 +111,26 @@ npm run build
 npm start          # stdio
 npm run start:http # Streamable HTTP
 ```
+
+### Connecting your client
+
+Each account gets its own MCP key — no shared service account. Grab yours in **Account → MCP connection**, then point your client at the server with that key in the `MCP_API_KEY` env var:
+
+**Claude Code / Codex** (`.mcp.json` / `config.toml`):
+
+```json
+{
+  "mcpServers": {
+    "etsy": {
+      "command": "npx",
+      "args": ["-y", "etsy-ai-toolkit-mcp"],
+      "env": { "MCP_API_KEY": "mcp_your_personal_key" }
+    }
+  }
+}
+```
+
+The server sends the key as the `x-mcp-key` header; the site maps it back to your profile and deducts credits from **your** account. Resetting the key in Account invalidates the old one immediately.
 
 ## Tech stack
 

@@ -28,6 +28,10 @@ const faqs: Faq[] = [
     a: "Free includes listing, messages, reviews, social posts, and keywords. Basic adds translation, optimizer, and pricing advisor. Pro and Scale unlock product image generation and higher monthly limits.",
   },
   {
+    q: "Can I use these tools from Claude Code or Codex?",
+    a: "Yes. The toolkit ships an MCP server with all 10 tools. Grab your personal MCP key in Account → MCP connection, then add the etsy-ai-toolkit-mcp server to your client. Credits and image quota are tracked against your own account.",
+  },
+  {
     q: "What happens to my credits at the end of the month?",
     a: "Credits reset at the start of each billing month. Unused credits do not roll over.",
   },
