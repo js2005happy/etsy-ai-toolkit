@@ -68,45 +68,11 @@ function ProductMockup() {
         <span className="h-3 w-3 rounded-full bg-[#e2e0dc]" />
         <span className="h-3 w-3 rounded-full bg-[#e2e0dc]" />
         <div className="ml-3 flex-1 rounded-md bg-[#f4f1ec] px-3 py-1.5 text-xs text-[#8a857e]">
-          craftly.world/listing
+          craftly.world/dashboard
         </div>
       </div>
-      <div className="grid divide-y divide-[#e9e5df] md:grid-cols-2 md:divide-x md:divide-y-0">
-        {/* input */}
-        <div className="p-6 md:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a948c]">Your notes</p>
-          <div className="mt-4 rounded-xl border border-[#e9e5df] bg-[#fbfaf8] p-5 text-sm leading-relaxed text-[#4a453f]">
-            Hand-thrown ceramic mug in speckled stoneware. Holds 12oz, glazed in matte
-            sage, microwave and dishwasher safe.
-          </div>
-          <div className="mt-4 flex h-10 items-center justify-center rounded-xl bg-[#1a1714] text-sm font-medium text-white">
-            Write the listing
-          </div>
-        </div>
-        {/* output */}
-        <div className="bg-[#fbfaf8] p-6 md:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a948c]">
-            Ready to publish
-          </p>
-          <p className="mt-4 font-display text-xl leading-snug text-[#1a1714] md:text-2xl">
-            Speckled Stoneware Mug — Matte Sage, 12oz
-          </p>
-          <p className="mt-3 text-sm leading-relaxed text-[#4a453f]">
-            A hand-thrown mug with a soft matte sage glaze and a warm, earthy speckle.
-            Holds 12 ounces, dishwasher and microwave safe.
-          </p>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {['ceramic mug', 'stoneware', 'handmade', 'sage green'].map((tag) => (
-              <span
-                key={tag}
-                className="rounded-full border border-[#e9e5df] bg-white px-3 py-1 text-xs text-[#3f3a35]"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/dashboard.webp" alt="Craftly dashboard" className="block w-full" />
     </div>
   )
 }
@@ -693,6 +659,16 @@ export default function AurevonLanding() {
               </Reveal>
             ))}
           </div>
+
+          <Reveal delay={120}>
+            <div className="mt-14 overflow-hidden rounded-2xl border border-[#e9e5df] bg-white shadow-[0_24px_60px_-30px_rgba(26,23,20,0.2)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images-page.webp" alt="Craftly image generation" className="block w-full" />
+              <p className="border-t border-[#e9e5df] px-6 py-4 text-sm text-[#6b6560]">
+                Generate product photos in three modes — variants, platform sizes, and bulk.
+              </p>
+            </div>
+          </Reveal>
         </div>
       </section>
 
