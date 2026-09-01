@@ -707,6 +707,29 @@
     color: var(--k-ink-dim);
     font-size: 14px;
   }
+  .k-badges {
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px solid var(--k-line);
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .k-badges a {
+    display: inline-flex;
+    align-items: center;
+    opacity: 0.72;
+    transition: opacity 0.25s;
+  }
+  .k-badges a:hover {
+    opacity: 1;
+  }
+  .k-badges img {
+    height: 42px;
+    width: auto;
+    max-width: 180px;
+  }
 }
 
 /* ---------- keyframes (top level) ---------- */
