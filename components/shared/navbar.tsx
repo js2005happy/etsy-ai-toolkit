@@ -70,7 +70,7 @@ export default function Navbar() {
       <nav
         className="liquid-glass mx-auto flex h-14 max-w-[1200px] items-center justify-between rounded-full px-4 transition-colors duration-300"
         style={{
-          background: scrolled ? "rgba(40, 43, 88, 0.72)" : "rgba(40, 43, 88, 0.35)",
+          background: scrolled ? "rgba(251, 250, 248, 0.82)" : "rgba(251, 250, 248, 0.5)",
         }}
       >
         <Logo brand={t("nav.brand")} />

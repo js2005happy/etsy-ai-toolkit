@@ -709,6 +709,22 @@ export default function AurevonLanding() {
               />
             </a>
             <a
+              href="https://www.toolpilot.ai"
+              target="_blank"
+              rel="dofollow noopener"
+              aria-label="ToolPilot AI"
+              className="inline-block transition-opacity hover:opacity-80"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://www.toolpilot.ai/cdn/shop/files/f-w_690x151_crop_center.png"
+                alt="ToolPilot AI"
+                width={180}
+                height={39}
+                className="h-auto w-[180px] max-w-full"
+              />
+            </a>
+            <a
               href="https://www.producthunt.com/products/etsy-ai-toolkit?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-etsy-ai-toolkit"
               target="_blank"
               rel="noopener noreferrer"

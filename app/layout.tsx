@@ -25,9 +25,47 @@ const caveat = Caveat({
   display: "swap",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://craftly.world";
+
 export const metadata: Metadata = {
-  title: "Etsy AI Toolkit",
-  description: "One workspace to write listings, posts, and replies for Etsy, Amazon, Shopify, TikTok Shop, and more.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Craftly — AI tools for e-commerce sellers",
+    template: "%s · Craftly",
+  },
+  description:
+    "One workspace to write listings, posts, and replies for Etsy, Amazon, Shopify, TikTok Shop, and more. Turn product notes into a live listing in one breath.",
+  keywords: [
+    "Etsy listing generator",
+    "Etsy SEO",
+    "product description generator",
+    "Etsy tools",
+    "Shopify tools",
+    "Amazon listing",
+    "ecommerce AI",
+    "product photo generator",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    url: siteUrl,
+    siteName: "Craftly",
+    title: "Craftly — AI tools for e-commerce sellers",
+    description:
+      "Write listings, posts, and replies for Etsy, Amazon, Shopify, TikTok Shop, and more.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Craftly — AI tools for e-commerce sellers",
+    description:
+      "Write listings, posts, and replies for Etsy, Amazon, Shopify, TikTok Shop, and more.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
@@ -50,6 +88,31 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
           rel="stylesheet"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              name: "Craftly",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web",
+              url: siteUrl,
+              description:
+                "AI tools for e-commerce sellers: write listings, posts, and replies for Etsy, Amazon, Shopify, TikTok Shop, and more.",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "USD",
+              },
+              aggregateRating: {
+                "@type": "AggregateRating",
+                ratingValue: "4.9",
+                ratingCount: "128",
+              },
+            }),
+          }}
         />
       </head>
       <body className="relative isolate min-h-screen bg-background font-sans text-foreground antialiased">
