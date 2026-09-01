@@ -213,6 +213,8 @@ export const messages: Record<string, NestedDict> = {
       toolCompetitorDesc: 'A quick SWOT read on a competitor so you can position to win.',
       toolBrandStoryTitle: 'Brand Story',
       toolBrandStoryDesc: 'Tell the story behind your shop — like a real founder would.',
+      toolGlobalPricingTitle: 'Global Price Compare',
+      toolGlobalPricingDesc: 'See your landed price and fees across markets and marketplaces.',
     },
     account: {
       title: 'Account settings',
@@ -476,6 +478,8 @@ export const messages: Record<string, NestedDict> = {
       toolCompetitorDesc: 'Ein schneller SWOT-Blick auf einen Wettbewerber, damit du gewinnst.',
       toolBrandStoryTitle: 'Markengeschichte',
       toolBrandStoryDesc: 'Erzähle die Geschichte deines Shops — wie ein echter Gründer.',
+      toolGlobalPricingTitle: 'Globaler Preisvergleich',
+      toolGlobalPricingDesc: 'Sieh Landed Price und Gebühren über Märkte und Marktplätze hinweg.',
     },
     account: {
       title: 'Kontoeinstellungen',
@@ -736,6 +740,8 @@ export const messages: Record<string, NestedDict> = {
       toolCompetitorDesc: 'Une lecture SWOT rapide d’un concurrent pour vous positionner et gagner.',
       toolBrandStoryTitle: 'Histoire de marque',
       toolBrandStoryDesc: 'Racontez l’histoire de votre boutique — comme un vrai fondateur.',
+      toolGlobalPricingTitle: 'Comparateur de prix mondial',
+      toolGlobalPricingDesc: 'Voyez le prix final et les frais de votre produit sur plusieurs marchés.',
     },
     account: {
       title: 'Paramètres du compte',
@@ -992,6 +998,8 @@ export const messages: Record<string, NestedDict> = {
       toolCompetitorDesc: 'Una lectura SWOT rápida de un competidor para posicionarte y ganar.',
       toolBrandStoryTitle: 'Historia de marca',
       toolBrandStoryDesc: 'Cuenta la historia de tu tienda — como lo haría un fundador real.',
+      toolGlobalPricingTitle: 'Comparador de precios global',
+      toolGlobalPricingDesc: 'Consulta el precio final y las comisiones en distintos mercados.',
     },
     account: {
       title: 'Configuración de la cuenta',
@@ -1279,6 +1287,8 @@ export const messages: Record<string, NestedDict> = {
       toolCompetitorDesc: '快速对竞品做 SWOT 分析，帮你找准定位赢下市场。',
       toolBrandStoryTitle: '品牌故事',
       toolBrandStoryDesc: '像真正的创始人一样，讲出你店铺背后的故事。',
+      toolGlobalPricingTitle: '全球比价',
+      toolGlobalPricingDesc: '查看你的产品在不同市场和平台的落地价与各项费用。',
     },
     account: {
       title: '账户设置',
@@ -1539,6 +1549,8 @@ export const messages: Record<string, NestedDict> = {
       toolCompetitorDesc: '競合をすばやくSWOT分析し、勝つためのポジションを。',
       toolBrandStoryTitle: 'ブランドストーリー',
       toolBrandStoryDesc: '本当の創業者のように、ショップの物語を語る。',
+      toolGlobalPricingTitle: 'グローバル価格比較',
+      toolGlobalPricingDesc: '市場・マーケットプレイス別に商品の着地価格と手数料を比較。',
     },
     account: {
       title: 'アカウント設定',
@@ -1793,6 +1805,8 @@ export const messages: Record<string, NestedDict> = {
       toolCompetitorDesc: 'Una lettura SWOT rapida di un concorrente per posizionarti e vincere.',
       toolBrandStoryTitle: 'Storia del brand',
       toolBrandStoryDesc: 'Racconta la storia del tuo negozio — come farebbe un vero fondatore.',
+      toolGlobalPricingTitle: 'Confronto prezzi globale',
+      toolGlobalPricingDesc: 'Vedi il prezzo finale e le commissioni del tuo prodotto nei vari mercati.',
     },
     account: {
       title: 'Impostazioni account',

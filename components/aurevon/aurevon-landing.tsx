@@ -187,6 +187,7 @@ export default function AurevonLanding() {
         { title: t('dashboard.toolSocialTitle'), desc: t('dashboard.toolSocialDesc'), href: '/dashboard/social' },
         { title: t('dashboard.toolAdCopyTitle'), desc: t('dashboard.toolAdCopyDesc'), href: '/dashboard/ad-copy' },
         { title: t('dashboard.toolPricingTitle'), desc: t('dashboard.toolPricingDesc'), href: '/dashboard/pricing' },
+        { title: t('dashboard.toolGlobalPricingTitle'), desc: t('dashboard.toolGlobalPricingDesc'), href: '/dashboard/global-pricing' },
       ],
     },
   ]

@@ -507,6 +507,24 @@ export async function generatePricingAdvice(input: PricingInput): Promise<Pricin
   return JSON.parse(content) as PricingOutput;
 }
 
+export interface GlobalPricingInput { product_name?: string; base_price_usd: number; markets: string[]; }
+export interface GlobalPricingOutput { strategy: string; }
+
+export async function generateGlobalPricingStrategy(input: GlobalPricingInput): Promise<GlobalPricingOutput> {
+  if (process.env.USE_MOCK_AI === "true") {
+    return { strategy: "Price slightly above the local market average; use round numbers in local currency and absorb platform fees into a markup of roughly 10–15%." };
+  }
+  const prompt =
+    "You are a cross-border e-commerce pricing strategist. A seller is expanding a product to several international markets.\n\n" +
+    "Product: " + (input.product_name || "a handmade product") + "\n" +
+    "Base price (USD): " + input.base_price_usd + "\n" +
+    "Target markets: " + input.markets.join(", ") + "\n\n" +
+    "Give 3-5 concrete, actionable pricing recommendations for going global — cover how to set a local landed price, how to absorb marketplace fees and VAT/duties, and how to keep the same product profitable across markets. Write in a warm, direct, founder-to-founder tone. No corporate clichés, no AI-sounding platitudes.\n\n" +
+    "Return JSON with exactly one field:\n\"strategy\": a string with the recommendations (use line breaks between points)";
+  const content = await chat(prompt, { system: "You are a cross-border pricing strategist. Always return valid JSON.", json: true });
+  return JSON.parse(content) as GlobalPricingOutput;
+}
+
 // ===== New e-commerce tool functions =====
 
 export async function generateBulletPoints(input: BulletPointsInput): Promise<BulletPointsOutput> {

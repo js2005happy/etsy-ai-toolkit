@@ -23,6 +23,7 @@ import {
   Target,
   Crosshair,
   BookOpen,
+  Globe,
 } from 'lucide-react'
 
 export default function DashboardPage() {
@@ -125,6 +126,12 @@ export default function DashboardPage() {
       title: t('dashboard.toolBrandStoryTitle'),
       description: t('dashboard.toolBrandStoryDesc'),
       href: '/dashboard/brand-story',
+    },
+    {
+      icon: Globe,
+      title: t('dashboard.toolGlobalPricingTitle'),
+      description: t('dashboard.toolGlobalPricingDesc'),
+      href: '/dashboard/global-pricing',
     },
   ]
 
