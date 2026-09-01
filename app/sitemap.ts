@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/refund",
     "/login",
     "/signup",
+    "/tools/free-etsy-title-generator",
   ];
 
   return routes.map((route) => ({
