@@ -12,7 +12,7 @@ export default function WelcomePage() {
       <main className="flex flex-1 items-center justify-center px-5 py-24">
         <Reveal>
           <div className="mx-auto max-w-lg rounded-xl border border-border bg-card p-10 text-center md:p-12">
-            <h1 className="font-display text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
+            <h1 className="font-sans text-4xl font-extrabold tracking-tight text-foreground md:text-5xl">
               You&apos;re all set.
             </h1>
             <p className="mt-5 text-lg leading-relaxed text-muted-foreground">

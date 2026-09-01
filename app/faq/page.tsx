@@ -24,7 +24,7 @@ export default function FaqPage() {
           eyebrow={t("faq.eyebrow")}
           title={
             <>
-              {t("faq.titleA")} <span className="text-primary">{t("faq.titleB")}</span>
+              {t("faq.titleA")} <span className="serif-accent grad">{t("faq.titleB")}</span>
             </>
           }
           subtitle={t("faq.subtitle")}

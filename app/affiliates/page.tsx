@@ -52,7 +52,7 @@ export default function AffiliatesPage() {
           eyebrow="Affiliates"
           title={
             <>
-              Earn <span className="text-primary">30%</span> recommending the
+              Earn <span className="serif-accent grad">30%</span> recommending the
               copilot for marketplace sellers
             </>
           }
@@ -65,7 +65,7 @@ export default function AffiliatesPage() {
               <Reveal key={s.title} delay={i * 60}>
                 <div className="h-full rounded-2xl border border-border bg-card p-6">
                   <s.icon className="mb-4 h-6 w-6 text-primary" />
-                  <h3 className="font-display text-lg text-foreground">{s.title}</h3>
+                  <h3 className="font-sans text-lg font-extrabold text-foreground">{s.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.body}</p>
                 </div>
               </Reveal>
@@ -75,14 +75,14 @@ export default function AffiliatesPage() {
 
         <section className="px-5 pb-16">
           <div className="mx-auto max-w-4xl">
-            <h2 className="mb-6 text-center font-display text-2xl text-foreground md:text-3xl">
+            <h2 className="mb-6 text-center font-sans text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">
               Why your audience will thank you
             </h2>
             <div className="grid gap-4 md:grid-cols-2">
               {perks.map((p, i) => (
                 <Reveal key={p.title} delay={i * 50}>
                   <div className="h-full rounded-2xl border border-border bg-card p-6">
-                    <h3 className="font-display text-lg text-foreground">{p.title}</h3>
+                    <h3 className="font-sans text-lg font-extrabold text-foreground">{p.title}</h3>
                     <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{p.body}</p>
                   </div>
                 </Reveal>
@@ -94,7 +94,7 @@ export default function AffiliatesPage() {
         <section className="px-5 pb-28 md:pb-36">
           <div className="mx-auto max-w-xl rounded-2xl border border-border bg-card p-8 text-center shadow-xl">
             <Percent className="mx-auto mb-4 h-8 w-8 text-primary" />
-            <h2 className="font-display text-2xl text-foreground">30% of every paid plan</h2>
+            <h2 className="font-sans text-2xl font-extrabold text-foreground">30% of every paid plan</h2>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
               One commission per referred customer, paid on their first month. Want to join? Email
               us and we'll get your account set up.

@@ -43,7 +43,7 @@ export default function SourcingHeader() {
       <nav
         className="liquid-glass mx-auto flex h-14 max-w-[1200px] items-center justify-between rounded-full px-4 transition-colors duration-300"
         style={{
-          background: scrolled ? "rgba(251, 250, 248, 0.82)" : "rgba(251, 250, 248, 0.5)",
+          background: scrolled ? "rgba(10, 9, 8, 0.72)" : "rgba(10, 9, 8, 0)",
         }}
       >
         <Link href="/sourcing" className="flex items-center gap-2.5">
@@ -51,7 +51,7 @@ export default function SourcingHeader() {
             <PackageSearch className="h-5 w-5" />
           </span>
           <span className="flex flex-col leading-none">
-            <span className="font-display text-lg font-semibold text-foreground">
+            <span className="font-sans text-lg font-extrabold text-foreground">
               Craftly Sourcing
             </span>
             <span className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">

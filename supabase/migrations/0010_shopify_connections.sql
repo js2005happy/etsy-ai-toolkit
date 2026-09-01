@@ -14,6 +14,8 @@ create table if not exists public.shopify_connections (
 
 alter table public.shopify_connections enable row level security;
 
+drop policy if exists "users manage own shopify connections" on public.shopify_connections;
+
 create policy "users manage own shopify connections"
   on public.shopify_connections for all
   using (auth.uid() = user_id);

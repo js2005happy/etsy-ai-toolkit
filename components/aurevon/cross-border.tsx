@@ -45,7 +45,7 @@ export default function CrossBorder() {
   const { t } = useI18n()
 
   return (
-    <section className="relative overflow-hidden bg-[#2f5d3f] px-6 py-24 md:py-32">
+    <section className="relative overflow-hidden border-y border-border bg-card px-6 py-24 md:py-32">
       {/* texture */}
       <div
         aria-hidden
@@ -58,26 +58,26 @@ export default function CrossBorder() {
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-24 top-1/2 h-[420px] w-[420px] -translate-y-1/2 rounded-full bg-[#4c8a60]/40 blur-[120px]"
+        className="pointer-events-none absolute -left-24 top-1/2 h-[420px] w-[420px] -translate-y-1/2 rounded-full bg-primary/20 blur-[120px]"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-24 top-0 h-[360px] w-[360px] rounded-full bg-[#1a1714]/30 blur-[110px]"
+        className="pointer-events-none absolute -right-24 top-0 h-[360px] w-[360px] rounded-full bg-[#FF5C8A]/15 blur-[110px]"
       />
 
       <div className="relative mx-auto max-w-6xl">
         <Reveal>
-          <p className="text-center text-sm font-semibold uppercase tracking-[0.16em] text-[#cfe0d4]">
+          <p className="text-center text-sm font-semibold uppercase tracking-[0.16em] text-primary">
             {t('home.worldLabel')}
           </p>
         </Reveal>
         <Reveal delay={60}>
-          <h2 className="mx-auto mt-4 max-w-2xl text-center font-display text-4xl leading-[1.05] tracking-tight text-white md:text-5xl">
+          <h2 className="mx-auto mt-4 max-w-2xl text-center font-sans text-4xl font-extrabold leading-[1.05] tracking-tight text-foreground md:text-5xl">
             {t('home.worldTitle')}
           </h2>
         </Reveal>
         <Reveal delay={120}>
-          <p className="mx-auto mt-5 max-w-xl text-center text-base text-[#d7e2d9] md:text-lg">
+          <p className="mx-auto mt-5 max-w-xl text-center text-base text-muted-foreground md:text-lg">
             {t('home.worldSub')}
           </p>
         </Reveal>
@@ -85,24 +85,24 @@ export default function CrossBorder() {
         <div className="mt-16 grid gap-5 md:grid-cols-3">
           {PAIRINGS.map((p, i) => (
             <Reveal key={p.craft} delay={i * 70} className="h-full">
-              <div className="flex h-full flex-col rounded-2xl border border-white/15 bg-white/[0.07] p-7 backdrop-blur-sm transition hover:border-white/30 hover:bg-white/[0.11]">
+              <div className="flex h-full flex-col rounded-2xl border border-border bg-muted/40 p-7 backdrop-blur-sm transition hover:border-foreground/30 hover:bg-muted/60">
                 <div className="flex items-center gap-3">
-                  <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white">
+                  <span className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm font-medium text-foreground">
                     <MapPin className="h-3.5 w-3.5" />
                     {p.from}
-                    <span className="text-white/50">· {p.fromCountry}</span>
+                    <span className="text-muted-foreground">· {p.fromCountry}</span>
                   </span>
-                  <MoveRight className="h-4 w-4 text-[#cfe0d4]" />
-                  <span className="flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white">
+                  <MoveRight className="h-4 w-4 text-primary" />
+                  <span className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-sm font-medium text-foreground">
                     <MapPin className="h-3.5 w-3.5" />
                     {p.to}
-                    <span className="text-white/50">· {p.toCountry}</span>
+                    <span className="text-muted-foreground">· {p.toCountry}</span>
                   </span>
                 </div>
-                <h3 className="mt-6 font-display text-2xl leading-tight text-white">
+                <h3 className="mt-6 font-sans text-2xl font-extrabold leading-tight text-foreground">
                   {p.craft}
                 </h3>
-                <p className="mt-3 text-sm leading-relaxed text-[#d7e2d9]">{p.note}</p>
+                <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{p.note}</p>
               </div>
             </Reveal>
           ))}
@@ -112,7 +112,7 @@ export default function CrossBorder() {
           <div className="mt-14 flex justify-center">
             <Link
               href="/signup"
-              className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-white px-8 text-sm font-medium text-[#2f5d3f] transition hover:bg-[#eef3ef]"
+              className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#FF9E5E] to-[#FF5C8A] px-8 text-sm font-semibold text-[#150B05] shadow-[0_10px_30px_-12px_rgba(255,122,69,0.75)] transition hover:-translate-y-0.5 hover:opacity-90"
             >
               <Sparkles className="h-4 w-4" />
               {t('home.worldCta')}

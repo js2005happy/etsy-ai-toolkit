@@ -15,7 +15,7 @@ export default function ContactPage() {
           eyebrow="Contact"
           title={
             <>
-              Get in <span className="text-primary">touch</span>
+              Get in <span className="serif-accent grad">touch</span>
             </>
           }
           subtitle="Questions, feedback, or a billing issue? Send us a message and we'll get back to you."

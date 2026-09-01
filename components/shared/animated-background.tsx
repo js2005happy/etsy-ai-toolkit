@@ -1,16 +1,36 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+
 export default function AnimatedBackground() {
+  const spotRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const spot = spotRef.current
+    if (!spot) return
+    const onMove = (e: PointerEvent) => {
+      spot.style.setProperty('--x', `${e.clientX}px`)
+      spot.style.setProperty('--y', `${e.clientY}px`)
+    }
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => window.removeEventListener('pointermove', onMove)
+  }, [])
+
   return (
     <div
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden bg-background"
     >
-      {/* 柔和暖色光晕，替代原来的冷色极光 */}
-      <div className="absolute -top-32 left-[8%] h-[36rem] w-[36rem] rounded-full bg-[#e9e5df]/50 blur-3xl" />
-      <div className="absolute top-[26%] -right-28 h-[34rem] w-[34rem] rounded-full bg-[#f0ece4]/60 blur-3xl" />
-      <div className="absolute bottom-[-12rem] left-[26%] h-[32rem] w-[32rem] rounded-full bg-[#e9e5df]/40 blur-3xl" />
+      {/* E · Kinetic ambient orbs — amber / rose / mint */}
+      <div className="orb orb-a" />
+      <div className="orb orb-b" />
+      <div className="orb orb-c" />
 
-      {/* 胶片颗粒（极淡，保持通透） */}
-      <div className="film-grain absolute inset-0 opacity-[0.02]" />
+      {/* cursor-follow spotlight */}
+      <div ref={spotRef} className="spotlight" />
+
+      {/* film grain (kept faint for clarity) */}
+      <div className="film-grain absolute inset-0 opacity-[0.045] mix-blend-overlay" />
     </div>
   )
 }
