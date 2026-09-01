@@ -31,6 +31,7 @@ export default function SiteFooter() {
       links: [
         { label: t("footer.howItWorks"), href: "/#how" },
         { label: t("footer.pricing"), href: "/pricing" },
+        { label: "Sourcing", href: "/sourcing" },
         { label: t("footer.dashboard"), href: "/dashboard" },
         { label: "FAQ", href: "/faq" },
       ],

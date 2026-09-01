@@ -16,6 +16,11 @@ import {
   Menu,
   X,
   Mail,
+  Wrench,
+  PackageSearch,
+  Truck,
+  Camera,
+  Wallet,
 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/client'
 import { locales, type Locale } from '@/lib/i18n/locales'
@@ -117,6 +122,7 @@ export default function AurevonLanding() {
 
   const links = [
     { label: t('nav.tools'), href: '#tools' },
+    { label: t('nav.sourcing'), href: '/sourcing' },
     { label: t('nav.howItWorks'), href: '#how' },
     { label: t('nav.pricing'), href: '/pricing' },
     { label: t('nav.support'), href: '/contact' },
@@ -147,6 +153,15 @@ export default function AurevonLanding() {
       desc: t('home.goalGrowDesc'),
       href: '/dashboard/pricing',
     },
+  ]
+
+  const modules = [
+    { icon: Wrench, title: t('home.moduleToolsTitle'), desc: t('home.moduleToolsDesc'), href: '#tools', soon: false },
+    { icon: PackageSearch, title: t('home.moduleSourcingTitle'), desc: t('home.moduleSourcingDesc'), href: '/sourcing', soon: false },
+    { icon: TrendingUp, title: t('home.moduleGrowthTitle'), desc: t('home.moduleGrowthDesc'), href: null, soon: true },
+    { icon: Truck, title: t('home.moduleLogisticsTitle'), desc: t('home.moduleLogisticsDesc'), href: null, soon: true },
+    { icon: Camera, title: t('home.moduleContentTitle'), desc: t('home.moduleContentDesc'), href: null, soon: true },
+    { icon: Wallet, title: t('home.moduleFinanceTitle'), desc: t('home.moduleFinanceDesc'), href: null, soon: true },
   ]
 
   const groups = [
@@ -500,6 +515,61 @@ export default function AurevonLanding() {
               <ProductMockup />
             </div>
           </Reveal>
+        </div>
+      </section>
+
+      {/* Platform overview */}
+      <section className="px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl">
+          <Reveal>
+            <p className="text-center text-sm font-semibold uppercase tracking-[0.16em] text-[#2f5d3f]">
+              {t('home.platformLabel')}
+            </p>
+          </Reveal>
+          <Reveal delay={60}>
+            <h2 className="mx-auto mt-4 max-w-2xl text-center font-display text-4xl leading-[1.05] tracking-tight text-[#1a1714] md:text-5xl">
+              {t('home.platformTitle')}
+            </h2>
+          </Reveal>
+          <Reveal delay={120}>
+            <p className="mx-auto mt-5 max-w-xl text-center text-base text-[#6b6560] md:text-lg">
+              {t('home.platformSub')}
+            </p>
+          </Reveal>
+
+          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {modules.map((mod, i) => (
+              <Reveal key={mod.title} delay={i * 60} className="h-full">
+                {mod.soon ? (
+                  <div className="relative flex h-full flex-col rounded-2xl border border-dashed border-[#e9e5df] bg-white/60 p-7">
+                    <span className="absolute right-4 top-4 rounded-full bg-[#f4f1ec] px-3 py-1 text-xs font-medium text-[#8a857e]">
+                      {t('home.comingSoon')}
+                    </span>
+                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f4f1ec]">
+                      <mod.icon className="h-5 w-5 text-[#b6b0a8]" />
+                    </span>
+                    <h3 className="mt-5 font-display text-xl text-[#9a948c]">{mod.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[#b6b0a8]">{mod.desc}</p>
+                  </div>
+                ) : (
+                  <Link
+                    href={mod.href!}
+                    className="group flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:border-[#1a1714]/30 hover:shadow-[0_24px_50px_-28px_rgba(26,23,20,0.35)]"
+                  >
+                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#2f5d3f]/10 transition-colors duration-300 group-hover:bg-[#2f5d3f]">
+                      <mod.icon className="h-5 w-5 text-[#2f5d3f] transition-colors duration-300 group-hover:text-white" />
+                    </span>
+                    <h3 className="mt-5 font-display text-xl text-[#1a1714]">{mod.title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[#6b6560]">{mod.desc}</p>
+                    <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-[#1a1714]">
+                      {t('home.moduleLearnMore')}
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                    </span>
+                  </Link>
+                )}
+              </Reveal>
+            ))}
+          </div>
         </div>
       </section>
 
