@@ -15,12 +15,15 @@ import {
   ArrowRight,
   Menu,
   X,
+  Mail,
 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/client'
 import { locales, type Locale } from '@/lib/i18n/locales'
 import { createClient } from '@/lib/supabase/client'
 import { PLATFORMS } from '@/lib/platforms'
 import Reveal from '@/components/shared/reveal'
+import SampleGallery from '@/components/aurevon/sample-gallery'
+import CrossBorder from '@/components/aurevon/cross-border'
 import type { User } from '@supabase/supabase-js'
 
 const INK = '#1a1714'
@@ -572,6 +575,8 @@ export default function AurevonLanding() {
         </div>
       </section>
 
+      <SampleGallery />
+
       {/* How it works */}
       <section id="how" className="border-t border-[#e9e5df] px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
@@ -634,6 +639,8 @@ export default function AurevonLanding() {
           </div>
         </div>
       </section>
+
+      <CrossBorder />
 
       {/* Final CTA */}
       <section className="border-t border-[#e9e5df] px-6 py-28 text-center md:py-36">
@@ -742,7 +749,16 @@ export default function AurevonLanding() {
             </a>
           </div>
 
-          <p className="mt-6 text-sm text-[#9a948c]">{t('footer.copyright')}</p>
+          <div className="mt-8 flex flex-col gap-3 border-t border-[#e9e5df] pt-6 sm:flex-row sm:items-center sm:justify-between">
+            <a
+              href="mailto:contact@craftly.world"
+              className="inline-flex items-center gap-2 text-sm font-medium text-[#1a1714] transition-colors hover:text-[#2f5d3f]"
+            >
+              <Mail className="h-4 w-4" />
+              contact@craftly.world
+            </a>
+            <p className="text-sm text-[#9a948c]">{t('footer.copyright')}</p>
+          </div>
         </div>
       </footer>
     </div>
