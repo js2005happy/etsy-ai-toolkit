@@ -4,13 +4,25 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { initializePaddle, CheckoutEventNames } from '@paddle/paddle-js'
 import type { Paddle } from '@paddle/paddle-js'
-import { Check, Loader2 } from 'lucide-react'
+import { Check } from 'lucide-react'
 import Reveal from '@/components/shared/reveal'
 import { TIERS } from '@/lib/pricing'
 import type { Tier } from '@/lib/pricing'
 import { useI18n } from '@/lib/i18n/client'
 
 type BillingPeriod = 'month' | 'year'
+
+// Static USD price fallback — the price renders server-side / immediately, so
+// the page never shows an empty placeholder while Paddle.js loads (or fails).
+function formatStaticPrice(priceUsd: Tier['priceUsd'], period: BillingPeriod): string {
+  if (!priceUsd) return '—'
+  return `$${period === 'month' ? priceUsd.month : priceUsd.year}`
+}
+
+function formatSavings(priceUsd: Tier['priceUsd']): string {
+  if (!priceUsd) return ''
+  return `$${priceUsd.month * 12 - priceUsd.year}`
+}
 
 interface PricingClientProps {
   countryCode: string | null
@@ -156,6 +168,17 @@ export default function PricingClient({
                 }`}
               >
                 {p === 'month' ? t('pricing.monthly') : t('pricing.yearly')}
+                {p === 'year' && (
+                  <span
+                    className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-semibold ${
+                      period === p
+                        ? 'bg-primary-foreground/20 text-primary-foreground'
+                        : 'bg-emerald-400/15 text-emerald-400'
+                    }`}
+                  >
+                    {t('pricing.yearlySave')}
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -193,24 +216,26 @@ export default function PricingClient({
                     <span className="text-5xl font-semibold tracking-tight text-foreground">
                       $0
                     </span>
-                  ) : loading ? (
-                    <span className="flex items-center gap-2 text-muted-foreground">
-                      <Loader2 className="h-6 w-6 animate-spin" />
-                    </span>
                   ) : (
-                    <span className="text-5xl font-semibold tracking-tight text-foreground">
-                      {prices[tier.name] || '—'}
-                    </span>
-                  )}
-                  {!isFree(tier.name) && !loading && prices[tier.name] && (
-                    <span className="text-base text-muted-foreground">
-                      /{period === 'month' ? t('pricing.mo') : t('pricing.yr')}
-                    </span>
+                    <>
+                      <span className="text-5xl font-semibold tracking-tight text-foreground">
+                        {prices[tier.name] || formatStaticPrice(tier.priceUsd, period)}
+                      </span>
+                      <span className="text-base text-muted-foreground">
+                        /{period === 'month' ? t('pricing.mo') : t('pricing.yr')}
+                      </span>
+                    </>
                   )}
                 </div>
-                {period === 'year' && !isFree(tier.name) && (
+                {isFree(tier.name) ? (
+                  <p className="mt-1 text-xs font-medium text-emerald-400">
+                    {t('pricing.freeForever')}
+                  </p>
+                ) : (
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {t('pricing.billedAnnually')}
+                    {period === 'month'
+                      ? t('pricing.billedMonthly')
+                      : `${t('pricing.billedAnnually')} · ${t('pricing.save')} ${formatSavings(tier.priceUsd)}`}
                   </p>
                 )}
 

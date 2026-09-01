@@ -36,102 +36,126 @@ export default function DashboardPage() {
 
   const isPaid = plan !== 'free' && plan != null
 
-  const tools = [
+  const groups = [
     {
-      icon: FileText,
-      title: t('dashboard.toolListingTitle'),
-      description: t('dashboard.toolListingDesc'),
-      href: '/dashboard/listing',
+      label: t('home.groupCreate'),
+      benefit: t('home.groupCreateBenefit'),
+      tools: [
+        {
+          icon: FileText,
+          title: t('dashboard.toolListingTitle'),
+          description: t('dashboard.toolListingDesc'),
+          href: '/dashboard/listing',
+        },
+        {
+          icon: ListChecks,
+          title: t('dashboard.toolBulletsTitle'),
+          description: t('dashboard.toolBulletsDesc'),
+          href: '/dashboard/bullets',
+        },
+        {
+          icon: BookOpen,
+          title: t('dashboard.toolBrandStoryTitle'),
+          description: t('dashboard.toolBrandStoryDesc'),
+          href: '/dashboard/brand-story',
+        },
+        {
+          icon: ImageIcon,
+          title: t('dashboard.toolImagesTitle'),
+          description: t('dashboard.toolImagesDesc'),
+          href: '/dashboard/images',
+        },
+      ],
     },
     {
-      icon: MessageCircle,
-      title: t('dashboard.toolMessagesTitle'),
-      description: t('dashboard.toolMessagesDesc'),
-      href: '/dashboard/messages',
+      label: t('home.groupOptimize'),
+      benefit: t('home.groupOptimizeBenefit'),
+      tools: [
+        {
+          icon: Wand2,
+          title: t('dashboard.toolOptimizerTitle'),
+          description: t('dashboard.toolOptimizerDesc'),
+          href: '/dashboard/optimizer',
+        },
+        {
+          icon: Search,
+          title: t('dashboard.toolKeywordsTitle'),
+          description: t('dashboard.toolKeywordsDesc'),
+          href: '/dashboard/keywords',
+        },
+        {
+          icon: Languages,
+          title: t('dashboard.toolTranslateTitle'),
+          description: t('dashboard.toolTranslateDesc'),
+          href: '/dashboard/translate',
+        },
+        {
+          icon: Crosshair,
+          title: t('dashboard.toolCompetitorTitle'),
+          description: t('dashboard.toolCompetitorDesc'),
+          href: '/dashboard/competitor-analysis',
+        },
+      ],
     },
     {
-      icon: Share2,
-      title: t('dashboard.toolSocialTitle'),
-      description: t('dashboard.toolSocialDesc'),
-      href: '/dashboard/social',
+      label: t('home.groupReply'),
+      benefit: t('home.groupReplyBenefit'),
+      tools: [
+        {
+          icon: MessageCircle,
+          title: t('dashboard.toolMessagesTitle'),
+          description: t('dashboard.toolMessagesDesc'),
+          href: '/dashboard/messages',
+        },
+        {
+          icon: Star,
+          title: t('dashboard.toolReviewsTitle'),
+          description: t('dashboard.toolReviewsDesc'),
+          href: '/dashboard/reviews',
+        },
+        {
+          icon: Mail,
+          title: t('dashboard.toolEmailTitle'),
+          description: t('dashboard.toolEmailDesc'),
+          href: '/dashboard/email',
+        },
+        {
+          icon: Megaphone,
+          title: t('dashboard.toolAnnouncementTitle'),
+          description: t('dashboard.toolAnnouncementDesc'),
+          href: '/dashboard/announcement',
+        },
+      ],
     },
     {
-      icon: Star,
-      title: t('dashboard.toolReviewsTitle'),
-      description: t('dashboard.toolReviewsDesc'),
-      href: '/dashboard/reviews',
-    },
-    {
-      icon: Megaphone,
-      title: t('dashboard.toolAnnouncementTitle'),
-      description: t('dashboard.toolAnnouncementDesc'),
-      href: '/dashboard/announcement',
-    },
-    {
-      icon: Search,
-      title: t('dashboard.toolKeywordsTitle'),
-      description: t('dashboard.toolKeywordsDesc'),
-      href: '/dashboard/keywords',
-    },
-    {
-      icon: Languages,
-      title: t('dashboard.toolTranslateTitle'),
-      description: t('dashboard.toolTranslateDesc'),
-      href: '/dashboard/translate',
-    },
-    {
-      icon: Wand2,
-      title: t('dashboard.toolOptimizerTitle'),
-      description: t('dashboard.toolOptimizerDesc'),
-      href: '/dashboard/optimizer',
-    },
-    {
-      icon: DollarSign,
-      title: t('dashboard.toolPricingTitle'),
-      description: t('dashboard.toolPricingDesc'),
-      href: '/dashboard/pricing',
-    },
-    {
-      icon: ImageIcon,
-      title: t('dashboard.toolImagesTitle'),
-      description: t('dashboard.toolImagesDesc'),
-      href: '/dashboard/images',
-    },
-    {
-      icon: ListChecks,
-      title: t('dashboard.toolBulletsTitle'),
-      description: t('dashboard.toolBulletsDesc'),
-      href: '/dashboard/bullets',
-    },
-    {
-      icon: Target,
-      title: t('dashboard.toolAdCopyTitle'),
-      description: t('dashboard.toolAdCopyDesc'),
-      href: '/dashboard/ad-copy',
-    },
-    {
-      icon: Mail,
-      title: t('dashboard.toolEmailTitle'),
-      description: t('dashboard.toolEmailDesc'),
-      href: '/dashboard/email',
-    },
-    {
-      icon: Crosshair,
-      title: t('dashboard.toolCompetitorTitle'),
-      description: t('dashboard.toolCompetitorDesc'),
-      href: '/dashboard/competitor-analysis',
-    },
-    {
-      icon: BookOpen,
-      title: t('dashboard.toolBrandStoryTitle'),
-      description: t('dashboard.toolBrandStoryDesc'),
-      href: '/dashboard/brand-story',
-    },
-    {
-      icon: Globe,
-      title: t('dashboard.toolGlobalPricingTitle'),
-      description: t('dashboard.toolGlobalPricingDesc'),
-      href: '/dashboard/global-pricing',
+      label: t('home.groupGrow'),
+      benefit: t('home.groupGrowBenefit'),
+      tools: [
+        {
+          icon: Share2,
+          title: t('dashboard.toolSocialTitle'),
+          description: t('dashboard.toolSocialDesc'),
+          href: '/dashboard/social',
+        },
+        {
+          icon: Target,
+          title: t('dashboard.toolAdCopyTitle'),
+          description: t('dashboard.toolAdCopyDesc'),
+          href: '/dashboard/ad-copy',
+        },
+        {
+          icon: DollarSign,
+          title: t('dashboard.toolPricingTitle'),
+          description: t('dashboard.toolPricingDesc'),
+          href: '/dashboard/pricing',
+        },
+        {
+          icon: Globe,
+          title: t('dashboard.toolGlobalPricingTitle'),
+          description: t('dashboard.toolGlobalPricingDesc'),
+          href: '/dashboard/global-pricing',
+        },
+      ],
     },
   ]
 
@@ -293,15 +317,27 @@ export default function DashboardPage() {
           <span className="text-sm text-muted-foreground">{t('dashboard.nineToolsZero')}</span>
         </div>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {tools.map((tool) => (
-            <TiltCard
-              key={tool.href}
-              href={tool.href}
-              icon={<tool.icon className="h-6 w-6" />}
-              title={tool.title}
-              description={tool.description}
-            />
+        <div className="space-y-14">
+          {groups.map((group) => (
+            <section key={group.label}>
+              <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="font-display text-xl tracking-tight text-foreground">
+                  {group.label}
+                </h3>
+                <span className="text-sm text-muted-foreground">{group.benefit}</span>
+              </div>
+              <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                {group.tools.map((tool) => (
+                  <TiltCard
+                    key={tool.href}
+                    href={tool.href}
+                    icon={<tool.icon className="h-6 w-6" />}
+                    title={tool.title}
+                    description={tool.description}
+                  />
+                ))}
+              </div>
+            </section>
           ))}
         </div>
       </div>

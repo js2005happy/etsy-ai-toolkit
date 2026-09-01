@@ -18,9 +18,7 @@ import {
   Mail,
   Wrench,
   PackageSearch,
-  Truck,
-  Camera,
-  Wallet,
+  Check,
 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/client'
 import { locales, type Locale } from '@/lib/i18n/locales'
@@ -111,6 +109,24 @@ function ProductMockup() {
   )
 }
 
+function ComparisonCell({ value }: { value: string }) {
+  if (value === 'yes') {
+    return <Check className="h-5 w-5 text-[#2f5d3f]" strokeWidth={2.5} />
+  }
+  if (value === 'no') {
+    return <X className="h-5 w-5 text-[#c4beb5]" strokeWidth={2.5} />
+  }
+  return <span>{value}</span>
+}
+
+const comparison = [
+  { label: 'Notes to a publishable listing', chatgpt: 'Needs careful prompts', etsy: 'no', craftly: 'yes' },
+  { label: 'Keywords tuned to Etsy search', chatgpt: 'Generic results', etsy: 'Basic tools', craftly: 'yes' },
+  { label: 'Writes in your voice', chatgpt: 'Needs retries', etsy: 'Templated', craftly: 'yes' },
+  { label: 'One brief, 10 marketplaces', chatgpt: 'Single text only', etsy: 'no', craftly: 'yes' },
+  { label: 'Source from China suppliers', chatgpt: 'no', etsy: 'no', craftly: 'yes' },
+]
+
 export default function AurevonLanding() {
   const { t } = useI18n()
   const router = useRouter()
@@ -156,12 +172,9 @@ export default function AurevonLanding() {
   ]
 
   const modules = [
-    { icon: Wrench, title: t('home.moduleToolsTitle'), desc: t('home.moduleToolsDesc'), href: '#tools', soon: false },
-    { icon: PackageSearch, title: t('home.moduleSourcingTitle'), desc: t('home.moduleSourcingDesc'), href: '/sourcing', soon: false },
-    { icon: TrendingUp, title: t('home.moduleGrowthTitle'), desc: t('home.moduleGrowthDesc'), href: null, soon: true },
-    { icon: Truck, title: t('home.moduleLogisticsTitle'), desc: t('home.moduleLogisticsDesc'), href: null, soon: true },
-    { icon: Camera, title: t('home.moduleContentTitle'), desc: t('home.moduleContentDesc'), href: null, soon: true },
-    { icon: Wallet, title: t('home.moduleFinanceTitle'), desc: t('home.moduleFinanceDesc'), href: null, soon: true },
+    { icon: Wrench, title: t('home.moduleToolsTitle'), desc: t('home.moduleToolsDesc'), href: '#tools', badge: null },
+    { icon: PackageSearch, title: t('home.moduleSourcingTitle'), desc: t('home.moduleSourcingDesc'), href: '/sourcing', badge: null },
+    { icon: TrendingUp, title: t('home.moduleGrowthTitle'), desc: t('home.moduleGrowthDesc'), href: '/dashboard/social', badge: 'new' as const },
   ]
 
   const groups = [
@@ -219,6 +232,12 @@ export default function AurevonLanding() {
     { title: t('home.proof1Title'), desc: t('home.proof1Desc') },
     { title: t('home.proof2Title'), desc: t('home.proof2Desc') },
     { title: t('home.proof3Title'), desc: t('home.proof3Desc') },
+  ]
+
+  const founding = [
+    { title: t('home.founding1Title'), desc: t('home.founding1Desc') },
+    { title: t('home.founding2Title'), desc: t('home.founding2Desc') },
+    { title: t('home.founding3Title'), desc: t('home.founding3Desc') },
   ]
 
   const footerColumns = [
@@ -488,6 +507,11 @@ export default function AurevonLanding() {
                 {t('home.heroSub')}
               </p>
             </Reveal>
+            <Reveal delay={150}>
+              <p className="mx-auto mt-4 max-w-xl text-base font-medium italic text-[#2f5d3f]">
+                {t('home.differentiator')}
+              </p>
+            </Reveal>
             <Reveal delay={180}>
               <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
                 <Link
@@ -518,6 +542,58 @@ export default function AurevonLanding() {
         </div>
       </section>
 
+      {/* Comparison */}
+      <section className="border-t border-[#e9e5df] bg-white px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-5xl">
+          <Reveal>
+            <p className="text-center text-sm font-semibold uppercase tracking-[0.16em] text-[#2f5d3f]">
+              {t('home.compareLabel')}
+            </p>
+          </Reveal>
+          <Reveal delay={60}>
+            <h2 className="mx-auto mt-4 max-w-2xl text-center font-display text-4xl leading-[1.05] tracking-tight text-[#1a1714] md:text-5xl">
+              {t('home.compareTitle')}
+            </h2>
+          </Reveal>
+          <Reveal delay={120}>
+            <p className="mx-auto mt-5 max-w-xl text-center text-base text-[#6b6560] md:text-lg">
+              {t('home.compareSub')}
+            </p>
+          </Reveal>
+
+          <Reveal delay={180}>
+            <div className="mt-14 overflow-x-auto">
+              <table className="w-full min-w-[640px] border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-[#e9e5df]">
+                    <th className="py-4 pr-6 text-sm font-medium text-[#8a857e]"></th>
+                    <th className="py-4 pr-6 text-sm font-semibold text-[#6b6560]">ChatGPT</th>
+                    <th className="py-4 pr-6 text-sm font-semibold text-[#6b6560]">Etsy native tools</th>
+                    <th className="py-4 text-sm font-semibold text-[#2f5d3f]">Craftly</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {comparison.map((row) => (
+                    <tr key={row.label} className="border-b border-[#f4f1ec]">
+                      <td className="py-4 pr-6 text-sm font-medium text-[#1a1714]">{row.label}</td>
+                      <td className="py-4 pr-6 text-sm text-[#8a857e]">
+                        <ComparisonCell value={row.chatgpt} />
+                      </td>
+                      <td className="py-4 pr-6 text-sm text-[#8a857e]">
+                        <ComparisonCell value={row.etsy} />
+                      </td>
+                      <td className="py-4 text-sm">
+                        <ComparisonCell value={row.craftly} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
       {/* Platform overview */}
       <section className="px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
@@ -540,33 +616,25 @@ export default function AurevonLanding() {
           <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {modules.map((mod, i) => (
               <Reveal key={mod.title} delay={i * 60} className="h-full">
-                {mod.soon ? (
-                  <div className="relative flex h-full flex-col rounded-2xl border border-dashed border-[#e9e5df] bg-white/60 p-7">
-                    <span className="absolute right-4 top-4 rounded-full bg-[#f4f1ec] px-3 py-1 text-xs font-medium text-[#8a857e]">
-                      {t('home.comingSoon')}
+                <Link
+                  href={mod.href}
+                  className="group relative flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:border-[#1a1714]/30 hover:shadow-[0_24px_50px_-28px_rgba(26,23,20,0.35)]"
+                >
+                  {mod.badge === 'new' && (
+                    <span className="absolute right-4 top-4 rounded-full bg-[#2f5d3f] px-3 py-1 text-xs font-semibold text-white">
+                      {t('home.moduleNew')}
                     </span>
-                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#f4f1ec]">
-                      <mod.icon className="h-5 w-5 text-[#b6b0a8]" />
-                    </span>
-                    <h3 className="mt-5 font-display text-xl text-[#9a948c]">{mod.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[#b6b0a8]">{mod.desc}</p>
-                  </div>
-                ) : (
-                  <Link
-                    href={mod.href!}
-                    className="group flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:border-[#1a1714]/30 hover:shadow-[0_24px_50px_-28px_rgba(26,23,20,0.35)]"
-                  >
-                    <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#2f5d3f]/10 transition-colors duration-300 group-hover:bg-[#2f5d3f]">
-                      <mod.icon className="h-5 w-5 text-[#2f5d3f] transition-colors duration-300 group-hover:text-white" />
-                    </span>
-                    <h3 className="mt-5 font-display text-xl text-[#1a1714]">{mod.title}</h3>
-                    <p className="mt-2 text-sm leading-relaxed text-[#6b6560]">{mod.desc}</p>
-                    <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-[#1a1714]">
-                      {t('home.moduleLearnMore')}
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                    </span>
-                  </Link>
-                )}
+                  )}
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#2f5d3f]/10 transition-colors duration-300 group-hover:bg-[#2f5d3f]">
+                    <mod.icon className="h-5 w-5 text-[#2f5d3f] transition-colors duration-300 group-hover:text-white" />
+                  </span>
+                  <h3 className="mt-5 font-display text-xl text-[#1a1714]">{mod.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-[#6b6560]">{mod.desc}</p>
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-[#1a1714]">
+                    {t('home.moduleLearnMore')}
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </Link>
               </Reveal>
             ))}
           </div>
@@ -757,6 +825,58 @@ export default function AurevonLanding() {
                 </div>
               </Reveal>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Founding sellers */}
+      <section className="border-t border-[#e9e5df] bg-[#fbfaf8] px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl">
+          <div className="overflow-hidden rounded-3xl bg-[#1a1714] px-8 py-14 md:px-16 md:py-20">
+            <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+              <div>
+                <Reveal>
+                  <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#7fae8c]">
+                    {t('home.foundingLabel')}
+                  </p>
+                </Reveal>
+                <Reveal delay={60}>
+                  <h2 className="mt-4 font-display text-4xl leading-[1.05] tracking-tight text-white md:text-5xl">
+                    {t('home.foundingTitle')}
+                  </h2>
+                </Reveal>
+                <Reveal delay={120}>
+                  <p className="mt-5 max-w-md text-base leading-relaxed text-white/70 md:text-lg">
+                    {t('home.foundingSub')}
+                  </p>
+                </Reveal>
+                <Reveal delay={180}>
+                  <Link
+                    href="/contact"
+                    className="mt-8 inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-sm font-medium text-[#1a1714] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#f1efe9]"
+                  >
+                    {t('home.foundingCta')}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Reveal>
+              </div>
+
+              <div className="space-y-4">
+                {founding.map((item, i) => (
+                  <Reveal key={item.title} delay={i * 60}>
+                    <div className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/5 p-5">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white">
+                        {i + 1}
+                      </span>
+                      <div>
+                        <h3 className="font-display text-lg text-white">{item.title}</h3>
+                        <p className="mt-1 text-sm leading-relaxed text-white/70">{item.desc}</p>
+                      </div>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>

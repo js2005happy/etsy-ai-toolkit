@@ -72,7 +72,11 @@ export default function KeywordsPage() {
       <div className="mx-auto max-w-3xl px-4">
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold text-foreground">Keyword Research Tool</h1>
-          <p className="mt-2 text-muted-foreground">Find high-search-volume keywords for your products.</p>
+          <p className="mt-2 text-muted-foreground">AI-suggested keywords to start your listing from.</p>
+          <p className="mt-2 text-sm text-muted-foreground/70">
+            Suggestions are AI-generated ideas, not live Etsy search-volume data. Validate them against
+            Etsy's own search bar and your shop stats before you commit.
+          </p>
           {credits !== null && (
             <p className="mt-2 text-sm text-muted-foreground">{credits} Credits Left</p>
           )}

@@ -4,6 +4,13 @@ export interface Tier {
   name: TierName
   credits: number
   images: number
+  // Static USD price, server-rendered so the pricing page never shows an empty
+  // placeholder while Paddle.js loads (or when it fails). Paddle's localized
+  // PricePreview still overrides this at runtime when available.
+  priceUsd: {
+    month: number
+    year: number
+  } | null
   priceId: {
     month: string
     year: string
@@ -30,12 +37,14 @@ export const TIERS: Tier[] = [
     name: 'Free',
     credits: 10,
     images: 3, // lead-gen trial: 3 free posters so Free users can try image gen
+    priceUsd: null,
     priceId: null,
   },
   {
     name: 'Basic',
     credits: 100,
     images: 50,
+    priceUsd: { month: 9, year: 79 },
     priceId: {
       month: 'pri_01m14nefyckgxfwghxaferkem9', // $9 Starter Monthly
       year: 'pri_01m14neg9t3h5z29sf6y5hpgma', // $79 Starter Yearly
@@ -45,6 +54,7 @@ export const TIERS: Tier[] = [
     name: 'Pro',
     credits: 300,
     images: 120,
+    priceUsd: { month: 19, year: 179 },
     priceId: {
       month: 'pri_01m14kdhc8ksgzbzxyan895r41', // $19 Pro Monthly
       year: 'pri_01m14negn1c9xgym2jncv8bx14', // $179 Pro Yearly
@@ -54,6 +64,7 @@ export const TIERS: Tier[] = [
     name: 'Scale',
     credits: 1000,
     images: 300,
+    priceUsd: { month: 39, year: 450 },
     priceId: {
       month: 'pri_01m14neh05966mkbv7dzbf8wbw', // $39 Advanced Monthly
       year: 'pri_01m1bxtb0bv7cs53jjsnhmz6jf', // $450 Advanced Yearly

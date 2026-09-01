@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Navbar from "@/components/shared/navbar";
+import SourcingHeader from "@/components/sourcing/sourcing-header";
 import PageHero from "@/components/shared/page-hero";
 import SiteFooter from "@/components/shared/site-footer";
 import CinematicBackground from "@/components/cinematic/cinematic-background";
@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Sourcing — Craftly",
+  title: "Craftly Sourcing — Verified Chinese Suppliers",
   description:
     "Source products from verified Chinese suppliers. We find factories, negotiate prices, inspect quality, and ship to your door.",
 };
@@ -46,7 +46,7 @@ export default function SourcingPage() {
   return (
     <div className="flex min-h-screen flex-col">
       <CinematicBackground />
-      <Navbar />
+      <SourcingHeader />
       <main className="flex-1">
         <PageHero
           eyebrow="Sourcing"
@@ -60,7 +60,7 @@ export default function SourcingPage() {
         />
 
         {/* How it works */}
-        <section className="px-5 pb-20 md:pb-28">
+        <section id="how" className="px-5 pb-20 md:pb-28">
           <div className="mx-auto max-w-6xl">
             <Reveal>
               <p className="mb-4 text-[13px] uppercase tracking-[0.2em] text-primary">
@@ -90,7 +90,7 @@ export default function SourcingPage() {
         </section>
 
         {/* Pricing */}
-        <section className="border-t border-border px-5 py-20 md:py-28">
+        <section id="pricing" className="border-t border-border px-5 py-20 md:py-28">
           <div className="mx-auto max-w-4xl">
             <Reveal>
               <p className="mb-4 text-[13px] uppercase tracking-[0.2em] text-primary">
@@ -122,7 +122,7 @@ export default function SourcingPage() {
         </section>
 
         {/* Trust */}
-        <section className="border-t border-border px-5 py-20 md:py-28">
+        <section id="trust" className="border-t border-border px-5 py-20 md:py-28">
           <div className="mx-auto max-w-4xl">
             <Reveal>
               <p className="mb-4 text-[13px] uppercase tracking-[0.2em] text-primary">
@@ -148,7 +148,7 @@ export default function SourcingPage() {
         </section>
 
         {/* Quote form */}
-        <section className="border-t border-border px-5 pb-28 pt-20 md:pb-36">
+        <section id="quote" className="border-t border-border px-5 pb-28 pt-20 md:pb-36">
           <div className="mx-auto max-w-xl">
             <Reveal>
               <h2 className="mb-2 text-center font-display text-3xl font-semibold leading-tight tracking-tight text-foreground md:text-4xl">
