@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Inter, Fraunces, Caveat } from "next/font/google";
 import { cookies } from "next/headers";
 import AnimatedBackground from "@/components/shared/animated-background";
+import PostHogProvider from "@/components/shared/posthog-provider";
 import { I18nProvider } from "@/lib/i18n/client";
 import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/locales";
 import "./globals.css";
@@ -118,7 +119,7 @@ export default function RootLayout({
       <body className="relative isolate min-h-screen bg-background font-sans text-foreground antialiased">
         <I18nProvider initialLocale={locale}>
           <AnimatedBackground />
-          {children}
+          <PostHogProvider>{children}</PostHogProvider>
         </I18nProvider>
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>
