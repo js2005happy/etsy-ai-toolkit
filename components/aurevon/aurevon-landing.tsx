@@ -299,8 +299,10 @@ export default function AurevonLanding() {
         }`}
       >
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <a href="#" className="text-lg font-semibold tracking-tight text-[#1a1714]">
-            {t('nav.brand')}
+          <a href="#" className="flex items-center gap-2.5">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt={t('nav.brand')} width={28} height={28} className="h-7 w-7 shrink-0 object-contain" />
+            <span className="text-lg font-semibold tracking-tight text-[#1a1714]">{t('nav.brand')}</span>
           </a>
 
           <nav className="hidden items-center gap-8 md:flex">
@@ -720,7 +722,11 @@ export default function AurevonLanding() {
       <footer className="border-t border-[#e9e5df] bg-white px-6 pb-12 pt-20">
         <div className="mx-auto max-w-6xl">
           <div className="mb-12">
-            <span className="text-xl font-semibold tracking-tight text-[#1a1714]">{t('nav.brand')}</span>
+            <span className="flex items-center gap-2.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt={t('nav.brand')} width={30} height={30} className="h-8 w-8 shrink-0 object-contain" />
+              <span className="text-xl font-semibold tracking-tight text-[#1a1714]">{t('nav.brand')}</span>
+            </span>
           </div>
           <div className="grid grid-cols-2 gap-x-8 gap-y-10 md:grid-cols-5">
             {footerColumns.map((col) => (
