@@ -3,66 +3,31 @@ import PageHero from "@/components/shared/page-hero";
 import SiteFooter from "@/components/shared/site-footer";
 import Reveal from "@/components/shared/reveal";
 import CinematicBackground from "@/components/cinematic/cinematic-background";
+import { getServerTranslations } from "@/lib/i18n/server";
 
-type Faq = { q: string; a: string };
-
-const faqs: Faq[] = [
-  {
-    q: "What is Craftly?",
-    a: "A single workspace for marketplace sellers to write listings, reply to customers, research keywords, translate and optimize listings, price products, and generate product images — across 10 marketplaces including Etsy, Amazon, Shopify, eBay, TikTok Shop, Temu, and Walmart.",
-  },
-  {
-    q: "How do credits work?",
-    a: "Each AI generation (a listing, a set of replies, a keyword list, etc.) costs one credit. The free plan includes 10 credits per month. Paid plans include more credits and unlock extra tools like image generation.",
-  },
-  {
-    q: "Do I need a credit card to start?",
-    a: "No. The free plan requires no card. Sign up and start generating right away.",
-  },
-  {
-    q: "How do I upgrade or cancel my plan?",
-    a: "Go to Account → Manage Billing, or the Pricing page. You can upgrade, downgrade, or cancel at any time through the Paddle customer portal.",
-  },
-  {
-    q: "Which tools are included in each plan?",
-    a: "Free includes listing, messages, reviews, social posts, and keywords. Basic adds translation, optimizer, and pricing advisor. Pro and Scale unlock product image generation and higher monthly limits.",
-  },
-  {
-    q: "Can I use these tools from Claude Code or Codex?",
-    a: "Yes. The toolkit ships an MCP server with all 15 tools. Grab your personal MCP key in Account → MCP connection, then add the etsy-ai-toolkit-mcp server to your client. Credits and image quota are tracked against your own account.",
-  },
-  {
-    q: "Do you have an affiliate program?",
-    a: "Yes. Recommend Craftly to your audience and earn 30% of every paid plan you refer (paid on their first month). There's a free tier to make it easy to try. See the Affiliates page to apply.",
-  },
-  {
-    q: "What happens to my credits at the end of the month?",
-    a: "Credits reset at the start of each billing month. Unused credits do not roll over.",
-  },
-  {
-    q: "Is my data safe?",
-    a: "Yes. We don't sell your data, and payment details are handled entirely by Paddle — we never see or store your full card number. See our Privacy Policy for details.",
-  },
-  {
-    q: "Is this tool affiliated with Etsy?",
-    a: "No. Etsy Seller AI Toolkit is an independent product and is not affiliated with or endorsed by Etsy, Inc.",
-  },
-];
+const FAQ_COUNT = 10;
 
 export default function FaqPage() {
+  const { t } = getServerTranslations();
+
+  const faqs = Array.from({ length: FAQ_COUNT }, (_, i) => ({
+    q: t(`faq.q${i + 1}`),
+    a: t(`faq.a${i + 1}`),
+  }));
+
   return (
     <div className="flex min-h-screen flex-col">
       <CinematicBackground />
       <Navbar />
       <main className="flex-1">
         <PageHero
-          eyebrow="Help"
+          eyebrow={t("faq.eyebrow")}
           title={
             <>
-              Frequently asked <span className="text-primary">questions</span>
+              {t("faq.titleA")} <span className="text-primary">{t("faq.titleB")}</span>
             </>
           }
-          subtitle="Everything you need to know about credits, plans, and billing."
+          subtitle={t("faq.subtitle")}
         />
 
         <section className="px-5 pb-28 md:pb-36">
