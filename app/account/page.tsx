@@ -10,10 +10,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Mail, Coins, Crown, ArrowLeft, LogOut, KeyRound, Sparkles, Upload, Terminal, Copy, Check, RefreshCw, Link2, ShoppingBag } from 'lucide-react'
+import { Loader2, Mail, Coins, Crown, ArrowLeft, LogOut, KeyRound, Sparkles, Upload, Terminal, Copy, Check, RefreshCw, Link2, ShoppingBag, Store } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import Navbar from '@/components/shared/navbar'
 import ShopifyConnect from '@/components/account/shopify-connect'
+import EtsyConnect from '@/components/account/etsy-connect'
 import type { User } from '@supabase/supabase-js'
 
 export default function AccountPage() {
@@ -580,6 +581,20 @@ export default function AccountPage() {
           </CardHeader>
           <CardContent>
             <ShopifyConnect />
+          </CardContent>
+        </Card>
+
+        {/* Etsy connected shops */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Store className="h-5 w-5" />
+              {t('account.etsyTitle')}
+            </CardTitle>
+            <CardDescription>{t('account.etsyDesc')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <EtsyConnect />
           </CardContent>
         </Card>
 
