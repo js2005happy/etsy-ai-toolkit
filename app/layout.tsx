@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     template: "%s · Craftly",
   },
   description:
-    "One workspace to write listings, posts, and replies for Etsy, Amazon, Shopify, TikTok Shop, and more. Turn product notes into a live listing in one breath.",
+    "One workspace to write listings, posts, and replies for 10 marketplaces — Etsy, Amazon, Shopify, eBay, TikTok Shop, Temu, Walmart, and more. Turn product notes into a live listing in one breath.",
   keywords: [
     "Etsy listing generator",
     "Etsy SEO",
@@ -55,13 +55,13 @@ export const metadata: Metadata = {
     siteName: "Craftly",
     title: "Craftly — AI tools for e-commerce sellers",
     description:
-      "Write listings, posts, and replies for Etsy, Amazon, Shopify, TikTok Shop, and more.",
+      "Write listings, posts, and replies for 10 marketplaces — Etsy, Amazon, Shopify, eBay, TikTok Shop, Temu, and more.",
   },
   twitter: {
     card: "summary_large_image",
     title: "Craftly — AI tools for e-commerce sellers",
     description:
-      "Write listings, posts, and replies for Etsy, Amazon, Shopify, TikTok Shop, and more.",
+      "Write listings, posts, and replies for 10 marketplaces — Etsy, Amazon, Shopify, eBay, TikTok Shop, Temu, and more.",
   },
   robots: {
     index: true,
@@ -101,7 +101,7 @@ export default function RootLayout({
               operatingSystem: "Web",
               url: siteUrl,
               description:
-                "AI tools for e-commerce sellers: write listings, posts, and replies for Etsy, Amazon, Shopify, TikTok Shop, and more.",
+                "AI tools for e-commerce sellers: write listings, posts, and replies for 10 marketplaces including Etsy, Amazon, Shopify, eBay, TikTok Shop, Temu, and Walmart.",
               offers: {
                 "@type": "Offer",
                 price: "0",

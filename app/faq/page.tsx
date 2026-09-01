@@ -8,8 +8,8 @@ type Faq = { q: string; a: string };
 
 const faqs: Faq[] = [
   {
-    q: "What is Etsy AI Toolkit?",
-    a: "A single workspace for marketplace sellers to write listings, reply to customers, research keywords, translate and optimize listings, price products, and generate product images — across Etsy, Amazon, Shopify, TikTok Shop, and more.",
+    q: "What is Craftly?",
+    a: "A single workspace for marketplace sellers to write listings, reply to customers, research keywords, translate and optimize listings, price products, and generate product images — across 10 marketplaces including Etsy, Amazon, Shopify, eBay, TikTok Shop, Temu, and Walmart.",
   },
   {
     q: "How do credits work?",
@@ -33,7 +33,7 @@ const faqs: Faq[] = [
   },
   {
     q: "Do you have an affiliate program?",
-    a: "Yes. Recommend Etsy AI Toolkit to your audience and earn 30% of every paid plan you refer (paid on their first month). There's a free tier to make it easy to try. See the Affiliates page to apply.",
+    a: "Yes. Recommend Craftly to your audience and earn 30% of every paid plan you refer (paid on their first month). There's a free tier to make it easy to try. See the Affiliates page to apply.",
   },
   {
     q: "What happens to my credits at the end of the month?",

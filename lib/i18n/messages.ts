@@ -3,7 +3,7 @@ export type NestedDict = { [key: string]: string | string[] | NestedDict }
 export const messages: Record<string, NestedDict> = {
   en: {
     nav: {
-      brand: 'Etsy AI Toolkit',
+      brand: 'Craftly',
       tools: 'Tools',
       howItWorks: 'How it works',
       pricing: 'Pricing',
@@ -18,7 +18,7 @@ export const messages: Record<string, NestedDict> = {
       heroTitleA: 'Made by you.',
       heroTitleB: 'Sold everywhere.',
       heroSub:
-        'One workspace to write listings, posts, and replies for Etsy, Amazon, Shopify, TikTok Shop, and more.',
+        'One workspace to write listings, posts, and replies for 10 marketplaces — Etsy, Amazon, Shopify, eBay, TikTok Shop, Temu, and more.',
       learnMore: 'See how it works >',
       startFree: 'Begin free >',
       listingGenerator: 'Listing Generator',
@@ -305,7 +305,7 @@ export const messages: Record<string, NestedDict> = {
 
   de: {
     nav: {
-      brand: 'Etsy AI Toolkit',
+      brand: 'Craftly',
       tools: 'Tools',
       howItWorks: 'So funktioniert es',
       pricing: 'Preise',
@@ -320,7 +320,7 @@ export const messages: Record<string, NestedDict> = {
       heroTitleA: 'Von dir gemacht.',
       heroTitleB: 'Überall verkauft.',
       heroSub:
-        'Ein Arbeitsplatz für Listings, Posts und Antworten — für Etsy, Amazon, Shopify, TikTok Shop und mehr.',
+        'Ein Arbeitsplatz für Listings, Posts und Antworten — für Etsy, Amazon, Shopify, eBay, TikTok Shop, Temu und mehr.',
       learnMore: 'So funktioniert es >',
       startFree: 'Kostenlos beginnen >',
       listingGenerator: 'Listing-Generator',
@@ -563,7 +563,7 @@ export const messages: Record<string, NestedDict> = {
 
   fr: {
     nav: {
-      brand: 'Etsy AI Toolkit',
+      brand: 'Craftly',
       tools: 'Outils',
       howItWorks: 'Comment ça marche',
       pricing: 'Tarifs',
@@ -578,7 +578,7 @@ export const messages: Record<string, NestedDict> = {
       heroTitleA: 'Fait par vous.',
       heroTitleB: 'Vendu partout.',
       heroSub:
-        'Un espace de travail pour rédiger annonces, posts et réponses — pour Etsy, Amazon, Shopify, TikTok Shop et plus encore.',
+        'Un espace de travail pour rédiger annonces, posts et réponses — pour Etsy, Amazon, Shopify, eBay, TikTok Shop, Temu et plus encore.',
       learnMore: 'Voir comment ça marche >',
       startFree: 'Commencer gratuitement >',
       listingGenerator: 'Générateur d’annonces',
@@ -826,7 +826,7 @@ export const messages: Record<string, NestedDict> = {
 
   es: {
     nav: {
-      brand: 'Etsy AI Toolkit',
+      brand: 'Craftly',
       tools: 'Herramientas',
       howItWorks: 'Cómo funciona',
       pricing: 'Precios',
@@ -841,7 +841,7 @@ export const messages: Record<string, NestedDict> = {
       heroTitleA: 'Hecho por ti.',
       heroTitleB: 'Vendido en todas partes.',
       heroSub:
-        'Un espacio para escribir anuncios, publicaciones y respuestas — para Etsy, Amazon, Shopify, TikTok Shop y más.',
+        'Un espacio para escribir anuncios, publicaciones y respuestas — para Etsy, Amazon, Shopify, eBay, TikTok Shop, Temu y más.',
       learnMore: 'Ver cómo funciona >',
       startFree: 'Empieza gratis >',
       listingGenerator: 'Generador de anuncios',
@@ -1085,7 +1085,7 @@ export const messages: Record<string, NestedDict> = {
 
   zh: {
     nav: {
-      brand: 'Etsy AI Toolkit',
+      brand: 'Craftly',
       tools: '工具',
       howItWorks: '工作原理',
       pricing: '定价',
@@ -1099,7 +1099,7 @@ export const messages: Record<string, NestedDict> = {
     home: {
       heroTitleA: '手艺，你来做。',
       heroTitleB: '生意，卖遍全球。',
-      heroSub: '一个工作台，搞定 Etsy、Amazon、Shopify、TikTok Shop 等平台的文案、帖子和回复。',
+      heroSub: '一个工作台，搞定 Etsy、Amazon、Shopify、eBay、TikTok Shop、Temu 等 10 个平台的文案、帖子和回复。',
       learnMore: '看看怎么做 >',
       startFree: '免费开始 >',
       listingGenerator: '商品文案生成器',
@@ -1382,7 +1382,7 @@ export const messages: Record<string, NestedDict> = {
 
   ja: {
     nav: {
-      brand: 'Etsy AI Toolkit',
+      brand: 'Craftly',
       tools: 'ツール',
       howItWorks: '仕組み',
       pricing: '料金',
@@ -1397,7 +1397,7 @@ export const messages: Record<string, NestedDict> = {
       heroTitleA: '作るのは、あなた。',
       heroTitleB: '売るのは、どこでも。',
       heroSub:
-        'Etsy、Amazon、Shopify、TikTok Shop などのリスティング・投稿・返信を、ひとつの作業場で。',
+        'Etsy、Amazon、Shopify、eBay、TikTok Shop、Temu など、10 のマーケットプレイスのリスティング・投稿・返信を、ひとつの作業場で。',
       learnMore: '仕組みを見る >',
       startFree: '無料で始める >',
       listingGenerator: 'リスティング生成',
@@ -1637,7 +1637,7 @@ export const messages: Record<string, NestedDict> = {
 
   it: {
     nav: {
-      brand: 'Etsy AI Toolkit',
+      brand: 'Craftly',
       tools: 'Strumenti',
       howItWorks: 'Come funziona',
       pricing: 'Prezzi',
@@ -1652,7 +1652,7 @@ export const messages: Record<string, NestedDict> = {
       heroTitleA: 'Fatto da te.',
       heroTitleB: 'Venduto ovunque.',
       heroSub:
-        'Un unico spazio per scrivere annunci, post e risposte — per Etsy, Amazon, Shopify, TikTok Shop e oltre.',
+        'Un unico spazio per scrivere annunci, post e risposte — per Etsy, Amazon, Shopify, eBay, TikTok Shop, Temu e oltre.',
       learnMore: 'Scopri come funziona >',
       startFree: 'Inizia gratis >',
       listingGenerator: 'Generatore di annunci',

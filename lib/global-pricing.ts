@@ -35,6 +35,9 @@ export const PLATFORM_FEES: PlatformFee[] = [
   { id: 'shopify', name: 'Shopify', feePct: 0.029, fixed: 0.3, note: 'Online card processing' },
   { id: 'ebay', name: 'eBay', feePct: 0.1325, fixed: 0.3, note: 'Final value fee + payment' },
   { id: 'tiktok', name: 'TikTok Shop', feePct: 0.08, fixed: 0.2, note: 'Commission fee' },
+  { id: 'temu', name: 'Temu', feePct: 0.1, fixed: 0.2, note: 'Commission + fulfillment (approx.)' },
+  { id: 'walmart', name: 'Walmart', feePct: 0.15, fixed: 0.3, note: 'Referral fee (typical category)' },
+  { id: 'google', name: 'Google Shopping', feePct: 0.06, fixed: 0, note: 'No commission — est. ad/feed cost' },
   { id: 'own', name: 'Own website', feePct: 0.029, fixed: 0.3, note: 'Payment gateway only' },
 ]
 

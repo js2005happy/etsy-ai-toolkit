@@ -56,7 +56,7 @@ export default function AffiliatesPage() {
               copilot for marketplace sellers
             </>
           }
-          subtitle="You have an audience of online sellers. We have the tools they use every day. Recommend Etsy AI Toolkit and earn 30% of every paid plan your readers buy."
+          subtitle="You have an audience of online sellers. We have the tools they use every day. Recommend Craftly and earn 30% of every paid plan your readers buy."
         />
 
         <section className="px-5 pb-16">

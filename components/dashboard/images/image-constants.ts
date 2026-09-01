@@ -1,11 +1,17 @@
-export const PLATFORMS = [
-  { label: 'Etsy Listing (1:1)', size: '1024x1024' },
-  { label: 'Instagram Post (1:1)', size: '1024x1024' },
-  { label: 'Pinterest Pin (2:3)', size: '1024x1536' },
-  { label: 'TikTok / Reels Cover (9:16)', size: '1024x1536' },
-  { label: 'YouTube Thumbnail (16:9)', size: '1536x1024' },
-  { label: 'Facebook Ad (4:5)', size: '1024x1536' },
-]
+import { PLATFORMS as MARKETPLACES } from '@/lib/platforms'
+
+// Product-image size presets, derived from the single source of truth in
+// lib/platforms. Every marketplace maps to the closest gpt-image-supported
+// canvas: square for 1:1 marketplaces, tall for portrait-first ones.
+export interface ImagePlatform {
+  label: string
+  size: string
+}
+
+export const PLATFORMS: ImagePlatform[] = MARKETPLACES.map((p) => ({
+  label: p.label,
+  size: p.imageH > p.imageW ? '1024x1536' : '1024x1024',
+}))
 
 export const STYLES = [
   'Studio product photography',

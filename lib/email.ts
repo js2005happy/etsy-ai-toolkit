@@ -33,13 +33,13 @@ function shell(inner: string): string {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#14141c;border:1px solid #26262f;border-radius:16px;overflow:hidden;">
             <tr>
               <td style="padding:32px;">
-                <div style="font-size:20px;font-weight:700;color:#ffffff;margin-bottom:20px;">Etsy AI Toolkit</div>
+                <div style="font-size:20px;font-weight:700;color:#ffffff;margin-bottom:20px;">Craftly</div>
                 ${inner}
               </td>
             </tr>
             <tr>
               <td style="padding:20px 32px;border-top:1px solid #26262f;color:#6b6b76;font-size:12px;line-height:1.6;">
-                You're receiving this because you signed up for Etsy AI Toolkit.
+                You're receiving this because you signed up for Craftly.
               </td>
             </tr>
           </table>
@@ -112,7 +112,7 @@ export async function sendWelcomeEmail(to: string): Promise<void> {
     <p style="margin:0;font-size:14px;color:#9a9aa5;line-height:1.6;">Generate listings, replies, keywords, translations and more. When you're ready for more volume and image generation, upgrade to Pro or Scale.</p>
     ${button(`${SITE_URL}/dashboard`, 'Open your dashboard')}
   `)
-  await send(to, 'Welcome to Etsy AI Toolkit', html)
+  await send(to, 'Welcome to Craftly', html)
 }
 
 export async function sendSubscriptionActiveEmail(to: string, tier: string): Promise<void> {

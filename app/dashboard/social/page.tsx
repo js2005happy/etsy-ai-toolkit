@@ -10,6 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Loader2, Copy, Check, Coins } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
+import { PLATFORMS } from '@/lib/platforms'
+
+const SOCIAL_PLATFORMS = PLATFORMS.filter((p) =>
+  ['instagram', 'pinterest', 'tiktok'].includes(p.id)
+)
 
 interface SocialPostOutput {
   caption: string
@@ -25,7 +30,7 @@ export default function SocialPage() {
 
   const [formData, setFormData] = useState({
     product_description: '',
-    platform: 'Instagram',
+    platform: 'instagram',
   })
 
   useEffect(() => {
@@ -135,9 +140,11 @@ export default function SocialPage() {
                     <SelectValue placeholder="Select platform" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Instagram">Instagram</SelectItem>
-                    <SelectItem value="Pinterest">Pinterest</SelectItem>
-                    <SelectItem value="TikTok">TikTok</SelectItem>
+                    {SOCIAL_PLATFORMS.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.label}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

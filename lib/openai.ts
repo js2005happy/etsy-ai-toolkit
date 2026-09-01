@@ -127,7 +127,8 @@ export async function generateSocialPost(input: SocialPostInput): Promise<Social
   if (process.env.USE_MOCK_AI === "true") {
     return { caption: "Check out this amazing product! Perfect for any occasion. #handmade #giftideas", hashtags: ["handmade","giftideas","smallbusiness","shopsmall","etsyfinds","homedecor","unique","supportsmallbusiness"] };
   }
-  const prompt = "You are a social media expert. Create a high-converting social media post for the following product description, specifically for " + input.platform + ".\n\nProduct description: " + input.product_description + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly two fields:\n1. \"caption\": a short, engaging caption (include emojis)\n2. \"hashtags\": an array of 8-10 relevant hashtags (without # symbol)";
+  const p = getPlatform(input.platform);
+  const prompt = "You are a social media expert. Create a high-converting social media post for the following product description, specifically for " + p.label + ". Match the platform's native voice: " + p.tone + "\n\nProduct description: " + input.product_description + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly two fields:\n1. \"caption\": a short, engaging caption (include emojis)\n2. \"hashtags\": an array of 8-10 relevant hashtags (without # symbol)";
   const content = await chat(prompt, { system: "You are a social media expert. Always return valid JSON.", json: true });
   return JSON.parse(content) as SocialPostOutput;
 }
