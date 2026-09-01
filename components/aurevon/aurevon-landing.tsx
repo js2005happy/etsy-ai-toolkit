@@ -192,6 +192,8 @@ export default function AurevonLanding() {
     },
   ]
 
+  const toolTitles = groups.flatMap((g) => g.tools.map((tool) => tool.title))
+
   const steps = [
     { n: '01', title: t('home.step1Title'), desc: t('home.step1Desc') },
     { n: '02', title: t('home.step2Title'), desc: t('home.step2Desc') },
@@ -368,7 +370,7 @@ export default function AurevonLanding() {
                 </a>
                 <a
                   href="/signup"
-                  className="rounded-full bg-[#1a1714] px-5 py-2 text-sm font-medium text-white transition hover:bg-[#33302c]"
+                  className="rounded-full bg-[#1a1714] px-5 py-2 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#33302c] hover:shadow-[0_10px_24px_-12px_rgba(26,23,20,0.5)]"
                 >
                   {t('pricing.startFree')}
                 </a>
@@ -428,17 +430,40 @@ export default function AurevonLanding() {
       )}
 
       {/* Hero */}
-      <section className="px-6 pb-20 pt-32 md:pb-28 md:pt-44">
-        <div className="mx-auto max-w-6xl">
+      <section className="relative px-6 pb-20 pt-32 md:pb-28 md:pt-44">
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute left-1/2 top-[-10rem] h-[34rem] w-[54rem] -translate-x-1/2 rounded-full bg-[#2f5d3f]/[0.07] blur-3xl" />
+          <div className="absolute left-1/2 top-[2rem] h-80 w-80 -translate-x-[70%] rounded-full bg-[#e9e5df]/70 blur-3xl" />
+        </div>
+        <div className="relative mx-auto max-w-6xl">
           <div className="mx-auto max-w-3xl text-center">
             <Reveal>
-              <p className="text-sm font-medium text-[#2f5d3f]">{t('home.platformsLabel')}</p>
+              <p className="inline-flex items-center gap-2 text-sm font-medium text-[#2f5d3f]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#2f5d3f]" />
+                {t('home.platformsLabel')}
+              </p>
             </Reveal>
             <Reveal delay={60}>
               <h1 className="mt-5 font-display text-5xl leading-[1.02] tracking-tight text-[#1a1714] sm:text-6xl md:text-7xl">
                 {t('home.heroTitleA')}
                 <br className="hidden sm:block" />
-                {t('home.heroTitleB')}
+                <span className="relative inline-block italic">
+                  {t('home.heroTitleB')}
+                  <svg
+                    className="absolute -bottom-2 left-0 w-full sm:-bottom-3"
+                    viewBox="0 0 320 14"
+                    fill="none"
+                    preserveAspectRatio="none"
+                    aria-hidden
+                  >
+                    <path
+                      d="M3 10 C 80 2, 170 2, 317 8"
+                      stroke="#2f5d3f"
+                      strokeWidth="4"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </span>
               </h1>
             </Reveal>
             <Reveal delay={120}>
@@ -450,7 +475,7 @@ export default function AurevonLanding() {
               <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
                 <Link
                   href="/signup"
-                  className="inline-flex h-12 items-center justify-center rounded-full bg-[#1a1714] px-8 text-sm font-medium text-white transition hover:bg-[#33302c]"
+                  className="inline-flex h-12 items-center justify-center rounded-full bg-[#1a1714] px-8 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#33302c] hover:shadow-[0_16px_32px_-14px_rgba(26,23,20,0.55)]"
                 >
                   {t('pricing.startFree')}
                   <ArrowRight className="ml-2 h-4 w-4" />
@@ -462,6 +487,9 @@ export default function AurevonLanding() {
                   {t('nav.howItWorks')}
                 </a>
               </div>
+              <p className="mt-8 -rotate-1 font-hand text-2xl text-[#2f5d3f]">
+                {t('home.handNote')}
+              </p>
             </Reveal>
           </div>
 
@@ -483,6 +511,24 @@ export default function AurevonLanding() {
               </span>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Outcome marquee */}
+      <section className="overflow-hidden bg-[#1a1714] py-5">
+        <div className="flex w-max animate-marquee items-center">
+          {[0, 1].map((copy) => (
+            <div key={copy} className="flex items-center" aria-hidden={copy === 1}>
+              {toolTitles.map((title, i) => (
+                <span key={i} className="flex items-center whitespace-nowrap">
+                  <span className="px-5 text-sm font-semibold uppercase tracking-[0.16em] text-[#fbfaf8]/75">
+                    {title}
+                  </span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#2f5d3f]" />
+                </span>
+              ))}
+            </div>
+          ))}
         </div>
       </section>
 
@@ -510,9 +556,11 @@ export default function AurevonLanding() {
               <Reveal key={goal.href} delay={i * 60} className="h-full">
                 <Link
                   href={goal.href}
-                  className="group flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-white p-7 transition hover:border-[#1a1714]/30 hover:shadow-[0_16px_40px_-24px_rgba(26,23,20,0.25)]"
+                  className="group flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:border-[#1a1714]/30 hover:shadow-[0_24px_50px_-28px_rgba(26,23,20,0.35)]"
                 >
-                  <goal.icon className="h-6 w-6 text-[#2f5d3f]" />
+                  <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#2f5d3f]/10 transition-colors duration-300 group-hover:bg-[#2f5d3f]">
+                    <goal.icon className="h-5 w-5 text-[#2f5d3f] transition-colors duration-300 group-hover:text-white" />
+                  </span>
                   <h3 className="mt-5 font-display text-xl text-[#1a1714]">{goal.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-[#6b6560]">{goal.desc}</p>
                   <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-medium text-[#1a1714]">
@@ -595,7 +643,7 @@ export default function AurevonLanding() {
           <div className="mt-14 grid gap-4 md:grid-cols-3">
             {steps.map((s, i) => (
               <Reveal key={s.n} delay={i * 60} className="h-full">
-                <div className="flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-white p-8">
+                <div className="flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-white p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#1a1714]/25 hover:shadow-[0_24px_50px_-28px_rgba(26,23,20,0.35)]">
                   <span className="font-display text-sm text-[#2f5d3f]">{s.n}</span>
                   <h3 className="mt-4 font-display text-2xl text-[#1a1714]">{s.title}</h3>
                   <p className="mt-3 text-base leading-relaxed text-[#6b6560]">{s.desc}</p>
@@ -628,7 +676,7 @@ export default function AurevonLanding() {
           <div className="mt-14 grid gap-4 md:grid-cols-3">
             {proof.map((item, i) => (
               <Reveal key={item.title} delay={i * 60} className="h-full">
-                <div className="flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-[#fbfaf8] p-8">
+                <div className="flex h-full flex-col rounded-2xl border border-[#e9e5df] bg-[#fbfaf8] p-8 transition-all duration-300 hover:-translate-y-1 hover:border-[#1a1714]/25 hover:shadow-[0_24px_50px_-28px_rgba(26,23,20,0.3)]">
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#2f5d3f]/10 text-sm font-semibold text-[#2f5d3f]">
                     {i + 1}
                   </span>
@@ -659,7 +707,7 @@ export default function AurevonLanding() {
           <Reveal delay={200}>
             <Link
               href="/signup"
-              className="mt-10 inline-flex h-12 items-center justify-center rounded-full bg-[#1a1714] px-8 text-sm font-medium text-white transition hover:bg-[#33302c]"
+              className="mt-10 inline-flex h-12 items-center justify-center rounded-full bg-[#1a1714] px-8 text-sm font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#33302c] hover:shadow-[0_16px_32px_-14px_rgba(26,23,20,0.55)]"
             >
               {t('pricing.startFree')}
               <ArrowRight className="ml-2 h-4 w-4" />
@@ -762,6 +810,8 @@ export default function AurevonLanding() {
           </div>
         </div>
       </footer>
+
+      <div aria-hidden className="pointer-events-none fixed inset-0 z-[1] film-grain opacity-[0.05]" />
     </div>
   )
 }
