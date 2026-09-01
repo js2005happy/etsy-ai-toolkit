@@ -14,10 +14,21 @@ const ETSY_SCOPES = 'listings_w listings_r shops_r'
 function getEtsyClient() {
   const apiKey = process.env.ETSY_API_KEY
   const redirectUri = process.env.ETSY_REDIRECT_URI
+  const sharedSecret = process.env.ETSY_SHARED_SECRET
   if (!apiKey || !redirectUri) {
     throw new Error('Etsy env vars not configured (ETSY_API_KEY / ETSY_REDIRECT_URI)')
   }
-  return { apiKey, redirectUri }
+  return { apiKey, redirectUri, sharedSecret }
+}
+
+// Etsy v3 requires x-api-key: <keystring>:<shared_secret> on every API request
+// (since 2026-01-18 the shared secret suffix is mandatory, not just keystring).
+function apiHeaders(accessToken: string): Record<string, string> {
+  const { apiKey, sharedSecret } = getEtsyClient()
+  return {
+    Authorization: `Bearer ${accessToken}`,
+    'x-api-key': sharedSecret ? `${apiKey}:${sharedSecret}` : apiKey,
+  }
 }
 
 function base64UrlEncode(buf: Buffer): string {
@@ -97,8 +108,10 @@ export interface EtsyShop {
 }
 
 export async function getUserShops(accessToken: string): Promise<EtsyShop[]> {
-  const res = await fetch(`${ETSY_API_BASE}/shops`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+  // Etsy v3 access tokens are "<user_id>.<token>"; the user id is the prefix.
+  const userId = accessToken.split('.')[0]
+  const res = await fetch(`${ETSY_API_BASE}/users/${userId}/shops`, {
+    headers: apiHeaders(accessToken),
   })
   if (!res.ok) {
     throw new Error(`Etsy getShops failed (${res.status})`)
@@ -110,7 +123,7 @@ export async function getUserShops(accessToken: string): Promise<EtsyShop[]> {
 
 async function getShippingProfileId(shopId: number, accessToken: string): Promise<number | null> {
   const res = await fetch(`${ETSY_API_BASE}/shops/${shopId}/shipping-profiles`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: apiHeaders(accessToken),
   })
   if (!res.ok) return null
   const data = await res.json()
@@ -141,7 +154,7 @@ function findLeafId(nodes: TaxNode[], predicate: (name: string) => boolean): num
 // then surface a clear error so the user can pass taxonomy_id explicitly.
 async function findTaxonomyId(title: string, accessToken: string): Promise<number | null> {
   const res = await fetch(`${ETSY_API_BASE}/seller-taxonomy/nodes?limit=100`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: apiHeaders(accessToken),
   })
   if (!res.ok) return null
   const data = await res.json()
@@ -201,7 +214,7 @@ export async function createListing(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
+      ...apiHeaders(accessToken),
     },
     body: JSON.stringify(body),
   })
@@ -218,7 +231,7 @@ export async function createListing(
       try {
         await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings/${listingId}/images`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+          headers: { 'Content-Type': 'application/json', ...apiHeaders(accessToken) },
           body: JSON.stringify({ image: src }),
         })
       } catch {
