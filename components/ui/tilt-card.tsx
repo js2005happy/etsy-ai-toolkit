@@ -91,11 +91,11 @@ export default function TiltCard({ href, icon, title, description }: TiltCardPro
           transformStyle: 'preserve-3d',
           transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
         }}
-        className="relative flex h-full flex-col rounded-xl border border-border bg-card p-8 transition-colors hover:border-primary/30"
+        className="relative flex h-full flex-col rounded-2xl border border-border bg-card p-8 transition-[border-color,box-shadow] duration-300 hover:border-primary/30 hover:shadow-hover"
       >
         {/* 图标层（浮起） */}
         <div
-          className="mb-8 flex h-12 w-12 items-center justify-center rounded-lg bg-secondary text-foreground transition-transform duration-100 ease-out"
+          className="mb-8 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform duration-100 ease-out"
           style={{ transform: 'translate3d(var(--icon-x), var(--icon-y), 24px)' }}
         >
           {icon}

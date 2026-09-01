@@ -194,85 +194,100 @@ export default function DashboardPage() {
       <div className="mx-auto max-w-6xl px-5 py-14 md:py-16">
         {/* Header */}
         <div className="mb-12">
-          <h1 className="text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
+          <p className="font-hand text-2xl text-primary">craftly</p>
+          <h1 className="mt-1 font-display text-4xl tracking-tight text-foreground md:text-5xl">
             {t('dashboard.welcomeBack')}
           </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
-            {t('dashboard.manageTools')}
-          </p>
+          <p className="mt-3 text-lg text-muted-foreground">{t('dashboard.manageTools')}</p>
         </div>
 
         {/* Credits */}
-        <div className="mb-14 rounded-xl border border-border bg-card p-8 md:p-10">
-          <div className="flex flex-col items-start justify-between gap-8 md:flex-row md:items-center">
-            <div className="flex items-center gap-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-secondary text-foreground">
-                <Coins className="h-7 w-7" />
+        <div className="relative mb-14 overflow-hidden rounded-3xl bg-primary p-8 text-primary-foreground md:p-12">
+          <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-28 -left-16 h-72 w-72 rounded-full bg-black/15 blur-3xl" />
+
+          <div className="relative flex flex-col items-start justify-between gap-10 md:flex-row md:items-center">
+            <div>
+              <div className="flex items-center gap-2 text-sm font-medium text-primary-foreground/70">
+                <Coins className="h-4 w-4" />
+                {t('dashboard.yourCredits')}
               </div>
-              <div>
-                <div className="text-sm font-normal text-muted-foreground">
-                  {t('dashboard.yourCredits')}
-                </div>
-                <div className="mt-1 flex items-baseline gap-2">
-                  <span className="text-4xl font-semibold tracking-tight text-foreground">
-                    {credits !== null ? credits : '…'}
-                  </span>
-                  {quota !== null && (
-                    <span className="text-lg text-muted-foreground">/ {quota}</span>
-                  )}
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {t('dashboard.creditsRemaining')}
-                </p>
+              <div className="mt-3 flex items-baseline gap-3">
+                <span className="font-display text-6xl leading-none tracking-tight md:text-7xl">
+                  {isPaid ? '∞' : credits !== null ? credits : '…'}
+                </span>
+                {!isPaid && quota !== null && (
+                  <span className="text-xl text-primary-foreground/60">/ {quota}</span>
+                )}
               </div>
+              <p className="mt-3 text-sm text-primary-foreground/70">
+                {isPaid ? t('dashboard.unlimitedGenerations') : t('dashboard.creditsRemaining')}
+              </p>
             </div>
 
-            {isPaid ? (
-              <Button
-                variant="outline"
-                className="rounded-full px-6 py-3 font-medium"
-                onClick={handleManageBilling}
-                disabled={isManaging}
-              >
-                {isManaging && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('dashboard.manageBilling')}
-              </Button>
-            ) : (
-              <div className="w-full max-w-xs">
-                <div className="mb-2 flex justify-between text-xs font-medium text-muted-foreground">
-                  <span>{t('dashboard.usageThisMonth')}</span>
-                  <span>
-                    {credits !== null ? credits : 0} / {quota ?? '—'}
-                  </span>
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all duration-500"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
+            <div className="flex w-full flex-col items-center gap-6 md:w-auto md:items-end">
+              {isPaid ? (
                 <Button
-                  className="mt-5 w-full rounded-full px-6 py-3 font-medium"
-                  onClick={handleUpgrade}
-                  disabled={isUpgrading}
+                  variant="outline"
+                  className="rounded-full border-white/30 bg-white/10 px-6 py-3 font-medium text-primary-foreground hover:bg-white/20"
+                  onClick={handleManageBilling}
+                  disabled={isManaging}
                 >
-                  {isUpgrading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t('dashboard.processing')}
-                    </>
-                  ) : (
-                    t('dashboard.upgradeToPro')
-                  )}
+                  {isManaging && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {t('dashboard.manageBilling')}
                 </Button>
-              </div>
-            )}
+              ) : (
+                <>
+                  <div className="relative h-28 w-28">
+                    <svg viewBox="0 0 112 112" className="h-full w-full -rotate-90">
+                      <circle
+                        cx="56"
+                        cy="56"
+                        r="48"
+                        fill="none"
+                        stroke="rgba(255,255,255,0.18)"
+                        strokeWidth="8"
+                      />
+                      <circle
+                        cx="56"
+                        cy="56"
+                        r="48"
+                        fill="none"
+                        stroke="rgba(255,255,255,0.95)"
+                        strokeWidth="8"
+                        strokeLinecap="round"
+                        strokeDasharray={2 * Math.PI * 48}
+                        strokeDashoffset={2 * Math.PI * 48 * (1 - progressPercentage / 100)}
+                        className="transition-[stroke-dashoffset] duration-700 ease-out"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="font-display text-2xl">{Math.round(progressPercentage)}%</span>
+                    </div>
+                  </div>
+                  <Button
+                    className="w-full rounded-full bg-white px-6 py-3 font-semibold text-primary hover:bg-white/90 md:w-auto"
+                    onClick={handleUpgrade}
+                    disabled={isUpgrading}
+                  >
+                    {isUpgrading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t('dashboard.processing')}
+                      </>
+                    ) : (
+                      t('dashboard.upgradeToPro')
+                    )}
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Tools */}
         <div className="mb-8 flex items-baseline justify-between">
-          <h2 className="text-2xl font-semibold tracking-tight text-foreground">
+          <h2 className="font-display text-2xl tracking-tight text-foreground">
             {t('dashboard.yourTools')}
           </h2>
           <span className="text-sm text-muted-foreground">{t('dashboard.nineToolsZero')}</span>
