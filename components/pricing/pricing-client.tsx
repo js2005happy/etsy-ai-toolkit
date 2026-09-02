@@ -68,6 +68,10 @@ export default function PricingClient({
 
   const handleSubscribe = useCallback(
     (tier: Tier) => {
+      if (!userId) {
+        window.location.href = '/signup'
+        return
+      }
       if (!paddle || !tier.priceId) return
       const priceId = tier.priceId[period]
       paddle.Checkout.open({
