@@ -35,6 +35,7 @@ export default function SiteFooter() {
             <Link href="/contact">{t("footer.contact")}</Link>
             <Link href="/privacy">{t("footer.privacy")}</Link>
             <Link href="/terms">{t("footer.terms")}</Link>
+            <Link href="/refund">{t("footer.refunds")}</Link>
           </div>
         </div>
         <div className="k-foot-bottom">
