@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/client'
 
 export default function ContactForm() {
+  const { t } = useI18n()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
@@ -52,37 +54,37 @@ export default function ContactForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">{t("marketing.contact.name")}</Label>
         <Input
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
+          placeholder={t("marketing.contact.namePh")}
           required
           autoComplete="name"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t("marketing.contact.email")}</Label>
         <Input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder={t("marketing.contact.emailPh")}
           required
           autoComplete="email"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="message">Message</Label>
+        <Label htmlFor="message">{t("marketing.contact.message")}</Label>
         <Textarea
           id="message"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="How can we help?"
+          placeholder={t("marketing.contact.messagePh")}
           rows={5}
           required
         />
@@ -90,12 +92,12 @@ export default function ContactForm() {
 
       {status === 'error' && (
         <p className="text-sm font-medium text-destructive">
-          Something went wrong. Please email us directly at js2005happy@gmail.com.
+          {t("marketing.contact.error")}
         </p>
       )}
       {status === 'sent' && (
         <p className="text-sm font-medium text-emerald-400">
-          Thanks — your message is on its way. We&apos;ll get back to you soon.
+          {t("marketing.contact.sent")}
         </p>
       )}
 
@@ -103,10 +105,10 @@ export default function ContactForm() {
         {status === 'sending' ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Sending…
+            {t("marketing.contact.sending")}
           </>
         ) : (
-          'Send message'
+          t("marketing.contact.send")
         )}
       </Button>
     </form>

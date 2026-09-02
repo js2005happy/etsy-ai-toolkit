@@ -10,8 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Copy, Check, Coins } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import PlatformSelect from '@/components/dashboard/platform-select'
+import { useI18n } from '@/lib/i18n/client'
 
 export default function BulletsPage() {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [result, setResult] = useState<string[]>([])
@@ -53,11 +55,11 @@ export default function BulletsPage() {
           count: parseInt(count, 10),
         }),
       })
-      if (res.status === 401) { setError('Please log in to use this tool.'); return }
-      if (res.status === 403) { setError('Insufficient credits. Please upgrade your plan.'); return }
+      if (res.status === 401) { setError(t('dashboardTools.common.logIn')); return }
+      if (res.status === 403) { setError(t('dashboardTools.common.insufficientCredits')); return }
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Something went wrong')
+        throw new Error(data.error || t('dashboardTools.common.somethingWrong'))
       }
       const data = await res.json()
       setResult(data.bullets || [])
@@ -80,13 +82,13 @@ export default function BulletsPage() {
       <CinematicBackground theme="listing" />
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold font-display text-foreground">Bullet Points</h1>
-          <p className="text-muted-foreground">Turn features into benefit-led bullet points that answer buyer objections.</p>
+          <h1 className="text-3xl font-bold font-display text-foreground">{t('dashboardTools.bullets.h1')}</h1>
+          <p className="text-muted-foreground">{t('dashboardTools.bullets.sub')}</p>
         </div>
         {credits !== null && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20">
             <Coins className="h-4 w-4" />
-            <span>{credits} Credits Left</span>
+            <span>{credits} {t('dashboardTools.common.creditsLeft')}</span>
           </div>
         )}
       </div>
@@ -94,33 +96,33 @@ export default function BulletsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle className="font-display">Product</CardTitle>
-            <CardDescription>Describe the product, pick your marketplace, and set how many bullets you need.</CardDescription>
+            <CardTitle className="font-display">{t('dashboardTools.bullets.product')}</CardTitle>
+            <CardDescription>{t('dashboardTools.bullets.productDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="product_name">Product Name</Label>
-                <Input id="product_name" placeholder="e.g. Handmade Ceramic Mug" value={productName} onChange={(e) => setProductName(e.target.value)} required />
+                <Label htmlFor="product_name">{t('dashboardTools.common.productName')}</Label>
+                <Input id="product_name" placeholder={t('dashboardTools.bullets.productNamePh')} value={productName} onChange={(e) => setProductName(e.target.value)} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="product_description">Product Description</Label>
-                <Textarea id="product_description" placeholder="e.g. 12oz stoneware mug, hand-glazed, dishwasher safe, comes in 4 colors" value={productDescription} onChange={(e) => setProductDescription(e.target.value)} required rows={4} />
+                <Label htmlFor="product_description">{t('dashboardTools.common.productDescription')}</Label>
+                <Textarea id="product_description" placeholder={t('dashboardTools.bullets.productDescPh')} value={productDescription} onChange={(e) => setProductDescription(e.target.value)} required rows={4} />
               </div>
               <PlatformSelect value={platform} onChange={setPlatform} />
               <div className="space-y-2">
-                <Label>Number of bullets</Label>
+                <Label>{t('dashboardTools.bullets.numberOfBullets')}</Label>
                 <Select value={count} onValueChange={setCount}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {[3, 4, 5, 6, 8].map((n) => (
-                      <SelectItem key={n} value={String(n)}>{n} bullets</SelectItem>
+                      <SelectItem key={n} value={String(n)}>{n} {t('dashboardTools.bullets.bulletsUnit')}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Writing bullets…</>) : 'Generate Bullets'}
+                {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('dashboardTools.bullets.writing')}</>) : t('dashboardTools.bullets.generate')}
               </Button>
             </form>
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
@@ -135,19 +137,19 @@ export default function BulletsPage() {
           )}
           {!result.length && !loading && !error && (
             <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
-              <p>Your bullets will appear here.</p>
+              <p>{t('dashboardTools.bullets.empty')}</p>
             </div>
           )}
           {loading && (
             <div className="h-full flex flex-col items-center justify-center p-12 text-center">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-lg font-medium">Writing your bullets…</p>
+              <p className="text-lg font-medium">{t('dashboardTools.bullets.loading')}</p>
             </div>
           )}
           {result.length > 0 && (
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium font-display">Bullet Points</CardTitle>
+                <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.bullets.result')}</CardTitle>
                 <Button variant="ghost" size="sm" onClick={copyAll}>
                   {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                 </Button>

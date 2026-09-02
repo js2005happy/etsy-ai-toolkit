@@ -6,6 +6,7 @@ import SiteFooter from "@/components/shared/site-footer";
 import Reveal from "@/components/shared/reveal";
 import CinematicBackground from "@/components/cinematic/cinematic-background";
 import FreeTitleGenerator from "@/components/tools/free-title-generator";
+import { getServerTranslations } from "@/lib/i18n/server";
 
 export const metadata: Metadata = {
   title: "Free Etsy Title Generator — SEO Titles & 13 Tags in Seconds | Craftly",
@@ -28,26 +29,28 @@ export const metadata: Metadata = {
   },
 };
 
-const faqs = [
-  {
-    q: "Is this Etsy title generator really free?",
-    a: "Yes. You get 3 free generations per day with no account, no card, and no email. The full Craftly toolkit (15 tools across Etsy, Amazon, TikTok Shop, and 7 more marketplaces) has a free plan with 10 credits per month.",
-  },
-  {
-    q: "What makes a good Etsy title?",
-    a: "Etsy weighs the first ~40 characters of your title most heavily in search. Front-load your strongest long-tail keyword phrase, stay under 140 characters, describe material and craft, and skip filler words like 'beautiful' or 'amazing' — buyers search specifics, not adjectives.",
-  },
-  {
-    q: "How do the 13 tags work?",
-    a: "Etsy gives every listing 13 tags, each up to 20 characters. Multi-word phrases buyers actually type (like 'personalized name necklace') beat single generic words ('necklace') — long-tail tags put you in smaller, more winnable search pools.",
-  },
-  {
-    q: "Is this tool affiliated with Etsy?",
-    a: "No. Craftly is an independent product and is not affiliated with or endorsed by Etsy, Inc.",
-  },
-];
-
 export default function FreeEtsyTitleGeneratorPage() {
+  const { t } = getServerTranslations();
+
+  const faqs = [
+    {
+      q: t("marketing.titleGen.faq1q"),
+      a: t("marketing.titleGen.faq1a"),
+    },
+    {
+      q: t("marketing.titleGen.faq2q"),
+      a: t("marketing.titleGen.faq2a"),
+    },
+    {
+      q: t("marketing.titleGen.faq3q"),
+      a: t("marketing.titleGen.faq3a"),
+    },
+    {
+      q: t("marketing.titleGen.faq4q"),
+      a: t("marketing.titleGen.faq4a"),
+    },
+  ];
+
   const faqJsonLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -57,6 +60,12 @@ export default function FreeEtsyTitleGeneratorPage() {
       acceptedAnswer: { "@type": "Answer", text: f.a },
     })),
   };
+
+  const steps = [
+    { step: "01", title: t("marketing.titleGen.step1t"), body: t("marketing.titleGen.step1b") },
+    { step: "02", title: t("marketing.titleGen.step2t"), body: t("marketing.titleGen.step2b") },
+    { step: "03", title: t("marketing.titleGen.step3t"), body: t("marketing.titleGen.step3b") },
+  ];
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -68,13 +77,14 @@ export default function FreeEtsyTitleGeneratorPage() {
       <Navbar />
       <main className="flex-1">
         <PageHero
-          eyebrow="Free tool"
+          eyebrow={t("marketing.titleGen.eyebrow")}
           title={
             <>
-              Free Etsy Title <span className="text-primary">Generator</span>
+              {t("marketing.titleGen.title1")}{" "}
+              <span className="text-primary">{t("marketing.titleGen.title2")}</span>
             </>
           }
-          subtitle="Describe what you made in plain words. Get an SEO-optimized title, all 13 tags, and a description preview — instantly, no signup."
+          subtitle={t("marketing.titleGen.subtitle")}
         />
 
         <FreeTitleGenerator />
@@ -83,40 +93,16 @@ export default function FreeEtsyTitleGeneratorPage() {
           <div className="mx-auto max-w-3xl">
             <Reveal>
               <h2 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-                Why your first 40 characters decide everything
+                {t("marketing.titleGen.sec1h")}
               </h2>
               <p className="mt-4 leading-relaxed text-muted-foreground">
-                Etsy&apos;s search algorithm reads your title from the left. The
-                keyword phrase you place in the first ~40 characters is what
-                your listing actually competes on — bury your main keyword at
-                position 80 and it may as well not be there. Every title this
-                generator writes puts your strongest long-tail phrase up
-                front, stays within Etsy&apos;s 140-character limit, and pairs
-                it with 13 multi-word tags (max 20 characters each) that drop
-                you into winnable search pools instead of oceans of
-                single-word competition.
+                {t("marketing.titleGen.sec1p")}
               </p>
             </Reveal>
 
             <Reveal delay={100}>
               <div className="mt-12 grid gap-6 md:grid-cols-3">
-                {[
-                  {
-                    step: "01",
-                    title: "Describe",
-                    body: "Type what you made like you'd text a friend. Material, style, what it is — no prompt engineering.",
-                  },
-                  {
-                    step: "02",
-                    title: "Generate",
-                    body: "Get a front-loaded SEO title, 13 buyer-searched tags, and a description preview in seconds.",
-                  },
-                  {
-                    step: "03",
-                    title: "Publish",
-                    body: "Copy, paste into Etsy, and get back to the workbench. Sign up free to unlock the full description.",
-                  },
-                ].map((s) => (
+                {steps.map((s) => (
                   <div
                     key={s.step}
                     className="rounded-xl border border-border bg-card p-6"
@@ -135,7 +121,7 @@ export default function FreeEtsyTitleGeneratorPage() {
 
             <Reveal delay={160}>
               <h2 className="mt-24 text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-                Frequently asked questions
+                {t("marketing.titleGen.faqH")}
               </h2>
               <div className="mt-6 space-y-4">
                 {faqs.map((f) => (
@@ -157,18 +143,16 @@ export default function FreeEtsyTitleGeneratorPage() {
             <Reveal delay={200}>
               <div className="mt-24 rounded-2xl border border-primary/40 bg-primary/5 p-10 text-center md:p-14">
                 <h2 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">
-                  The words take care of themselves.
+                  {t("marketing.titleGen.ctaH")}
                 </h2>
                 <p className="mx-auto mt-4 max-w-xl leading-relaxed text-muted-foreground">
-                  Craftly turns product notes into listings, buyer replies,
-                  social posts, and product images — for Etsy, Amazon, TikTok
-                  Shop, and 7 more marketplaces. Begin free. No card required.
+                  {t("marketing.titleGen.ctaP")}
                 </p>
                 <Link
                   href="/signup"
                   className="mt-8 inline-block rounded-full bg-primary px-10 py-3.5 font-medium text-primary-foreground hover:bg-primary/90"
                 >
-                  Start for free
+                  {t("marketing.titleGen.ctaBtn")}
                 </Link>
               </div>
             </Reveal>

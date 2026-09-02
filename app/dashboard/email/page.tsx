@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Copy, Check, Coins } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
+import { useI18n } from '@/lib/i18n/client'
 
 interface EmailResult {
   subject: string
@@ -17,15 +18,16 @@ interface EmailResult {
 }
 
 const EMAIL_TYPES = [
-  { id: 'welcome', label: 'Welcome' },
-  { id: 'abandoned_cart', label: 'Abandoned cart' },
-  { id: 'order_confirmation', label: 'Order confirmation' },
-  { id: 'shipping_update', label: 'Shipping update' },
-  { id: 'promotional', label: 'Promotional' },
-  { id: 'win_back', label: 'Win back' },
+  { id: 'welcome', labelKey: 'welcome' },
+  { id: 'abandoned_cart', labelKey: 'abandonedCart' },
+  { id: 'order_confirmation', labelKey: 'orderConfirmation' },
+  { id: 'shipping_update', labelKey: 'shippingUpdate' },
+  { id: 'promotional', labelKey: 'promotional' },
+  { id: 'win_back', labelKey: 'winBack' },
 ]
 
 export default function EmailPage() {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [result, setResult] = useState<EmailResult | null>(null)
@@ -61,11 +63,11 @@ export default function EmailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email_type: emailType, product_name: productName, product_description: productDescription, audience }),
       })
-      if (res.status === 401) { setError('Please log in to use this tool.'); return }
-      if (res.status === 403) { setError('Insufficient credits. Please upgrade your plan.'); return }
+      if (res.status === 401) { setError(t('dashboardTools.common.logIn')); return }
+      if (res.status === 403) { setError(t('dashboardTools.common.insufficientCredits')); return }
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Something went wrong')
+        throw new Error(data.error || t('dashboardTools.common.somethingWrong'))
       }
       const data = await res.json()
       setResult(data)
@@ -82,13 +84,13 @@ export default function EmailPage() {
       <CinematicBackground theme="messages" />
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold font-display text-foreground">Email Writer</h1>
-          <p className="text-muted-foreground">Write warm, human marketing emails for every stage of the buyer journey.</p>
+          <h1 className="text-3xl font-bold font-display text-foreground">{t('dashboardTools.email.h1')}</h1>
+          <p className="text-muted-foreground">{t('dashboardTools.email.sub')}</p>
         </div>
         {credits !== null && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20">
             <Coins className="h-4 w-4" />
-            <span>{credits} Credits Left</span>
+            <span>{credits} {t('dashboardTools.common.creditsLeft')}</span>
           </div>
         )}
       </div>
@@ -96,36 +98,36 @@ export default function EmailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle className="font-display">Email Brief</CardTitle>
-            <CardDescription>Pick the email type and describe the product.</CardDescription>
+            <CardTitle className="font-display">{t('dashboardTools.email.brief')}</CardTitle>
+            <CardDescription>{t('dashboardTools.email.briefDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label>Email Type</Label>
+                <Label>{t('dashboardTools.email.emailType')}</Label>
                 <Select value={emailType} onValueChange={setEmailType}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {EMAIL_TYPES.map((t) => (
-                      <SelectItem key={t.id} value={t.id}>{t.label}</SelectItem>
+                    {EMAIL_TYPES.map((et) => (
+                      <SelectItem key={et.id} value={et.id}>{t(`dashboardTools.email.${et.labelKey}`)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="product_name">Product Name</Label>
-                <Input id="product_name" placeholder="e.g. Handmade Ceramic Mug" value={productName} onChange={(e) => setProductName(e.target.value)} required />
+                <Label htmlFor="product_name">{t('dashboardTools.common.productName')}</Label>
+                <Input id="product_name" placeholder={t('dashboardTools.email.productNamePh')} value={productName} onChange={(e) => setProductName(e.target.value)} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="product_description">Product Description</Label>
-                <Textarea id="product_description" placeholder="What are you selling?" value={productDescription} onChange={(e) => setProductDescription(e.target.value)} required rows={3} />
+                <Label htmlFor="product_description">{t('dashboardTools.common.productDescription')}</Label>
+                <Textarea id="product_description" placeholder={t('dashboardTools.email.productDescPh')} value={productDescription} onChange={(e) => setProductDescription(e.target.value)} required rows={3} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="audience">Audience (optional)</Label>
-                <Input id="audience" placeholder="e.g. past customers, newsletter subscribers" value={audience} onChange={(e) => setAudience(e.target.value)} />
+                <Label htmlFor="audience">{t('dashboardTools.email.audience')}</Label>
+                <Input id="audience" placeholder={t('dashboardTools.email.audiencePh')} value={audience} onChange={(e) => setAudience(e.target.value)} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Writing email…</>) : 'Write Email'}
+                {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('dashboardTools.email.writing')}</>) : t('dashboardTools.email.generate')}
               </Button>
             </form>
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
@@ -140,20 +142,20 @@ export default function EmailPage() {
           )}
           {!result && !loading && !error && (
             <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
-              <p>Your email will appear here.</p>
+              <p>{t('dashboardTools.email.empty')}</p>
             </div>
           )}
           {loading && (
             <div className="h-full flex flex-col items-center justify-center p-12 text-center">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-lg font-medium">Writing your email…</p>
+              <p className="text-lg font-medium">{t('dashboardTools.email.loading')}</p>
             </div>
           )}
           {result && (
             <Card>
               <CardHeader className="space-y-0 pb-2">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium font-display">Subject</CardTitle>
+                  <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.email.subject')}</CardTitle>
                   <Button variant="ghost" size="sm" onClick={() => handleCopy(result.subject, 'subject')}>
                     {copiedField === 'subject' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>

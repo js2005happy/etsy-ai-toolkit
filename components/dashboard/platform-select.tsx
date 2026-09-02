@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { PLATFORMS } from '@/lib/platforms'
+import { useI18n } from '@/lib/i18n/client'
 
 interface PlatformSelectProps {
   value: string
@@ -16,12 +17,13 @@ interface PlatformSelectProps {
 }
 
 export default function PlatformSelect({ value, onChange }: PlatformSelectProps) {
+  const { t } = useI18n()
   return (
     <div className="space-y-2">
-      <Label htmlFor="platform">Marketplace</Label>
+      <Label htmlFor="platform">{t('dashboardTools.common.marketplace')}</Label>
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger id="platform" className="w-full">
-          <SelectValue placeholder="Select marketplace" />
+          <SelectValue placeholder={t('dashboardTools.common.selectMarketplace')} />
         </SelectTrigger>
         <SelectContent>
           {PLATFORMS.map((p) => (

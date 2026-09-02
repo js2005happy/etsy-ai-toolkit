@@ -2,13 +2,16 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import type { ProductImageInput, ProductImageOutput } from '@/lib/openai'
+import { useI18n } from '@/lib/i18n/client'
 
 export type { ProductImageInput, ProductImageOutput }
 
 export function useImageGeneration() {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(false)
   const [images, setImages] = useState<ProductImageOutput[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [creditError, setCreditError] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
 
   const refreshCredits = useCallback(async () => {
@@ -31,6 +34,7 @@ export function useImageGeneration() {
     async (items: ProductImageInput[]): Promise<ProductImageOutput[]> => {
       setLoading(true)
       setError(null)
+      setCreditError(false)
       setImages([])
       try {
         const response = await fetch('/api/generate-images', {
@@ -40,20 +44,17 @@ export function useImageGeneration() {
         })
 
         if (response.status === 401) {
-          setError('Please log in to use this tool.')
+          setError(t('dashboardTools.common.logIn'))
           return []
         }
         if (response.status === 403) {
-          const data = await response.json().catch(() => null)
-          setError(
-            data?.error ||
-              'Insufficient image credits. Please upgrade your plan to generate more images.'
-          )
+          setCreditError(true)
+          setError(t('dashboardTools.common.insufficientCredits'))
           return []
         }
         if (!response.ok) {
           const data = await response.json().catch(() => null)
-          throw new Error(data?.error || 'Something went wrong')
+          throw new Error(data?.error || t('dashboardTools.common.somethingWrong'))
         }
 
         const data = await response.json()
@@ -68,8 +69,8 @@ export function useImageGeneration() {
         setLoading(false)
       }
     },
-    [refreshCredits]
+    [refreshCredits, t]
   )
 
-  return { loading, images, error, credits, generate }
+  return { loading, images, error, creditError, credits, generate }
 }

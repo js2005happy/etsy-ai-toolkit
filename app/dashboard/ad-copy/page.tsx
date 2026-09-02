@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Copy, Check, Coins } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import PlatformSelect from '@/components/dashboard/platform-select'
+import { useI18n } from '@/lib/i18n/client'
 
 interface AdCopyResult {
   headlines: string[]
@@ -18,9 +19,16 @@ interface AdCopyResult {
   cta: string
 }
 
-const GOALS = ['conversions', 'traffic', 'brand_awareness', 'engagement', 'sales']
+const GOALS = [
+  { id: 'conversions', labelKey: 'goalConversions' },
+  { id: 'traffic', labelKey: 'goalTraffic' },
+  { id: 'brand_awareness', labelKey: 'goalBrandAwareness' },
+  { id: 'engagement', labelKey: 'goalEngagement' },
+  { id: 'sales', labelKey: 'goalSales' },
+]
 
 export default function AdCopyPage() {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [result, setResult] = useState<AdCopyResult | null>(null)
@@ -57,11 +65,11 @@ export default function AdCopyPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ product_name: productName, product_description: productDescription, platform, goal, audience }),
       })
-      if (res.status === 401) { setError('Please log in to use this tool.'); return }
-      if (res.status === 403) { setError('Insufficient credits. Please upgrade your plan.'); return }
+      if (res.status === 401) { setError(t('dashboardTools.common.logIn')); return }
+      if (res.status === 403) { setError(t('dashboardTools.common.insufficientCredits')); return }
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Something went wrong')
+        throw new Error(data.error || t('dashboardTools.common.somethingWrong'))
       }
       const data = await res.json()
       setResult(data)
@@ -78,13 +86,13 @@ export default function AdCopyPage() {
       <CinematicBackground theme="social" />
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold font-display text-foreground">Ad Copy</h1>
-          <p className="text-muted-foreground">High-converting ad copy for paid social and marketplaces.</p>
+          <h1 className="text-3xl font-bold font-display text-foreground">{t('dashboardTools.adCopy.h1')}</h1>
+          <p className="text-muted-foreground">{t('dashboardTools.adCopy.sub')}</p>
         </div>
         {credits !== null && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20">
             <Coins className="h-4 w-4" />
-            <span>{credits} Credits Left</span>
+            <span>{credits} {t('dashboardTools.common.creditsLeft')}</span>
           </div>
         )}
       </div>
@@ -92,37 +100,37 @@ export default function AdCopyPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle className="font-display">Ad Brief</CardTitle>
-            <CardDescription>Tell us what you're selling and the goal of the ad.</CardDescription>
+            <CardTitle className="font-display">{t('dashboardTools.adCopy.brief')}</CardTitle>
+            <CardDescription>{t('dashboardTools.adCopy.briefDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="product_name">Product Name</Label>
-                <Input id="product_name" placeholder="e.g. Handmade Ceramic Mug" value={productName} onChange={(e) => setProductName(e.target.value)} required />
+                <Label htmlFor="product_name">{t('dashboardTools.common.productName')}</Label>
+                <Input id="product_name" placeholder={t('dashboardTools.adCopy.productNamePh')} value={productName} onChange={(e) => setProductName(e.target.value)} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="product_description">Product Description</Label>
-                <Textarea id="product_description" placeholder="What makes it worth buying?" value={productDescription} onChange={(e) => setProductDescription(e.target.value)} required rows={3} />
+                <Label htmlFor="product_description">{t('dashboardTools.common.productDescription')}</Label>
+                <Textarea id="product_description" placeholder={t('dashboardTools.adCopy.productDescPh')} value={productDescription} onChange={(e) => setProductDescription(e.target.value)} required rows={3} />
               </div>
               <PlatformSelect value={platform} onChange={setPlatform} />
               <div className="space-y-2">
-                <Label>Campaign Goal</Label>
+                <Label>{t('dashboardTools.adCopy.campaignGoal')}</Label>
                 <Select value={goal} onValueChange={setGoal}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {GOALS.map((g) => (
-                      <SelectItem key={g} value={g}>{g.replace(/_/g, ' ')}</SelectItem>
+                      <SelectItem key={g.id} value={g.id}>{t(`dashboardTools.adCopy.${g.labelKey}`)}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="audience">Target Audience (optional)</Label>
-                <Input id="audience" placeholder="e.g. women 25-40, gift shoppers" value={audience} onChange={(e) => setAudience(e.target.value)} />
+                <Label htmlFor="audience">{t('dashboardTools.adCopy.targetAudience')}</Label>
+                <Input id="audience" placeholder={t('dashboardTools.adCopy.targetAudiencePh')} value={audience} onChange={(e) => setAudience(e.target.value)} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Writing ad…</>) : 'Generate Ad Copy'}
+                {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('dashboardTools.adCopy.writing')}</>) : t('dashboardTools.adCopy.generate')}
               </Button>
             </form>
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
@@ -137,20 +145,20 @@ export default function AdCopyPage() {
           )}
           {!result && !loading && !error && (
             <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
-              <p>Your ad copy will appear here.</p>
+              <p>{t('dashboardTools.adCopy.empty')}</p>
             </div>
           )}
           {loading && (
             <div className="h-full flex flex-col items-center justify-center p-12 text-center">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-lg font-medium">Writing your ad…</p>
+              <p className="text-lg font-medium">{t('dashboardTools.adCopy.loading')}</p>
             </div>
           )}
           {result && (
             <div className="space-y-4">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium font-display">Headlines</CardTitle>
+                  <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.adCopy.headlines')}</CardTitle>
                   <Button variant="ghost" size="sm" onClick={() => handleCopy(result.headlines.join('\n'), 'headlines')}>
                     {copiedField === 'headlines' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
@@ -165,7 +173,7 @@ export default function AdCopyPage() {
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium font-display">Primary Text</CardTitle>
+                  <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.adCopy.primaryText')}</CardTitle>
                   <Button variant="ghost" size="sm" onClick={() => handleCopy(result.primary_text, 'primary')}>
                     {copiedField === 'primary' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
@@ -174,7 +182,7 @@ export default function AdCopyPage() {
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium font-display">Description & CTA</CardTitle>
+                  <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.adCopy.descCta')}</CardTitle>
                   <Button variant="ghost" size="sm" onClick={() => handleCopy(result.description + '\n' + result.cta, 'desc')}>
                     {copiedField === 'desc' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>

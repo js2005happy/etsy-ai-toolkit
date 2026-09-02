@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CinematicBackground from '@/components/cinematic/cinematic-background';
 import PlatformSelect from '@/components/dashboard/platform-select';
+import { useI18n } from '@/lib/i18n/client';
 
 const LANGUAGES = ['German', 'French', 'Spanish', 'Italian', 'Japanese', 'Dutch', 'Portuguese'];
 
@@ -40,6 +41,7 @@ function compressImage(file: File, maxDim = 1024): Promise<string> {
 }
 
 export default function TranslatePage() {
+  const { t } = useI18n();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [mode, setMode] = useState<'text' | 'image'>('text');
@@ -77,7 +79,7 @@ export default function TranslatePage() {
       setImagePreview(dataUrl);
       setError('');
     } catch {
-      setError('Failed to process image.');
+      setError(t('dashboardTools.translate.failedProcessImage'));
     }
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -99,10 +101,10 @@ export default function TranslatePage() {
         body: JSON.stringify(payload),
       });
       if (res.status === 401) { router.push('/login'); return; }
-      if (res.status === 403) { setError('You have insufficient credits. Please upgrade.'); return; }
+      if (res.status === 403) { setError(t('dashboardTools.common.insufficientCredits')); return; }
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || 'Something went wrong.');
+        setError(data.error || t('dashboardTools.common.somethingWrong'));
         return;
       }
       const data = await res.json();
@@ -110,14 +112,14 @@ export default function TranslatePage() {
       if (data.extracted_text) setExtractedText(data.extracted_text);
       fetchCredits();
     } catch (err: any) {
-      setError(err.message || 'Network error');
+      setError(err.message || t('dashboardTools.common.networkError'));
     } finally {
       setLoading(false);
     }
   };
 
-  const copyToClipboard = (t: string) => {
-    navigator.clipboard.writeText(t);
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
   };
 
   return (
@@ -125,17 +127,17 @@ export default function TranslatePage() {
       <CinematicBackground theme="translate" />
       <div className="mx-auto max-w-3xl px-4">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold text-foreground">Listing Translator</h1>
-          <p className="mt-2 text-muted-foreground">Translate your listing text or an image poster into multiple languages.</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">{t('dashboardTools.translate.h1')}</h1>
+          <p className="mt-2 text-muted-foreground">{t('dashboardTools.translate.sub')}</p>
           {credits !== null && (
-            <p className="mt-2 text-sm text-muted-foreground">{credits} Credits Left</p>
+            <p className="mt-2 text-sm text-muted-foreground">{credits} {t('dashboardTools.common.creditsLeft')}</p>
           )}
         </div>
 
         <Card className="mb-8 rounded-xl border-border bg-card p-6">
           <CardHeader className="p-0">
-            <CardTitle>Translation Details</CardTitle>
-            <CardDescription>Enter text or upload an image, then choose a target language.</CardDescription>
+            <CardTitle>{t('dashboardTools.translate.details')}</CardTitle>
+            <CardDescription>{t('dashboardTools.translate.detailsDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="p-0 mt-4">
             <div className="mb-5 flex gap-2">
@@ -144,32 +146,32 @@ export default function TranslatePage() {
                 onClick={() => setMode('text')}
                 className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${mode === 'text' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
               >
-                Text
+                {t('dashboardTools.translate.text')}
               </button>
               <button
                 type="button"
                 onClick={() => setMode('image')}
                 className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${mode === 'image' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
               >
-                Image poster
+                {t('dashboardTools.translate.imagePoster')}
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {mode === 'text' ? (
                 <div>
-                  <Label htmlFor="text">Text to Translate</Label>
+                  <Label htmlFor="text">{t('dashboardTools.translate.textToTranslate')}</Label>
                   <Textarea
                     id="text"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Paste your listing title, description, or tags..."
+                    placeholder={t('dashboardTools.translate.textToTranslatePh')}
                     required
                   />
                 </div>
               ) : (
                 <div>
-                  <Label>Poster image</Label>
+                  <Label>{t('dashboardTools.translate.posterImage')}</Label>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -180,7 +182,7 @@ export default function TranslatePage() {
                   {imagePreview && (
                     <div className="mt-3 overflow-hidden rounded-lg border border-border">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={imagePreview} alt="Poster preview" className="max-h-64 w-full bg-secondary/50 object-contain" />
+                      <img src={imagePreview} alt={t('dashboardTools.translate.posterPreview')} className="max-h-64 w-full bg-secondary/50 object-contain" />
                     </div>
                   )}
                 </div>
@@ -188,9 +190,9 @@ export default function TranslatePage() {
 
               {mode === 'text' && <PlatformSelect value={platform} onChange={setPlatform} />}
               <div>
-                <Label htmlFor="target_language">Target Language</Label>
+                <Label htmlFor="target_language">{t('dashboardTools.translate.targetLanguage')}</Label>
                 <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                  <SelectTrigger><SelectValue placeholder="Select language" /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('dashboardTools.translate.selectLanguage')} /></SelectTrigger>
                   <SelectContent>
                     {LANGUAGES.map((l) => (
                       <SelectItem key={l} value={l}>{l}</SelectItem>
@@ -204,7 +206,7 @@ export default function TranslatePage() {
                 disabled={loading || (mode === 'image' && !image)}
                 className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
               >
-                {loading ? 'Translating...' : 'Translate'}
+                {loading ? t('dashboardTools.translate.translating') : t('dashboardTools.translate.translate')}
               </Button>
             </form>
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
@@ -213,7 +215,7 @@ export default function TranslatePage() {
 
         {extractedText && (
           <Card className="mb-4 rounded-xl border-border bg-card p-6">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Extracted text</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('dashboardTools.translate.extractedText')}</p>
             <p className="text-sm text-foreground whitespace-pre-wrap">{extractedText}</p>
           </Card>
         )}
@@ -222,7 +224,7 @@ export default function TranslatePage() {
           <Card className="rounded-xl border-border bg-card p-6">
             <div className="flex justify-between items-start">
               <p className="text-sm text-foreground whitespace-pre-wrap">{translatedText}</p>
-              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(translatedText)} className="ml-2">Copy</Button>
+              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(translatedText)} className="ml-2">{t('dashboardTools.common.copy')}</Button>
             </div>
           </Card>
         )}

@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Loader2, Copy, Check, Coins } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import PlatformSelect from '@/components/dashboard/platform-select'
+import { useI18n } from '@/lib/i18n/client'
 
 interface ListingResult {
   title: string
@@ -19,10 +20,12 @@ interface ListingResult {
 }
 
 export default function ListingPage() {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [result, setResult] = useState<ListingResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [creditError, setCreditError] = useState(false)
   const [copiedField, setCopiedField] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
@@ -58,6 +61,7 @@ export default function ListingPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setCreditError(false)
     setResult(null)
 
     try {
@@ -68,21 +72,22 @@ export default function ListingPage() {
       })
 
       if (response.status === 401) {
-        setError('Please log in to use this tool.')
+        setError(t('dashboardTools.common.logIn'))
         return
       }
       if (response.status === 403) {
-        setError('Insufficient credits. Please upgrade your plan to generate more listings.')
+        setCreditError(true)
+        setError(t('dashboardTools.common.insufficientCredits'))
         return
       }
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Something went wrong')
+        throw new Error(data.error || t('dashboardTools.common.somethingWrong'))
       }
 
       const data = await response.json()
       setResult(data)
-      
+
       const res = await fetch('/api/user/credits')
       if (res.ok) {
         const creditData = await res.json()
@@ -100,13 +105,13 @@ export default function ListingPage() {
       <CinematicBackground theme="listing" />
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold font-display">Etsy Listing Generator</h1>
-          <p className="text-muted-foreground">Generate SEO-optimized titles, descriptions, and tags for your products.</p>
+          <h1 className="text-3xl font-bold font-display">{t('dashboardTools.listing.h1')}</h1>
+          <p className="text-muted-foreground">{t('dashboardTools.listing.sub')}</p>
         </div>
         {credits !== null && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20">
             <Coins className="h-4 w-4" />
-            <span>{credits} Credits Left</span>
+            <span>{credits} {t('dashboardTools.common.creditsLeft')}</span>
           </div>
         )}
       </div>
@@ -114,46 +119,46 @@ export default function ListingPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle className="font-display">Product Details</CardTitle>
-            <CardDescription>Fill in the information below to generate your listing.</CardDescription>
+            <CardTitle className="font-display">{t('dashboardTools.listing.details')}</CardTitle>
+            <CardDescription>{t('dashboardTools.listing.detailsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="product_name">Product Name</Label>
-                <Input 
-                  id="product_name" 
-                  placeholder="e.g. Handmade Ceramic Mug" 
+                <Label htmlFor="product_name">{t('dashboardTools.common.productName')}</Label>
+                <Input
+                  id="product_name"
+                  placeholder={t('dashboardTools.listing.productNamePh')}
                   value={formData.product_name}
                   onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="product_type">Product Type</Label>
-                <Input 
-                  id="product_type" 
-                  placeholder="e.g. Kitchenware" 
+                <Label htmlFor="product_type">{t('dashboardTools.common.productType')}</Label>
+                <Input
+                  id="product_type"
+                  placeholder={t('dashboardTools.listing.productTypePh')}
                   value={formData.product_type}
                   onChange={(e) => setFormData({ ...formData, product_type: e.target.value })}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="material">Material</Label>
-                <Input 
-                  id="material" 
-                  placeholder="e.g. Stoneware Clay" 
+                <Label htmlFor="material">{t('dashboardTools.common.material')}</Label>
+                <Input
+                  id="material"
+                  placeholder={t('dashboardTools.listing.materialPh')}
                   value={formData.material}
                   onChange={(e) => setFormData({ ...formData, material: e.target.value })}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="style">Style</Label>
-                <Input 
-                  id="style" 
-                  placeholder="e.g. Minimalist, Boho" 
+                <Label htmlFor="style">{t('dashboardTools.common.style')}</Label>
+                <Input
+                  id="style"
+                  placeholder={t('dashboardTools.listing.stylePh')}
                   value={formData.style}
                   onChange={(e) => setFormData({ ...formData, style: e.target.value })}
                   required
@@ -164,10 +169,10 @@ export default function ListingPage() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
+                    {t('dashboardTools.listing.generating')}
                   </>
                 ) : (
-                  'Generate Listing'
+                  t('dashboardTools.listing.generate')
                 )}
               </Button>
             </form>
@@ -179,12 +184,12 @@ export default function ListingPage() {
             <Card className="border-destructive bg-destructive/10">
               <CardContent className="pt-6">
                 <p className="text-destructive font-medium">{error}</p>
-                {error.includes('credits') && (
+                {creditError && (
                   <Button variant="link" className="p-0 h-auto text-destructive mt-2" asChild>
-  <Link href="/pricing">
-    Upgrade Plan &rarr;
-  </Link>
-</Button>
+                    <Link href="/pricing">
+                      {t('dashboardTools.common.upgradePlan')} &rarr;
+                    </Link>
+                  </Button>
                 )}
               </CardContent>
             </Card>
@@ -192,32 +197,32 @@ export default function ListingPage() {
 
           {!result && !loading && !error && (
             <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
-              <p>Fill out the form and click generate to see the magic!</p>
+              <p>{t('dashboardTools.listing.empty')}</p>
             </div>
           )}
 
           {loading && (
             <div className="h-full flex flex-col items-center justify-center p-12 text-center">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-lg font-medium">AI is crafting your listing...</p>
+              <p className="text-lg font-medium">{t('dashboardTools.listing.loading')}</p>
             </div>
           )}
 
           {result && (
             <Tabs defaultValue="title" className="w-full">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="title">Title</TabsTrigger>
-                <TabsTrigger value="description">Description</TabsTrigger>
-                <TabsTrigger value="tags">Tags</TabsTrigger>
+                <TabsTrigger value="title">{t('dashboardTools.listing.titleTab')}</TabsTrigger>
+                <TabsTrigger value="description">{t('dashboardTools.listing.descTab')}</TabsTrigger>
+                <TabsTrigger value="tags">{t('dashboardTools.listing.tagsTab')}</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="title">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium font-display">Optimized Title</CardTitle>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.listing.optTitle')}</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleCopy(result.title, 'title')}
                     >
                       {copiedField === 'title' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -232,10 +237,10 @@ export default function ListingPage() {
               <TabsContent value="description">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium font-display">Engaging Description</CardTitle>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.listing.optDesc')}</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleCopy(result.description, 'description')}
                     >
                       {copiedField === 'description' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -252,10 +257,10 @@ export default function ListingPage() {
               <TabsContent value="tags">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium font-display">SEO Tags</CardTitle>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
+                    <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.listing.optTags')}</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleCopy(result.tags.join(', '), 'tags')}
                     >
                       {copiedField === 'tags' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}

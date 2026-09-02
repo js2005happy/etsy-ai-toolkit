@@ -9,8 +9,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CinematicBackground from '@/components/cinematic/cinematic-background';
 import PlatformSelect from '@/components/dashboard/platform-select';
+import { useI18n } from '@/lib/i18n/client';
 
 export default function OptimizerPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const [currentTitle, setCurrentTitle] = useState('');
   const [currentDescription, setCurrentDescription] = useState('');
@@ -47,17 +49,17 @@ export default function OptimizerPage() {
         body: JSON.stringify({ current_title: currentTitle, current_description: currentDescription, current_tags: currentTags, platform }),
       });
       if (res.status === 401) { router.push('/login'); return; }
-      if (res.status === 403) { setError('You have insufficient credits. Please upgrade.'); return; }
+      if (res.status === 403) { setError(t('dashboardTools.common.insufficientCredits')); return; }
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || 'Something went wrong.');
+        setError(data.error || t('dashboardTools.common.somethingWrong'));
         return;
       }
       const data = await res.json();
       setResult(data);
       fetchCredits();
     } catch (err: any) {
-      setError(err.message || 'Network error');
+      setError(err.message || t('dashboardTools.common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -72,50 +74,50 @@ export default function OptimizerPage() {
       <CinematicBackground theme="optimizer" />
       <div className="mx-auto max-w-4xl px-4">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold text-foreground">Listing Optimizer</h1>
-          <p className="mt-2 text-muted-foreground">Improve your existing Etsy listing for better SEO.</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">{t('dashboardTools.optimizer.h1')}</h1>
+          <p className="mt-2 text-muted-foreground">{t('dashboardTools.optimizer.sub')}</p>
           {credits !== null && (
-            <p className="mt-2 text-sm text-muted-foreground">{credits} Credits Left</p>
+            <p className="mt-2 text-sm text-muted-foreground">{credits} {t('dashboardTools.common.creditsLeft')}</p>
           )}
         </div>
 
         <Card className="mb-8 rounded-xl border-border bg-card p-6">
           <CardHeader className="p-0">
-            <CardTitle>Current Listing</CardTitle>
-            <CardDescription>Paste any part of your listing. Leave blank if not available.</CardDescription>
+            <CardTitle>{t('dashboardTools.optimizer.currentListing')}</CardTitle>
+            <CardDescription>{t('dashboardTools.optimizer.currentListingDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="p-0 mt-4">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="current_title">Current Title (optional)</Label>
+                <Label htmlFor="current_title">{t('dashboardTools.optimizer.currentTitle')}</Label>
                 <Input
                   id="current_title"
                   value={currentTitle}
                   onChange={(e) => setCurrentTitle(e.target.value)}
-                  placeholder="e.g. Blue ceramic mug, handmade coffee cup"
+                  placeholder={t('dashboardTools.optimizer.currentTitlePh')}
                 />
               </div>
               <div>
-                <Label htmlFor="current_description">Current Description (optional)</Label>
+                <Label htmlFor="current_description">{t('dashboardTools.optimizer.currentDesc')}</Label>
                 <Textarea
                   id="current_description"
                   value={currentDescription}
                   onChange={(e) => setCurrentDescription(e.target.value)}
-                  placeholder="Paste your current description..."
+                  placeholder={t('dashboardTools.optimizer.currentDescPh')}
                 />
               </div>
               <div>
-                <Label htmlFor="current_tags">Current Tags (optional)</Label>
+                <Label htmlFor="current_tags">{t('dashboardTools.optimizer.currentTags')}</Label>
                 <Input
                   id="current_tags"
                   value={currentTags}
                   onChange={(e) => setCurrentTags(e.target.value)}
-                  placeholder="e.g. handmade, mug, ceramic, coffee, gift"
+                  placeholder={t('dashboardTools.optimizer.currentTagsPh')}
                 />
               </div>
               <PlatformSelect value={platform} onChange={setPlatform} />
               <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
-                {loading ? 'Optimizing...' : 'Optimize Listing'}
+                {loading ? t('dashboardTools.optimizer.optimizing') : t('dashboardTools.optimizer.optimize')}
               </Button>
             </form>
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
@@ -128,10 +130,10 @@ export default function OptimizerPage() {
               <Card className="rounded-xl border-border bg-card p-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">Optimized Title</h4>
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">{t('dashboardTools.optimizer.optTitle')}</h4>
                     <p className="text-sm text-foreground">{result.title}</p>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(result.title)} className="ml-2">Copy</Button>
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(result.title)} className="ml-2">{t('dashboardTools.common.copy')}</Button>
                 </div>
               </Card>
             )}
@@ -139,10 +141,10 @@ export default function OptimizerPage() {
               <Card className="rounded-xl border-border bg-card p-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">Optimized Description</h4>
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">{t('dashboardTools.optimizer.optDesc')}</h4>
                     <p className="text-sm text-foreground whitespace-pre-wrap">{result.description}</p>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(result.description)} className="ml-2">Copy</Button>
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(result.description)} className="ml-2">{t('dashboardTools.common.copy')}</Button>
                 </div>
               </Card>
             )}
@@ -150,16 +152,16 @@ export default function OptimizerPage() {
               <Card className="rounded-xl border-border bg-card p-4">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">Optimized Tags</h4>
+                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">{t('dashboardTools.optimizer.optTags')}</h4>
                     <p className="text-sm text-foreground">{result.tags.join(', ')}</p>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(result.tags.join(', '))} className="ml-2">Copy</Button>
+                  <Button variant="ghost" size="sm" onClick={() => copyToClipboard(result.tags.join(', '))} className="ml-2">{t('dashboardTools.common.copy')}</Button>
                 </div>
               </Card>
             )}
             {result.suggestions && (
               <Card className="rounded-xl border-border bg-card p-4">
-                <h4 className="font-semibold text-sm text-secondary-foreground mb-1">Improvement Suggestions</h4>
+                <h4 className="font-semibold text-sm text-secondary-foreground mb-1">{t('dashboardTools.optimizer.suggestions')}</h4>
                 <p className="text-sm text-foreground">{result.suggestions}</p>
               </Card>
             )}

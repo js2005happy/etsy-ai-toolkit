@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/client'
 
 export default function SourcingQuoteForm() {
+  const { t } = useI18n()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [product, setProduct] = useState('')
@@ -66,71 +68,71 @@ export default function SourcingQuoteForm() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">{t("marketing.sourcing.name")}</Label>
         <Input
           id="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
+          placeholder={t("marketing.sourcing.namePh")}
           required
           autoComplete="name"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{t("marketing.sourcing.email")}</Label>
         <Input
           id="email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder={t("marketing.sourcing.emailPh")}
           required
           autoComplete="email"
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="product">What do you want to source?</Label>
+        <Label htmlFor="product">{t("marketing.sourcing.formProduct")}</Label>
         <Textarea
           id="product"
           value={product}
           onChange={(e) => setProduct(e.target.value)}
-          placeholder="e.g. Handmade ceramic mugs, 12oz, matte glaze — or paste a link to a product you want to recreate"
+          placeholder={t("marketing.sourcing.formProductPh")}
           rows={4}
           required
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="quantity">Estimated quantity or budget (optional)</Label>
+        <Label htmlFor="quantity">{t("marketing.sourcing.formQty")}</Label>
         <Input
           id="quantity"
           value={quantity}
           onChange={(e) => setQuantity(e.target.value)}
-          placeholder="e.g. 500 units, or $2,000 budget"
+          placeholder={t("marketing.sourcing.formQtyPh")}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="notes">Anything else? (optional)</Label>
+        <Label htmlFor="notes">{t("marketing.sourcing.formNotes")}</Label>
         <Textarea
           id="notes"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Target price, materials, certifications, shipping destination…"
+          placeholder={t("marketing.sourcing.formNotesPh")}
           rows={3}
         />
       </div>
 
       {status === 'error' && (
         <p className="text-sm font-medium text-destructive">
-          Something went wrong. Please email us directly at contact@craftly.world.
+          {t("marketing.sourcing.formError")}
         </p>
       )}
       {status === 'sent' && (
         <p className="text-sm font-medium text-emerald-400">
-          Thanks — your request is on its way. We&apos;ll get back to you within 24 hours.
+          {t("marketing.sourcing.formSent")}
         </p>
       )}
 
@@ -138,10 +140,10 @@ export default function SourcingQuoteForm() {
         {status === 'sending' ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Sending…
+            {t("marketing.sourcing.formSending")}
           </>
         ) : (
-          'Get a quote'
+          t("marketing.sourcing.formSubmit")
         )}
       </Button>
     </form>

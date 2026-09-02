@@ -11,16 +11,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Copy, Check, Coins } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import PlatformSelect from '@/components/dashboard/platform-select'
+import { useI18n } from '@/lib/i18n/client'
 
 interface MessageReplyOutput {
   replies: string[]
 }
 
 export default function MessagesPage() {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [result, setResult] = useState<MessageReplyOutput | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [creditError, setCreditError] = useState(false)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
 
   const [formData, setFormData] = useState({
@@ -55,6 +58,7 @@ export default function MessagesPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setCreditError(false)
     setResult(null)
 
     try {
@@ -65,21 +69,22 @@ export default function MessagesPage() {
       })
 
       if (response.status === 401) {
-        setError('Please log in to use this tool.')
+        setError(t('dashboardTools.common.logIn'))
         return
       }
       if (response.status === 403) {
-        setError('Insufficient credits. Please upgrade your plan to generate more replies.')
+        setCreditError(true)
+        setError(t('dashboardTools.common.insufficientCredits'))
         return
       }
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Something went wrong')
+        throw new Error(data.error || t('dashboardTools.common.somethingWrong'))
       }
 
       const data = await response.json()
       setResult(data)
-      
+
       const res = await fetch('/api/user/credits')
       if (res.ok) {
         const creditData = await res.json()
@@ -97,13 +102,13 @@ export default function MessagesPage() {
       <CinematicBackground theme="messages" />
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold font-display">Customer Message Assistant</h1>
-          <p className="text-muted-foreground">Generate professional, high-converting replies to your customers.</p>
+          <h1 className="text-3xl font-bold font-display">{t('dashboardTools.messages.h1')}</h1>
+          <p className="text-muted-foreground">{t('dashboardTools.messages.sub')}</p>
         </div>
         {credits !== null && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20">
             <Coins className="h-4 w-4" />
-            <span>{credits} Credits Left</span>
+            <span>{credits} {t('dashboardTools.common.creditsLeft')}</span>
           </div>
         )}
       </div>
@@ -111,16 +116,16 @@ export default function MessagesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle className="font-display">Message Details</CardTitle>
-            <CardDescription>Provide the customer's message and the desired tone.</CardDescription>
+            <CardTitle className="font-display">{t('dashboardTools.messages.details')}</CardTitle>
+            <CardDescription>{t('dashboardTools.messages.detailsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="customer_message">Customer Message</Label>
-                <Textarea 
-                  id="customer_message" 
-                  placeholder="Paste the customer message here..." 
+                <Label htmlFor="customer_message">{t('dashboardTools.messages.customerMessage')}</Label>
+                <Textarea
+                  id="customer_message"
+                  placeholder={t('dashboardTools.messages.customerMessagePh')}
                   value={formData.customer_message}
                   onChange={(e) => setFormData({ ...formData, customer_message: e.target.value })}
                   required
@@ -128,27 +133,27 @@ export default function MessagesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="product_info">Product Info (Optional)</Label>
-                <Input 
-                  id="product_info" 
-                  placeholder="e.g. Blue ceramic vase, shipping takes 3 days" 
+                <Label htmlFor="product_info">{t('dashboardTools.messages.productInfo')}</Label>
+                <Input
+                  id="product_info"
+                  placeholder={t('dashboardTools.messages.productInfoPh')}
                   value={formData.product_info}
                   onChange={(e) => setFormData({ ...formData, product_info: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="tone">Reply Tone</Label>
-                <Select 
-                  value={formData.tone} 
+                <Label htmlFor="tone">{t('dashboardTools.messages.tone')}</Label>
+                <Select
+                  value={formData.tone}
                   onValueChange={(value) => setFormData({ ...formData, tone: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select tone" />
+                    <SelectValue placeholder={t('dashboardTools.messages.selectTone')} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="friendly">Friendly & Warm</SelectItem>
-                    <SelectItem value="professional">Professional & Formal</SelectItem>
-                    <SelectItem value="apologetic">Apologetic & Empathetic</SelectItem>
+                    <SelectItem value="friendly">{t('dashboardTools.messages.friendlyWarm')}</SelectItem>
+                    <SelectItem value="professional">{t('dashboardTools.messages.professionalFormal')}</SelectItem>
+                    <SelectItem value="apologetic">{t('dashboardTools.messages.apologeticEmpathetic')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -157,10 +162,10 @@ export default function MessagesPage() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Replies...
+                    {t('dashboardTools.messages.generating')}
                   </>
                 ) : (
-                  'Generate Replies'
+                  t('dashboardTools.messages.generate')
                 )}
               </Button>
             </form>
@@ -172,12 +177,12 @@ export default function MessagesPage() {
             <Card className="border-destructive bg-destructive/10">
               <CardContent className="pt-6">
                 <p className="text-destructive font-medium">{error}</p>
-                {error.includes('credits') && (
+                {creditError && (
                   <Button variant="link" className="p-0 h-auto text-destructive mt-2" asChild>
-  <Link href="/pricing">
-    Upgrade Plan &rarr;
-  </Link>
-</Button>
+                    <Link href="/pricing">
+                      {t('dashboardTools.common.upgradePlan')} &rarr;
+                    </Link>
+                  </Button>
                 )}
               </CardContent>
             </Card>
@@ -185,29 +190,29 @@ export default function MessagesPage() {
 
           {!result && !loading && !error && (
             <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
-              <p>Input the customer message and click generate to see a few options!</p>
+              <p>{t('dashboardTools.messages.empty')}</p>
             </div>
           )}
 
           {loading && (
             <div className="h-full flex flex-col items-center justify-center p-12 text-center">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-lg font-medium">AI is drafting your replies...</p>
+              <p className="text-lg font-medium">{t('dashboardTools.messages.loading')}</p>
             </div>
           )}
 
           {result && (
             <div className="space-y-4">
-              <h3 className="text-lg font-medium font-display">Suggested Replies</h3>
+              <h3 className="text-lg font-medium font-display">{t('dashboardTools.messages.suggested')}</h3>
               {result.replies.map((reply, index) => (
                 <Card key={index} className="relative group">
                   <CardContent className="pt-6 pb-4">
                     <div className="flex justify-between items-start gap-4">
                       <p className="text-sm leading-relaxed whitespace-pre-wrap">{reply}</p>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 w-8 p-0" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0"
                         onClick={() => handleCopy(reply, index)}
                       >
                         {copiedIndex === index ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}

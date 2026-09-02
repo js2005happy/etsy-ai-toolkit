@@ -3,6 +3,7 @@ import PageHero from "@/components/shared/page-hero";
 import SiteFooter from "@/components/shared/site-footer";
 import Reveal from "@/components/shared/reveal";
 import CinematicBackground from "@/components/cinematic/cinematic-background";
+import { getServerTranslations } from "@/lib/i18n/server";
 
 type Section = {
   n: string;
@@ -10,88 +11,68 @@ type Section = {
   content: React.ReactNode;
 };
 
-const sections: Section[] = [
-  {
-    n: "01",
-    title: "Subscriptions",
-    content: (
-      <p>
-        The Pro plan is a recurring monthly subscription billed at $19 USD per month. Subscriptions renew
-        automatically each billing period until cancelled.
-      </p>
-    ),
-  },
-  {
-    n: "02",
-    title: "Cancellation",
-    content: (
-      <p>
-        You may cancel your subscription at any time through the billing portal or by contacting us.
-        Cancellation stops future charges and takes effect at the end of the current billing period. You
-        will continue to have access to Pro features until the end of the period you have already paid for.
-      </p>
-    ),
-  },
-  {
-    n: "03",
-    title: "Refunds",
-    content: (
-      <>
-        <p>
-          If you are not satisfied with the Service, contact us within 14 days of your most recent charge and
-          we will issue a refund for that charge. Refunds are issued to the original payment method.
-        </p>
-        <p>
-          Refunds are not provided for earlier billing periods, for partial months, or after a subscription
-          has been cancelled and access has already been used for the paid period.
-        </p>
-      </>
-    ),
-  },
-  {
-    n: "04",
-    title: "Chargebacks and Disputes",
-    content: (
-      <p>
-        If you believe a charge is incorrect, please contact us first so we can resolve it before filing a
-        dispute with your bank or card issuer.
-      </p>
-    ),
-  },
-  {
-    n: "05",
-    title: "Contact",
-    content: (
-      <p>
-        Refund or cancellation requests: contact us at{" "}
-        <a href="mailto:js2005happy@gmail.com" className="text-primary hover:underline">
-          js2005happy@gmail.com
-        </a>
-        .
-      </p>
-    ),
-  },
-];
-
 export default function RefundPage() {
+  const { t } = getServerTranslations();
+
+  const sections: Section[] = [
+    {
+      n: "01",
+      title: t("marketing.refund.s1t"),
+      content: <p>{t("marketing.refund.s1")}</p>,
+    },
+    {
+      n: "02",
+      title: t("marketing.refund.s2t"),
+      content: <p>{t("marketing.refund.s2")}</p>,
+    },
+    {
+      n: "03",
+      title: t("marketing.refund.s3t"),
+      content: (
+        <>
+          <p>{t("marketing.refund.s3a")}</p>
+          <p>{t("marketing.refund.s3b")}</p>
+        </>
+      ),
+    },
+    {
+      n: "04",
+      title: t("marketing.refund.s4t"),
+      content: <p>{t("marketing.refund.s4")}</p>,
+    },
+    {
+      n: "05",
+      title: t("marketing.refund.s5t"),
+      content: (
+        <p>
+          {t("marketing.refund.s5")}{" "}
+          <a href="mailto:js2005happy@gmail.com" className="text-primary hover:underline">
+            js2005happy@gmail.com
+          </a>
+          .
+        </p>
+      ),
+    },
+  ];
+
   return (
     <div className="flex min-h-screen flex-col">
       <CinematicBackground />
       <Navbar />
       <main className="flex-1">
         <PageHero
-          eyebrow="Legal"
+          eyebrow={t("marketing.refund.eyebrow")}
           title={
             <>
-              Refund &amp; <span className="text-primary">Cancellation</span>
+              {t("marketing.refund.title1")} <span className="text-primary">{t("marketing.refund.title2")}</span>
             </>
           }
-          subtitle="Our simple, no-nonsense refund and cancellation policy."
+          subtitle={t("marketing.refund.subtitle")}
         />
 
         <section className="px-5 pb-28 md:pb-36">
           <div className="mx-auto max-w-3xl">
-            <p className="mb-20 text-sm text-muted-foreground">Last updated: August 28, 2026</p>
+            <p className="mb-20 text-sm text-muted-foreground">{t("marketing.refund.updated")}</p>
 
             <div className="space-y-16">
               {sections.map((s) => (

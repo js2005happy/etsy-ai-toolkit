@@ -305,6 +305,87 @@
     color: var(--k-ink);
   }
 
+  /* ---------- navbar language switcher ---------- */
+  .k-lang {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .k-lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--k-line);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--k-ink);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .k-lang-toggle:hover {
+    border-color: rgba(224, 179, 121, 0.5);
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .k-lang-toggle .k-fl {
+    font-size: 14px;
+  }
+  .k-lang-caret {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid var(--k-ink-soft);
+  }
+  .k-lang-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 148px;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border-radius: 12px;
+    border: 1px solid var(--k-line);
+    background: rgba(18, 16, 14, 0.96);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .k-lang-menu button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: var(--k-ink-soft);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    line-height: 1;
+  }
+  .k-lang-menu button:hover {
+    color: var(--k-ink);
+    background: rgba(255, 255, 255, 0.06);
+  }
+  .k-lang-menu button.active {
+    color: var(--k-ink);
+    background: rgba(224, 179, 121, 0.12);
+  }
+  .k-lang-menu button .k-fl {
+    font-size: 15px;
+  }
+
   /* ---------- buttons ---------- */
   .k-btn {
     position: relative;

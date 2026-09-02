@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { getPlatform } from "@/lib/platforms";
+import { getSceneTemplate, buildStyleLockText } from "@/lib/image-scenes";
 
 export interface ListingInput { product_name: string; product_type: string; material: string; style: string; platform?: string; brand_tone?: string; brand_keywords?: string; }
 export interface ListingOutput { title: string; description: string; tags: string[]; }
@@ -222,7 +223,7 @@ export async function optimizeListing(input: OptimizeListingInput): Promise<Opti
   return JSON.parse(content) as OptimizeListingOutput;
 }
 
-export interface ProductImageInput { product_name: string; product_description: string; platform: string; size: string; style: string; language?: string; category?: string; }
+export interface ProductImageInput { product_name: string; product_description: string; platform: string; size: string; style: string; language?: string; category?: string; scene?: string; style_lock?: boolean; }
 export interface ProductImageOutput { imageUrl: string; revised_prompt?: string | null; }
 
 // Per-category "tuning" presets. Each category carries a different working
@@ -417,17 +418,26 @@ export async function generateImagePrompt(input: ProductImageInput): Promise<str
     return "professional product photography of " + input.product_name + ", " + input.style + ", high detail";
   }
   const preset = getCategoryPreset(input.category)
+  const scene = getSceneTemplate(input.scene)
+  const styleLock = input.style_lock ? buildStyleLockText() : ''
   const wantText = input.language && input.language !== "No text";
   const language = wantText ? input.language : "no text";
   const prompt =
     "You are an expert prompt engineer for AI product photography and marketing visuals. " +
-    "Write a single, detailed English prompt for an image generation model that renders a product marketing poster.\n\n" +
+    "Write a single, detailed English prompt for an image generation model that renders a product image.\n\n" +
     "Product name: " + input.product_name + "\n" +
     "Product description: " + input.product_description + "\n" +
     "Product category: " + preset.label + "\n" +
     "Target platform: " + input.platform + "\n" +
     "Visual style: " + input.style + "\n" +
     "On-image text language: " + language + "\n\n" +
+    (scene
+      ? "Scene/format brief — follow this closely:\n" +
+        "- Composition & staging: " + scene.logic + "\n" +
+        "- Lighting/material/mood vocabulary to weave in: " + scene.promptHints + "\n" +
+        "- Avoid at all costs: " + scene.avoid + "\n\n"
+      : "") +
+    (styleLock ? styleLock + "\n" : "") +
     "Category-specific brief — follow this closely:\n" +
     "- Composition & staging: " + preset.logic + "\n" +
     "- Lighting/material/mood vocabulary to weave in: " + preset.promptHints + "\n" +

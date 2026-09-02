@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Coins } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import PlatformSelect from '@/components/dashboard/platform-select'
+import { useI18n } from '@/lib/i18n/client'
 
 interface CompetitorResult {
   strengths: string[]
@@ -40,6 +41,7 @@ function Quadrant({ title, items, tone }: { title: string; items: string[]; tone
 }
 
 export default function CompetitorAnalysisPage() {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [result, setResult] = useState<CompetitorResult | null>(null)
@@ -75,11 +77,11 @@ export default function CompetitorAnalysisPage() {
           platform,
         }),
       })
-      if (res.status === 401) { setError('Please log in to use this tool.'); return }
-      if (res.status === 403) { setError('Insufficient credits. Please upgrade your plan.'); return }
+      if (res.status === 401) { setError(t('dashboardTools.common.logIn')); return }
+      if (res.status === 403) { setError(t('dashboardTools.common.insufficientCredits')); return }
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Something went wrong')
+        throw new Error(data.error || t('dashboardTools.common.somethingWrong'))
       }
       const data = await res.json()
       setResult(data)
@@ -96,13 +98,13 @@ export default function CompetitorAnalysisPage() {
       <CinematicBackground theme="optimizer" />
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold font-display text-foreground">Competitor Analysis</h1>
-          <p className="text-muted-foreground">A quick SWOT read on a competitor so you can position to win.</p>
+          <h1 className="text-3xl font-bold font-display text-foreground">{t('dashboardTools.competitor.h1')}</h1>
+          <p className="text-muted-foreground">{t('dashboardTools.competitor.sub')}</p>
         </div>
         {credits !== null && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20">
             <Coins className="h-4 w-4" />
-            <span>{credits} Credits Left</span>
+            <span>{credits} {t('dashboardTools.common.creditsLeft')}</span>
           </div>
         )}
       </div>
@@ -110,30 +112,30 @@ export default function CompetitorAnalysisPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle className="font-display">Your Product vs. Competitor</CardTitle>
-            <CardDescription>Describe your product, then the competitor you want to beat.</CardDescription>
+            <CardTitle className="font-display">{t('dashboardTools.competitor.vsTitle')}</CardTitle>
+            <CardDescription>{t('dashboardTools.competitor.vsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="product_name">Your Product Name</Label>
-                <Input id="product_name" placeholder="e.g. Handmade Ceramic Mug" value={productName} onChange={(e) => setProductName(e.target.value)} required />
+                <Label htmlFor="product_name">{t('dashboardTools.competitor.yourProductName')}</Label>
+                <Input id="product_name" placeholder={t('dashboardTools.competitor.yourProductNamePh')} value={productName} onChange={(e) => setProductName(e.target.value)} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="product_description">Your Product Description</Label>
-                <Textarea id="product_description" placeholder="What you sell and why it's good" value={productDescription} onChange={(e) => setProductDescription(e.target.value)} required rows={3} />
+                <Label htmlFor="product_description">{t('dashboardTools.competitor.yourProductDesc')}</Label>
+                <Textarea id="product_description" placeholder={t('dashboardTools.competitor.yourProductDescPh')} value={productDescription} onChange={(e) => setProductDescription(e.target.value)} required rows={3} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="competitor_name">Competitor Name (optional)</Label>
-                <Input id="competitor_name" placeholder="e.g. BestSeller Shop" value={competitorName} onChange={(e) => setCompetitorName(e.target.value)} />
+                <Label htmlFor="competitor_name">{t('dashboardTools.competitor.competitorName')}</Label>
+                <Input id="competitor_name" placeholder={t('dashboardTools.competitor.competitorNamePh')} value={competitorName} onChange={(e) => setCompetitorName(e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="competitor_description">Competitor Description (optional)</Label>
-                <Textarea id="competitor_description" placeholder="What you know about their product" value={competitorDescription} onChange={(e) => setCompetitorDescription(e.target.value)} rows={3} />
+                <Label htmlFor="competitor_description">{t('dashboardTools.competitor.competitorDesc')}</Label>
+                <Textarea id="competitor_description" placeholder={t('dashboardTools.competitor.competitorDescPh')} value={competitorDescription} onChange={(e) => setCompetitorDescription(e.target.value)} rows={3} />
               </div>
               <PlatformSelect value={platform} onChange={setPlatform} />
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Analyzing…</>) : 'Analyze Competitor'}
+                {loading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('dashboardTools.competitor.analyzing')}</>) : t('dashboardTools.competitor.analyze')}
               </Button>
             </form>
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
@@ -148,26 +150,26 @@ export default function CompetitorAnalysisPage() {
           )}
           {!result && !loading && !error && (
             <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
-              <p>Your analysis will appear here.</p>
+              <p>{t('dashboardTools.competitor.empty')}</p>
             </div>
           )}
           {loading && (
             <div className="h-full flex flex-col items-center justify-center p-12 text-center">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-lg font-medium">Analyzing the competition…</p>
+              <p className="text-lg font-medium">{t('dashboardTools.competitor.loading')}</p>
             </div>
           )}
           {result && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Quadrant title="Their strengths" items={result.strengths} tone="negative" />
-                <Quadrant title="Their weaknesses" items={result.weaknesses} tone="positive" />
-                <Quadrant title="Your opportunities" items={result.opportunities} tone="positive" />
-                <Quadrant title="Threats to watch" items={result.threats} tone="negative" />
+                <Quadrant title={t('dashboardTools.competitor.theirStrengths')} items={result.strengths} tone="negative" />
+                <Quadrant title={t('dashboardTools.competitor.theirWeaknesses')} items={result.weaknesses} tone="positive" />
+                <Quadrant title={t('dashboardTools.competitor.yourOpportunities')} items={result.opportunities} tone="positive" />
+                <Quadrant title={t('dashboardTools.competitor.threats')} items={result.threats} tone="negative" />
               </div>
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-semibold font-display">How to differentiate</CardTitle>
+                  <CardTitle className="text-sm font-semibold font-display">{t('dashboardTools.competitor.differentiate')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm leading-relaxed">{result.differentiation}</p>

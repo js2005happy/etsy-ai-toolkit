@@ -5,11 +5,13 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { PackageSearch, ArrowLeft } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
+import { useI18n } from "@/lib/i18n/client";
 
 // Sourcing is a distinct sub-brand (per the audit: separate it from the core
 // listing tools). This header drops the shared Craftly nav in favor of a
 // sourcing-only wordmark + "Back to Craftly" escape hatch.
 export default function SourcingHeader() {
+  const { t } = useI18n();
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
@@ -32,10 +34,10 @@ export default function SourcingHeader() {
   }, []);
 
   const links = [
-    { label: "How it works", href: "#how" },
-    { label: "Pricing", href: "#pricing" },
-    { label: "Why trust us", href: "#trust" },
-    { label: "Get a quote", href: "#quote" },
+    { label: t("marketing.sourcing.how"), href: "#how" },
+    { label: t("marketing.sourcing.pricing"), href: "#pricing" },
+    { label: t("marketing.sourcing.trust"), href: "#trust" },
+    { label: t("marketing.sourcing.quoteTitle"), href: "#quote" },
   ];
 
   return (
@@ -55,7 +57,7 @@ export default function SourcingHeader() {
               Craftly Sourcing
             </span>
             <span className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              A service by Craftly
+              {t("marketing.sourcing.byline")}
             </span>
           </span>
         </Link>
@@ -78,21 +80,21 @@ export default function SourcingHeader() {
             className="hidden items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:flex"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to Craftly
+            {t("marketing.sourcing.back")}
           </Link>
           {user ? (
             <Link
               href="/dashboard"
               className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
-              Dashboard
+              {t("marketing.sourcing.dashboard")}
             </Link>
           ) : (
             <Link
               href="/signup"
               className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
-              Sign up
+              {t("marketing.sourcing.signup")}
             </Link>
           )}
         </div>

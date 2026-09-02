@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Copy, Check, Loader2, Sparkles, Tag } from "lucide-react";
+import { useI18n } from "@/lib/i18n/client";
 
 // Anonymous free-tool widget. The daily counter is mirrored in localStorage
 // (UX) while the API route enforces the real limit server-side (3/day per IP).
@@ -41,6 +42,7 @@ function bumpUses() {
 }
 
 export default function FreeTitleGenerator() {
+  const { t } = useI18n();
   const [productName, setProductName] = useState("");
   const [productType, setProductType] = useState("");
   const [material, setMaterial] = useState("");
@@ -55,7 +57,7 @@ export default function FreeTitleGenerator() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!productName.trim() || !productType.trim() || !material.trim()) {
-      setError("Please fill in the product name, product type, and material.");
+      setError(t("marketing.titleGen.errorFill"));
       return;
     }
     setLoading(true);
@@ -74,7 +76,7 @@ export default function FreeTitleGenerator() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Something went wrong. Please try again.");
+        setError(data.error || t("marketing.titleGen.errorGeneric"));
         if (data.limitReached) {
           setLimitReached(true);
           setUsed(DAILY_LIMIT);
@@ -85,7 +87,7 @@ export default function FreeTitleGenerator() {
       bumpUses();
       setUsed(usesToday());
     } catch {
-      setError("Network error. Please check your connection and try again.");
+      setError(t("marketing.titleGen.errorNetwork"));
     } finally {
       setLoading(false);
     }
@@ -109,11 +111,11 @@ export default function FreeTitleGenerator() {
         <div className="rounded-xl border border-border bg-card p-6 md:p-10">
           <div className="mb-6 flex items-center justify-between">
             <p className="text-sm font-medium text-muted-foreground">
-              No signup needed · {limitReached ? 0 : remaining} of {DAILY_LIMIT} free today
+              {t("marketing.titleGen.noSignup")} · {limitReached ? 0 : remaining} {t("marketing.titleGen.freeToday")}
             </p>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-medium text-emerald-400">
               <Sparkles className="h-3.5 w-3.5" />
-              Free forever
+              {t("marketing.titleGen.freeForever")}
             </span>
           </div>
 
@@ -121,48 +123,48 @@ export default function FreeTitleGenerator() {
             <div className="grid gap-5 md:grid-cols-2">
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  What did you make? <span className="text-destructive">*</span>
+                  {t("marketing.titleGen.madeLabel")} <span className="text-destructive">*</span>
                 </label>
                 <input
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
-                  placeholder="Speckled stoneware mug"
+                  placeholder={t("marketing.titleGen.madePh")}
                   maxLength={120}
                   className="w-full rounded-lg border border-border bg-background px-4 py-3 text-[15px] text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
                 />
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  Product type <span className="text-destructive">*</span>
+                  {t("marketing.titleGen.typeLabel")} <span className="text-destructive">*</span>
                 </label>
                 <input
                   value={productType}
                   onChange={(e) => setProductType(e.target.value)}
-                  placeholder="Coffee mug"
+                  placeholder={t("marketing.titleGen.typePh")}
                   maxLength={80}
                   className="w-full rounded-lg border border-border bg-background px-4 py-3 text-[15px] text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
                 />
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  Material <span className="text-destructive">*</span>
+                  {t("marketing.titleGen.materialLabel")} <span className="text-destructive">*</span>
                 </label>
                 <input
                   value={material}
                   onChange={(e) => setMaterial(e.target.value)}
-                  placeholder="Speckled stoneware, matte sage glaze"
+                  placeholder={t("marketing.titleGen.materialPh")}
                   maxLength={80}
                   className="w-full rounded-lg border border-border bg-background px-4 py-3 text-[15px] text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
                 />
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-foreground">
-                  Style <span className="text-muted-foreground">(optional)</span>
+                  {t("marketing.titleGen.styleLabel")} <span className="text-muted-foreground">{t("marketing.titleGen.optional")}</span>
                 </label>
                 <input
                   value={style}
                   onChange={(e) => setStyle(e.target.value)}
-                  placeholder="Minimalist, boho, cottagecore…"
+                  placeholder={t("marketing.titleGen.stylePh")}
                   maxLength={80}
                   className="w-full rounded-lg border border-border bg-background px-4 py-3 text-[15px] text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none"
                 />
@@ -177,10 +179,10 @@ export default function FreeTitleGenerator() {
               {loading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Writing your listing…
+                  {t("marketing.titleGen.writing")}
                 </>
               ) : (
-                "Generate my Etsy title + tags"
+                t("marketing.titleGen.generate")
               )}
             </button>
           </form>
@@ -192,16 +194,16 @@ export default function FreeTitleGenerator() {
           {limitReached && !loading && (
             <div className="mt-6 rounded-lg border border-primary/40 bg-primary/5 p-5 text-center">
               <p className="text-[15px] font-medium text-foreground">
-                Today&apos;s 3 free generations are used up.
+                {t("marketing.titleGen.limitTitle")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                A free account gets 10 credits every month — no card required.
+                {t("marketing.titleGen.limitBody")}
               </p>
               <Link
                 href="/signup"
                 className="mt-4 inline-block rounded-full bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
               >
-                Create free account
+                {t("marketing.titleGen.limitCta")}
               </Link>
             </div>
           )}
@@ -211,7 +213,7 @@ export default function FreeTitleGenerator() {
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    SEO Title
+                    {t("marketing.titleGen.seoTitle")}
                   </h3>
                   <button
                     onClick={() => copy(result.title, "title")}
@@ -219,11 +221,11 @@ export default function FreeTitleGenerator() {
                   >
                     {copied === "title" ? (
                       <>
-                        <Check className="h-4 w-4" /> Copied
+                        <Check className="h-4 w-4" /> {t("marketing.titleGen.copied")}
                       </>
                     ) : (
                       <>
-                        <Copy className="h-4 w-4" /> Copy
+                        <Copy className="h-4 w-4" /> {t("marketing.titleGen.copy")}
                       </>
                     )}
                   </button>
@@ -232,14 +234,14 @@ export default function FreeTitleGenerator() {
                   {result.title}
                 </div>
                 <p className="mt-1.5 text-xs text-muted-foreground">
-                  {result.title.length}/140 characters — Etsy reads the first 40 most closely.
+                  {result.title.length}{t("marketing.titleGen.charCount")}
                 </p>
               </div>
 
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                    13 Tags
+                    {t("marketing.titleGen.tags")}
                   </h3>
                   <button
                     onClick={() => copy(result.tags.join(", "), "tags")}
@@ -247,11 +249,11 @@ export default function FreeTitleGenerator() {
                   >
                     {copied === "tags" ? (
                       <>
-                        <Check className="h-4 w-4" /> Copied
+                        <Check className="h-4 w-4" /> {t("marketing.titleGen.copied")}
                       </>
                     ) : (
                       <>
-                        <Copy className="h-4 w-4" /> Copy all
+                        <Copy className="h-4 w-4" /> {t("marketing.titleGen.copyAll")}
                       </>
                     )}
                   </button>
@@ -271,7 +273,7 @@ export default function FreeTitleGenerator() {
 
               <div>
                 <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Description preview
+                  {t("marketing.titleGen.descPreview")}
                 </h3>
                 <div className="rounded-lg border border-border bg-background p-4 text-[15px] leading-relaxed text-muted-foreground">
                   {result.description_preview}
@@ -281,17 +283,17 @@ export default function FreeTitleGenerator() {
               <div className="rounded-xl border-2 border-primary/60 bg-primary/5 p-6 text-center">
                 <p className="text-[15px] font-medium text-foreground">
                   {result.truncated
-                    ? "Unlock the full description + save & edit"
-                    : "Want to refine it and generate more?"}
+                    ? t("marketing.titleGen.unlockFull")
+                    : t("marketing.titleGen.refine")}
                 </p>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Free account: 10 credits/month, all 15 tools, no card required.
+                  {t("marketing.titleGen.freeAccount")}
                 </p>
                 <Link
                   href="/signup"
                   className="mt-4 inline-block rounded-full bg-primary px-8 py-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
                 >
-                  Get the full listing — free
+                  {t("marketing.titleGen.getFull")}
                 </Link>
               </div>
             </div>

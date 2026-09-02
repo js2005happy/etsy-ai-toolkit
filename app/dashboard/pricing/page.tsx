@@ -8,8 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CinematicBackground from '@/components/cinematic/cinematic-background';
 import PlatformSelect from '@/components/dashboard/platform-select';
+import { useI18n } from '@/lib/i18n/client';
 
 export default function PricingPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const [materialCost, setMaterialCost] = useState('');
   const [laborCost, setLaborCost] = useState('');
@@ -57,17 +59,17 @@ export default function PricingPage() {
         }),
       });
       if (res.status === 401) { router.push('/login'); return; }
-      if (res.status === 403) { setError('You have insufficient credits. Please upgrade.'); return; }
+      if (res.status === 403) { setError(t('dashboardTools.common.insufficientCredits')); return; }
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || 'Something went wrong.');
+        setError(data.error || t('dashboardTools.common.somethingWrong'));
         return;
       }
       const data = await res.json();
       setResult(data);
       fetchCredits();
     } catch (err: any) {
-      setError(err.message || 'Network error');
+      setError(err.message || t('dashboardTools.common.networkError'));
     } finally {
       setLoading(false);
     }
@@ -78,22 +80,22 @@ export default function PricingPage() {
       <CinematicBackground theme="pricing" />
       <div className="mx-auto max-w-4xl px-4">
         <div className="mb-8">
-          <h1 className="font-display text-3xl font-bold text-foreground">Pricing Advisor</h1>
-          <p className="mt-2 text-muted-foreground">Get a suggested price and profit analysis for your product.</p>
+          <h1 className="font-display text-3xl font-bold text-foreground">{t('dashboardTools.pricing.h1')}</h1>
+          <p className="mt-2 text-muted-foreground">{t('dashboardTools.pricing.sub')}</p>
           {credits !== null && (
-            <p className="mt-2 text-sm text-muted-foreground">{credits} Credits Left</p>
+            <p className="mt-2 text-sm text-muted-foreground">{credits} {t('dashboardTools.common.creditsLeft')}</p>
           )}
         </div>
 
         <Card className="mb-8 rounded-xl border-border bg-card p-6">
           <CardHeader className="p-0">
-            <CardTitle>Cost Details</CardTitle>
-            <CardDescription>Enter your costs to calculate pricing.</CardDescription>
+            <CardTitle>{t('dashboardTools.pricing.details')}</CardTitle>
+            <CardDescription>{t('dashboardTools.pricing.detailsDesc')}</CardDescription>
           </CardHeader>
           <CardContent className="p-0 mt-4">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="material_cost">Material Cost</Label>
+                <Label htmlFor="material_cost">{t('dashboardTools.pricing.materialCost')}</Label>
                 <Input
                   id="material_cost"
                   type="number"
@@ -105,7 +107,7 @@ export default function PricingPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="labor_cost">Labor Cost</Label>
+                <Label htmlFor="labor_cost">{t('dashboardTools.pricing.laborCost')}</Label>
                 <Input
                   id="labor_cost"
                   type="number"
@@ -117,7 +119,7 @@ export default function PricingPage() {
                 />
               </div>
               <div>
-                <Label htmlFor="shipping_cost">Shipping Cost</Label>
+                <Label htmlFor="shipping_cost">{t('dashboardTools.pricing.shippingCost')}</Label>
                 <Input
                   id="shipping_cost"
                   type="number"
@@ -130,7 +132,7 @@ export default function PricingPage() {
               </div>
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <Label htmlFor="competitor_min">Competitor Price Min (optional)</Label>
+                  <Label htmlFor="competitor_min">{t('dashboardTools.pricing.competitorMin')}</Label>
                   <Input
                     id="competitor_min"
                     type="number"
@@ -141,7 +143,7 @@ export default function PricingPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="competitor_max">Competitor Price Max (optional)</Label>
+                  <Label htmlFor="competitor_max">{t('dashboardTools.pricing.competitorMax')}</Label>
                   <Input
                     id="competitor_max"
                     type="number"
@@ -153,7 +155,7 @@ export default function PricingPage() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="profit_margin">Desired Profit Margin % (optional)</Label>
+                <Label htmlFor="profit_margin">{t('dashboardTools.pricing.profitMargin')}</Label>
                 <Input
                   id="profit_margin"
                   type="number"
@@ -165,7 +167,7 @@ export default function PricingPage() {
               </div>
               <PlatformSelect value={platform} onChange={setPlatform} />
               <Button type="submit" disabled={loading} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">
-                {loading ? 'Calculating...' : 'Get Pricing Advice'}
+                {loading ? t('dashboardTools.pricing.calculating') : t('dashboardTools.pricing.generate')}
               </Button>
             </form>
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
@@ -175,15 +177,15 @@ export default function PricingPage() {
         {result && (
           <Card className="rounded-xl border-border bg-card p-6 space-y-3">
             <div>
-              <h4 className="font-semibold text-sm text-muted-foreground">Suggested Price</h4>
+              <h4 className="font-semibold text-sm text-muted-foreground">{t('dashboardTools.pricing.suggestedPrice')}</h4>
               <p className="text-2xl font-bold text-secondary-foreground">${Number(result.suggested_price).toFixed(2)}</p>
             </div>
             <div>
-              <h4 className="font-semibold text-sm text-muted-foreground">Estimated Profit</h4>
+              <h4 className="font-semibold text-sm text-muted-foreground">{t('dashboardTools.pricing.estimatedProfit')}</h4>
               <p className="text-xl font-semibold text-foreground">${Number(result.estimated_profit).toFixed(2)}</p>
             </div>
             <div>
-              <h4 className="font-semibold text-sm text-muted-foreground">Pricing Strategy</h4>
+              <h4 className="font-semibold text-sm text-muted-foreground">{t('dashboardTools.pricing.pricingStrategy')}</h4>
               <p className="text-sm text-foreground">{result.pricing_strategy}</p>
             </div>
           </Card>

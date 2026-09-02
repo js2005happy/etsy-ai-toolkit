@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2 } from 'lucide-react'
 import { STYLES, LANGUAGES, PLATFORMS, CATEGORIES } from './image-constants'
 import type { ProductImageInput, ProductImageOutput } from './use-image-generation'
+import { useI18n } from '@/lib/i18n/client'
 
 interface Props {
   onGenerate: (items: ProductImageInput[]) => Promise<ProductImageOutput[]>
@@ -18,6 +19,9 @@ interface ParsedProduct {
   name: string
   description: string
 }
+
+const fmt = (s: string, v: Record<string, string | number>) =>
+  Object.entries(v).reduce((acc, [k, val]) => acc.replaceAll(`{${k}}`, String(val)), s)
 
 function parseProducts(raw: string): ParsedProduct[] {
   return raw
@@ -37,6 +41,7 @@ function parseProducts(raw: string): ParsedProduct[] {
 }
 
 export default function BulkPanel({ onGenerate, loading }: Props) {
+  const { t } = useI18n()
   const [raw, setRaw] = useState('')
   const [style, setStyle] = useState(STYLES[0])
   const [platform, setPlatform] = useState(PLATFORMS[0].label)
@@ -62,10 +67,10 @@ export default function BulkPanel({ onGenerate, loading }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="space-y-2">
-        <Label htmlFor="b-list">Product List</Label>
+        <Label htmlFor="b-list">{t('dashboardTools.images.productList')}</Label>
         <Textarea
           id="b-list"
-          placeholder={'One product per line. Use "Name | Description" or just the name.\n\ne.g.\nHandmade blue ceramic vase | Minimalist vase with floral patterns, deep blue glaze\nWalnut cutting board | Organic edge serving board, food-safe oil finish\nLinen throw pillow | Stone-washed linen cover, earthy tones'}
+          placeholder={t('dashboardTools.images.productListPh')}
           value={raw}
           onChange={(e) => setRaw(e.target.value)}
           required
@@ -73,15 +78,15 @@ export default function BulkPanel({ onGenerate, loading }: Props) {
         />
         <p className="text-xs text-muted-foreground">
           {products.length === 0
-            ? 'Paste one product per line.'
-            : `${products.length} product${products.length > 1 ? 's' : ''} detected.`}
+            ? t('dashboardTools.images.pasteProductHint')
+            : fmt(t('dashboardTools.images.productsDetected'), { n: products.length })}
         </p>
       </div>
       <div className="space-y-2">
-        <Label>Product Category</Label>
+        <Label>{t('dashboardTools.images.productCategory')}</Label>
         <Select value={category} onValueChange={setCategory}>
           <SelectTrigger>
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder={t('dashboardTools.images.selectCategory')} />
           </SelectTrigger>
           <SelectContent>
             {CATEGORIES.map((c) => (
@@ -92,15 +97,15 @@ export default function BulkPanel({ onGenerate, loading }: Props) {
           </SelectContent>
         </Select>
         <p className="text-xs text-muted-foreground">
-          Applies the same category tuning to every product in the list.
+          {t('dashboardTools.images.bulkCategoryHint')}
         </p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Visual Style</Label>
+          <Label>{t('dashboardTools.images.visualStyle')}</Label>
           <Select value={style} onValueChange={setStyle}>
             <SelectTrigger>
-              <SelectValue placeholder="Select style" />
+              <SelectValue placeholder={t('dashboardTools.images.selectStyle')} />
             </SelectTrigger>
             <SelectContent>
               {STYLES.map((s) => (
@@ -112,10 +117,10 @@ export default function BulkPanel({ onGenerate, loading }: Props) {
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Platform</Label>
+          <Label>{t('dashboardTools.images.platform')}</Label>
           <Select value={platform} onValueChange={setPlatform}>
             <SelectTrigger>
-              <SelectValue placeholder="Select platform" />
+              <SelectValue placeholder={t('dashboardTools.images.selectPlatform')} />
             </SelectTrigger>
             <SelectContent>
               {PLATFORMS.map((p) => (
@@ -131,10 +136,13 @@ export default function BulkPanel({ onGenerate, loading }: Props) {
         {loading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Generating...
+            {t('dashboardTools.images.generating')}
           </>
         ) : (
-          `Generate ${products.length} Poster${products.length === 1 ? '' : 's'}`
+          fmt(t('dashboardTools.images.generatePosters'), {
+            n: products.length,
+            s: products.length === 1 ? '' : 's',
+          })
         )}
       </Button>
     </form>

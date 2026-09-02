@@ -4,6 +4,7 @@ import Navbar from '@/components/shared/navbar'
 import SiteFooter from '@/components/shared/site-footer'
 import Reveal from '@/components/shared/reveal'
 import Faq from '@/components/shared/faq'
+import { getServerTranslations } from '@/lib/i18n/server'
 
 export const metadata: Metadata = {
   title: 'How it works — Craftly',
@@ -12,26 +13,24 @@ export const metadata: Metadata = {
 }
 
 export default function HowItWorksPage() {
+  const { t } = getServerTranslations()
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-1">
         <section className="k-wrap k-page-head">
           <div className="k-breadcrumb">
-            <Link href="/">Home</Link> / How it works
+            <Link href="/">{t('marketing.howItWorks.bcHome')}</Link> / {t('marketing.howItWorks.bcCurrent')}
           </div>
-          <div className="eyebrow">Under the hood</div>
+          <div className="eyebrow">{t('marketing.howItWorks.eyebrow')}</div>
           <h1 className="k-h1" style={{ marginTop: 16 }}>
-            It learns you,
+            {t('marketing.howItWorks.h1a')}
             <br />
-            then <span className="grad">stays out</span>{' '}
-            <em className="serif-accent">of the way.</em>
+            {t('marketing.howItWorks.h1b')} <span className="grad">{t('marketing.howItWorks.h1grad')}</span>{' '}
+            <em className="serif-accent">{t('marketing.howItWorks.h1em')}</em>
           </h1>
-          <p className="k-lead">
-            Most writing tools start from a blank page and a generic idea of
-            &ldquo;good copy&rdquo;. Craftly starts from twenty things you
-            already wrote, and stays inside them.
-          </p>
+          <p className="k-lead">{t('marketing.howItWorks.lead')}</p>
         </section>
 
         <section className="k-wrap" style={{ paddingTop: 0 }}>
@@ -40,20 +39,12 @@ export default function HowItWorksPage() {
               <div className="k-num">1</div>
             </div>
             <div>
-              <h3>You describe it badly</h3>
-              <p>
-                Open a tool, type the way you&apos;d text a friend, and attach a
-                phone photo if you have one. Spelling, grammar, and punctuation
-                are all irrelevant — the messier the better, honestly. Craftly
-                reads intent, not prose.
-              </p>
-              <p>
-                Most people finish this in under two minutes. There&apos;s no
-                form to fill and no dropdowns to fight.
-              </p>
+              <h3>{t('marketing.howItWorks.step1t')}</h3>
+              <p>{t('marketing.howItWorks.step1p1')}</p>
+              <p>{t('marketing.howItWorks.step1p2')}</p>
               <div className="k-cardlet">
-                <span className="k-lbl">What you actually type</span>
-                <p>speckled mug sage glaze 12oz dishwasher ok — small batch, made last week</p>
+                <span className="k-lbl">{t('marketing.howItWorks.step1lbl')}</span>
+                <p>{t('marketing.howItWorks.step1sample')}</p>
               </div>
             </div>
           </Reveal>
@@ -63,33 +54,17 @@ export default function HowItWorksPage() {
               <div className="k-num">2</div>
             </div>
             <div>
-              <h3>Craftly reads your voice first</h3>
-              <p>
-                Before it writes anything, it pulls from your voice profile —
-                built from twenty past messages and your recent listings. It
-                measures four things: how warm you are, how long your sentences
-                run, which words you use, and which ones you never touch.
-              </p>
-              <p>
-                That last one matters most. If you never write
-                &ldquo;elevate&rdquo;, &ldquo;curated&rdquo;, or
-                &ldquo;artisanal&rdquo;, neither will we.
-              </p>
+              <h3>{t('marketing.howItWorks.step2t')}</h3>
+              <p>{t('marketing.howItWorks.step2p1')}</p>
+              <p>{t('marketing.howItWorks.step2p2')}</p>
               <div className="k-split">
                 <div className="k-cardlet">
-                  <span className="k-lbl">Voice profile — Sage &amp; Clay Co.</span>
-                  <p>{`Match · 96%
-Warmth · High
-Length · Medium
-Filler · None
-Never uses · elevate, curated, must-have`}</p>
+                  <span className="k-lbl">{t('marketing.howItWorks.step2lbl1')}</span>
+                  <p>{t('marketing.howItWorks.step2sample1')}</p>
                 </div>
                 <div className="k-cardlet">
-                  <span className="k-lbl">Built from</span>
-                  <p>{`24 past buyer messages
-12 published listings
-6 Instagram captions
-2 shop policy pages`}</p>
+                  <span className="k-lbl">{t('marketing.howItWorks.step2lbl2')}</span>
+                  <p>{t('marketing.howItWorks.step2sample2')}</p>
                 </div>
               </div>
             </div>
@@ -100,26 +75,14 @@ Never uses · elevate, curated, must-have`}</p>
               <div className="k-num">3</div>
             </div>
             <div>
-              <h3>You get three, not one</h3>
-              <p>
-                Every run returns three variants. Not three shades of the same
-                sentence — three genuinely different angles: a straightforward
-                one, a shorter one, and one with more personality. Pick the
-                closest and edit the rest by hand.
-              </p>
-              <p>
-                Nothing is locked. The output is a text box, and it&apos;s yours
-                to change, shorten, or throw out.
-              </p>
+              <h3>{t('marketing.howItWorks.step3t')}</h3>
+              <p>{t('marketing.howItWorks.step3p1')}</p>
+              <p>{t('marketing.howItWorks.step3p2')}</p>
               <div className="k-cardlet">
-                <span className="k-lbl">Variant A</span>
-                <p>
-                  Hand-thrown Speckled Mug — Sage. Thrown on the wheel in small
-                  batches, then glazed in a soft sage that pools a shade deeper
-                  near the foot.
-                </p>
+                <span className="k-lbl">{t('marketing.howItWorks.step3lbl')}</span>
+                <p>{t('marketing.howItWorks.step3sample')}</p>
               </div>
-              <span className="k-arrow">↓ two more angles included</span>
+              <span className="k-arrow">{t('marketing.howItWorks.step3arrow')}</span>
             </div>
           </Reveal>
 
@@ -128,36 +91,29 @@ Never uses · elevate, curated, must-have`}</p>
               <div className="k-num">4</div>
             </div>
             <div>
-              <h3>Publish, or copy and leave</h3>
-              <p>
-                Send it straight to Etsy, Shopify, Amazon Handmade, Instagram,
-                Pinterest, TikTok Shop, or eBay. Or copy the text and paste it
-                wherever you like — there&apos;s no lock-in and no watermark.
-              </p>
-              <p>
-                Everything you publish stays yours. Export your whole library as
-                CSV or Markdown whenever you want, including if you cancel.
-              </p>
+              <h3>{t('marketing.howItWorks.step4t')}</h3>
+              <p>{t('marketing.howItWorks.step4p1')}</p>
+              <p>{t('marketing.howItWorks.step4p2')}</p>
               <div className="k-pipe">
                 <div>
-                  <b>Connect</b>
-                  <h4>OAuth, no passwords</h4>
-                  <span>Grant access per channel. Revoke any of them in one click.</span>
+                  <b>{t('marketing.howItWorks.pipe1t')}</b>
+                  <h4>{t('marketing.howItWorks.pipe1h')}</h4>
+                  <span>{t('marketing.howItWorks.pipe1s')}</span>
                 </div>
                 <div>
-                  <b>Generate</b>
-                  <h4>One voice, 15 tools</h4>
-                  <span>Listings, captions, replies, and emails all read from the same profile.</span>
+                  <b>{t('marketing.howItWorks.pipe2t')}</b>
+                  <h4>{t('marketing.howItWorks.pipe2h')}</h4>
+                  <span>{t('marketing.howItWorks.pipe2s')}</span>
                 </div>
                 <div>
-                  <b>Publish</b>
-                  <h4>Or just copy it</h4>
-                  <span>Push to seven marketplaces, or copy plain text and go.</span>
+                  <b>{t('marketing.howItWorks.pipe3t')}</b>
+                  <h4>{t('marketing.howItWorks.pipe3h')}</h4>
+                  <span>{t('marketing.howItWorks.pipe3s')}</span>
                 </div>
                 <div>
-                  <b>Export</b>
-                  <h4>Leave any time</h4>
-                  <span>CSV or Markdown, full history, no questions asked.</span>
+                  <b>{t('marketing.howItWorks.pipe4t')}</b>
+                  <h4>{t('marketing.howItWorks.pipe4h')}</h4>
+                  <span>{t('marketing.howItWorks.pipe4s')}</span>
                 </div>
               </div>
             </div>
@@ -166,73 +122,70 @@ Never uses · elevate, curated, must-have`}</p>
 
         <section className="k-wrap" style={{ paddingTop: 0 }}>
           <Reveal>
-            <div className="eyebrow">The honest comparison</div>
-            <h2 className="k-h2">Where Craftly fits.</h2>
-            <p className="k-lead">
-              We&apos;re not the right tool for everything. Here&apos;s the
-              straight version.
-            </p>
+            <div className="eyebrow">{t('marketing.howItWorks.cmpEyebrow')}</div>
+            <h2 className="k-h2">{t('marketing.howItWorks.cmpH')}</h2>
+            <p className="k-lead">{t('marketing.howItWorks.cmpLead')}</p>
           </Reveal>
           <div className="k-table-wrap">
             <table className="k-table">
               <thead>
                 <tr>
                   <th>&nbsp;</th>
-                  <th>Craftly</th>
-                  <th>A generic AI writer</th>
-                  <th>Writing it yourself</th>
-                  <th>Hiring a copywriter</th>
+                  <th>{t('marketing.howItWorks.th1')}</th>
+                  <th>{t('marketing.howItWorks.th2')}</th>
+                  <th>{t('marketing.howItWorks.th3')}</th>
+                  <th>{t('marketing.howItWorks.th4')}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>Sounds like you</td>
-                  <td className="yes hl">✓ Profile-driven, 96% match</td>
-                  <td className="no">Generic brand voice</td>
-                  <td className="yes">✓ Obviously</td>
-                  <td className="yes">✓ After a few rounds</td>
+                  <td>{t('marketing.howItWorks.r1')}</td>
+                  <td className="yes hl">{t('marketing.howItWorks.r1c1')}</td>
+                  <td className="no">{t('marketing.howItWorks.r1c2')}</td>
+                  <td className="yes">{t('marketing.howItWorks.r1c3')}</td>
+                  <td className="yes">{t('marketing.howItWorks.r1c4')}</td>
                 </tr>
                 <tr>
-                  <td>Time per listing</td>
-                  <td className="yes hl">✓ About 90 seconds</td>
-                  <td>5–10 min of prompting</td>
-                  <td className="no">25–40 minutes</td>
-                  <td className="no">2–5 days</td>
+                  <td>{t('marketing.howItWorks.r2')}</td>
+                  <td className="yes hl">{t('marketing.howItWorks.r2c1')}</td>
+                  <td>{t('marketing.howItWorks.r2c2')}</td>
+                  <td className="no">{t('marketing.howItWorks.r2c3')}</td>
+                  <td className="no">{t('marketing.howItWorks.r2c4')}</td>
                 </tr>
                 <tr>
-                  <td>Knows marketplaces</td>
-                  <td className="yes hl">✓ 7 channels, per-channel rules</td>
-                  <td className="no">None</td>
-                  <td className="no">Whatever you&apos;ve learned</td>
-                  <td>Varies</td>
+                  <td>{t('marketing.howItWorks.r3')}</td>
+                  <td className="yes hl">{t('marketing.howItWorks.r3c1')}</td>
+                  <td className="no">{t('marketing.howItWorks.r3c2')}</td>
+                  <td className="no">{t('marketing.howItWorks.r3c3')}</td>
+                  <td>{t('marketing.howItWorks.r3c4')}</td>
                 </tr>
                 <tr>
-                  <td>Learns your shop policies</td>
-                  <td className="yes hl">✓ Yes, for buyer replies</td>
-                  <td className="no">No</td>
-                  <td className="yes">✓ You wrote them</td>
-                  <td className="no">Needs briefing</td>
+                  <td>{t('marketing.howItWorks.r4')}</td>
+                  <td className="yes hl">{t('marketing.howItWorks.r4c1')}</td>
+                  <td className="no">{t('marketing.howItWorks.r4c2')}</td>
+                  <td className="yes">{t('marketing.howItWorks.r4c3')}</td>
+                  <td className="no">{t('marketing.howItWorks.r4c4')}</td>
                 </tr>
                 <tr>
-                  <td>Cost for 40 listings/mo</td>
-                  <td className="yes hl">✓ Pro, $19/mo</td>
-                  <td>$20–200</td>
-                  <td className="no">~20 hours</td>
-                  <td className="no">$1,200+</td>
+                  <td>{t('marketing.howItWorks.r5')}</td>
+                  <td className="yes hl">{t('marketing.howItWorks.r5c1')}</td>
+                  <td>{t('marketing.howItWorks.r5c2')}</td>
+                  <td className="no">{t('marketing.howItWorks.r5c3')}</td>
+                  <td className="no">{t('marketing.howItWorks.r5c4')}</td>
                 </tr>
                 <tr>
-                  <td>Works offline</td>
-                  <td className="no">No</td>
-                  <td className="no">No</td>
-                  <td className="yes">✓ Yes</td>
-                  <td className="yes">✓ Yes</td>
+                  <td>{t('marketing.howItWorks.r6')}</td>
+                  <td className="no">{t('marketing.howItWorks.r6c1')}</td>
+                  <td className="no">{t('marketing.howItWorks.r6c2')}</td>
+                  <td className="yes">{t('marketing.howItWorks.r6c3')}</td>
+                  <td className="yes">{t('marketing.howItWorks.r6c4')}</td>
                 </tr>
                 <tr>
-                  <td>Good at long-form</td>
-                  <td className="no">Not really — short-form only</td>
-                  <td className="yes">✓ Yes</td>
-                  <td className="yes">✓ Yes</td>
-                  <td className="yes">✓ Yes</td>
+                  <td>{t('marketing.howItWorks.r7')}</td>
+                  <td className="no">{t('marketing.howItWorks.r7c1')}</td>
+                  <td className="yes">{t('marketing.howItWorks.r7c2')}</td>
+                  <td className="yes">{t('marketing.howItWorks.r7c3')}</td>
+                  <td className="yes">{t('marketing.howItWorks.r7c4')}</td>
                 </tr>
               </tbody>
             </table>
@@ -241,80 +194,53 @@ Never uses · elevate, curated, must-have`}</p>
 
         <section className="k-wrap" style={{ paddingTop: 0 }}>
           <Reveal>
-            <div className="eyebrow">What we don&apos;t do</div>
-            <h2 className="k-h2">Three limits, stated up front.</h2>
+            <div className="eyebrow">{t('marketing.howItWorks.limEyebrow')}</div>
+            <h2 className="k-h2">{t('marketing.howItWorks.limH')}</h2>
           </Reveal>
           <div className="k-grid k-g3" style={{ marginTop: 44 }}>
             <Reveal className="k-cell">
               <div className="k-ico">01</div>
-              <h3>No long-form</h3>
-              <p>
-                Craftly is built for things under 300 words. Blog posts and
-                about pages need a human and a slow afternoon.
-              </p>
+              <h3>{t('marketing.howItWorks.lim1t')}</h3>
+              <p>{t('marketing.howItWorks.lim1d')}</p>
             </Reveal>
             <Reveal className="k-cell">
               <div className="k-ico">02</div>
-              <h3>No image generation</h3>
-              <p>
-                We&apos;ll caption and tag your photos, but we won&apos;t invent
-                them. Your work should look like your work.
-              </p>
+              <h3>{t('marketing.howItWorks.lim2t')}</h3>
+              <p>{t('marketing.howItWorks.lim2d')}</p>
             </Reveal>
             <Reveal className="k-cell">
               <div className="k-ico">03</div>
-              <h3>No invented facts</h3>
-              <p>
-                If you don&apos;t tell us the dimensions, we leave a blank
-                rather than guessing. Wrong specs cost more than no specs.
-              </p>
+              <h3>{t('marketing.howItWorks.lim3t')}</h3>
+              <p>{t('marketing.howItWorks.lim3d')}</p>
             </Reveal>
           </div>
         </section>
 
         <section className="k-wrap" style={{ paddingTop: 0 }}>
           <Reveal>
-            <div className="eyebrow">FAQ</div>
-            <h2 className="k-h2">Practical questions.</h2>
+            <div className="eyebrow">{t('marketing.howItWorks.faqEyebrow')}</div>
+            <h2 className="k-h2">{t('marketing.howItWorks.faqH')}</h2>
           </Reveal>
           <Faq
             items={[
-              {
-                q: 'How many messages do you need to learn my voice?',
-                a: "Twenty is the sweet spot — roughly your last ten buyer conversations and ten listings. Under twelve and we'll ask for a couple more before generation unlocks.",
-              },
-              {
-                q: 'Can I edit the voice profile by hand?',
-                a: 'Yes. Every profile has four dials — warmth, length, humor, and formality — plus a blocklist of words you never want to see. Changes apply to everything generated after that point.',
-              },
-              {
-                q: 'Do you train on my listings?',
-                a: "Your content is yours. We use it to serve you, not to improve a shared model. Delete anything and it's gone from our systems within seven days.",
-              },
-              {
-                q: 'What if the copy comes out wrong?',
-                a: 'Hit regenerate — you get three more. If a whole tool is consistently off, lower the match threshold in your profile or add the offending words to your blocklist.',
-              },
-              {
-                q: 'Is there an API?',
-                a: 'Not publicly yet. Pro and Scale accounts get early access to the private beta — ask in the dashboard.',
-              },
+              { q: t('marketing.howItWorks.faq1q'), a: t('marketing.howItWorks.faq1a') },
+              { q: t('marketing.howItWorks.faq2q'), a: t('marketing.howItWorks.faq2a') },
+              { q: t('marketing.howItWorks.faq3q'), a: t('marketing.howItWorks.faq3a') },
+              { q: t('marketing.howItWorks.faq4q'), a: t('marketing.howItWorks.faq4a') },
+              { q: t('marketing.howItWorks.faq5q'), a: t('marketing.howItWorks.faq5a') },
             ]}
           />
 
           <Reveal className="k-cta-band" style={{ marginTop: 80 }}>
-            <h2 className="k-h2">Read the output before you believe us.</h2>
-            <p className="k-lead">
-              Ten generations a month, free forever. No card, and no sales
-              call.
-            </p>
+            <h2 className="k-h2">{t('marketing.howItWorks.ctaH')}</h2>
+            <p className="k-lead">{t('marketing.howItWorks.ctaLead')}</p>
             <div className="k-cta-row">
               <Link href="/dashboard" className="k-btn k-btn-primary">
-                <span>Open the workspace</span>
+                <span>{t('marketing.howItWorks.ctaBtn1')}</span>
                 <i className="k-shine" />
               </Link>
               <Link href="/examples" className="k-btn">
-                See real examples
+                {t('marketing.howItWorks.ctaBtn2')}
               </Link>
             </div>
           </Reveal>

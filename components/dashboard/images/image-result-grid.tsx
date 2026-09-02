@@ -5,23 +5,27 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Loader2, Download, ExternalLink, Image as ImageIcon } from 'lucide-react'
 import type { ProductImageOutput } from './use-image-generation'
+import { useI18n } from '@/lib/i18n/client'
 
 interface Props {
   images: ProductImageOutput[]
   loading: boolean
   error: string | null
+  creditError: boolean
 }
 
-export default function ImageResultGrid({ images, loading, error }: Props) {
+export default function ImageResultGrid({ images, loading, error, creditError }: Props) {
+  const { t } = useI18n()
+
   return (
     <div className="space-y-6">
       {error && (
         <Card className="border-destructive bg-destructive/10">
           <CardContent className="pt-6">
             <p className="text-destructive font-medium">{error}</p>
-            {error.toLowerCase().includes('credit') && (
+            {creditError && (
               <Button variant="link" className="p-0 h-auto text-destructive mt-2" asChild>
-                <Link href="/pricing">Upgrade Plan &rarr;</Link>
+                <Link href="/pricing">{t('dashboardTools.common.upgradePlan')} &rarr;</Link>
               </Button>
             )}
           </CardContent>
@@ -31,14 +35,14 @@ export default function ImageResultGrid({ images, loading, error }: Props) {
       {loading && (
         <div className="flex flex-col items-center justify-center p-12 text-center text-foreground">
           <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-          <p className="text-lg font-medium">AI is painting your posters...</p>
+          <p className="text-lg font-medium">{t('dashboardTools.images.paintingLoading')}</p>
         </div>
       )}
 
       {!loading && !error && images.length === 0 && (
         <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
           <ImageIcon className="h-12 w-12 mb-4" />
-          <p>Describe your product and click generate to get marketing posters.</p>
+          <p>{t('dashboardTools.images.imagesEmpty')}</p>
         </div>
       )}
 
@@ -51,7 +55,7 @@ export default function ImageResultGrid({ images, loading, error }: Props) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={img.imageUrl}
-                    alt={`Generated poster ${i + 1}`}
+                    alt={t('dashboardTools.images.generatedPoster').replace('{n}', String(i + 1))}
                     className="w-full h-auto"
                   />
                 </div>

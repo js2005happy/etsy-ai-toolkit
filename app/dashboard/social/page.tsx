@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Copy, Check, Coins } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import { PLATFORMS } from '@/lib/platforms'
+import { useI18n } from '@/lib/i18n/client'
 
 const SOCIAL_PLATFORMS = PLATFORMS.filter((p) =>
   ['instagram', 'pinterest', 'tiktok'].includes(p.id)
@@ -22,10 +23,12 @@ interface SocialPostOutput {
 }
 
 export default function SocialPage() {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(false)
   const [credits, setCredits] = useState<number | null>(null)
   const [result, setResult] = useState<SocialPostOutput | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [creditError, setCreditError] = useState(false)
   const [copiedField, setCopiedField] = useState<'caption' | 'hashtags' | null>(null)
 
   const [formData, setFormData] = useState({
@@ -58,6 +61,7 @@ export default function SocialPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setCreditError(false)
     setResult(null)
 
     try {
@@ -68,21 +72,22 @@ export default function SocialPage() {
       })
 
       if (response.status === 401) {
-        setError('Please log in to use this tool.')
+        setError(t('dashboardTools.common.logIn'))
         return
       }
       if (response.status === 403) {
-        setError('Insufficient credits. Please upgrade your plan to generate more posts.')
+        setCreditError(true)
+        setError(t('dashboardTools.common.insufficientCredits'))
         return
       }
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Something went wrong')
+        throw new Error(data.error || t('dashboardTools.common.somethingWrong'))
       }
 
       const data = await response.json()
       setResult(data)
-      
+
       const res = await fetch('/api/user/credits')
       if (res.ok) {
         const creditData = await res.json()
@@ -100,13 +105,13 @@ export default function SocialPage() {
       <CinematicBackground theme="social" />
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold font-display">Social Media Post Generator</h1>
-          <p className="text-muted-foreground">Create eye-catching captions and hashtags for your social media.</p>
+          <h1 className="text-3xl font-bold font-display">{t('dashboardTools.social.h1')}</h1>
+          <p className="text-muted-foreground">{t('dashboardTools.social.sub')}</p>
         </div>
         {credits !== null && (
           <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20">
             <Coins className="h-4 w-4" />
-            <span>{credits} Credits Left</span>
+            <span>{credits} {t('dashboardTools.common.creditsLeft')}</span>
           </div>
         )}
       </div>
@@ -114,16 +119,16 @@ export default function SocialPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle className="font-display">Post Details</CardTitle>
-            <CardDescription>Describe your product and select the target platform.</CardDescription>
+            <CardTitle className="font-display">{t('dashboardTools.social.details')}</CardTitle>
+            <CardDescription>{t('dashboardTools.social.detailsDesc')}</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="product_description">Product Description</Label>
-                <Textarea 
-                  id="product_description" 
-                  placeholder="e.g. A handmade blue ceramic vase with floral patterns..." 
+                <Label htmlFor="product_description">{t('dashboardTools.common.productDescription')}</Label>
+                <Textarea
+                  id="product_description"
+                  placeholder={t('dashboardTools.social.productDescPh')}
                   value={formData.product_description}
                   onChange={(e) => setFormData({ ...formData, product_description: e.target.value })}
                   required
@@ -131,13 +136,13 @@ export default function SocialPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="platform">Platform</Label>
-                <Select 
-                  value={formData.platform} 
+                <Label htmlFor="platform">{t('dashboardTools.social.platform')}</Label>
+                <Select
+                  value={formData.platform}
                   onValueChange={(value) => setFormData({ ...formData, platform: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select platform" />
+                    <SelectValue placeholder={t('dashboardTools.social.selectPlatform')} />
                   </SelectTrigger>
                   <SelectContent>
                     {SOCIAL_PLATFORMS.map((p) => (
@@ -152,10 +157,10 @@ export default function SocialPage() {
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Post...
+                    {t('dashboardTools.social.generating')}
                   </>
                 ) : (
-                  'Generate Post'
+                  t('dashboardTools.social.generate')
                 )}
               </Button>
             </form>
@@ -167,12 +172,12 @@ export default function SocialPage() {
             <Card className="border-destructive bg-destructive/10">
               <CardContent className="pt-6">
                 <p className="text-destructive font-medium">{error}</p>
-                {error.includes('credits') && (
+                {creditError && (
                   <Button variant="link" className="p-0 h-auto text-destructive mt-2" asChild>
-  <Link href="/pricing">
-    Upgrade Plan &rarr;
-  </Link>
-</Button>
+                    <Link href="/pricing">
+                      {t('dashboardTools.common.upgradePlan')} &rarr;
+                    </Link>
+                  </Button>
                 )}
               </CardContent>
             </Card>
@@ -180,14 +185,14 @@ export default function SocialPage() {
 
           {!result && !loading && !error && (
             <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
-              <p>Describe your product and click generate to get a viral post!</p>
+              <p>{t('dashboardTools.social.empty')}</p>
             </div>
           )}
 
           {loading && (
             <div className="h-full flex flex-col items-center justify-center p-12 text-center">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-lg font-medium">AI is writing your caption...</p>
+              <p className="text-lg font-medium">{t('dashboardTools.social.loading')}</p>
             </div>
           )}
 
@@ -195,10 +200,10 @@ export default function SocialPage() {
             <div className="space-y-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium font-display">Caption</CardTitle>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.social.caption')}</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleCopy(result.caption, 'caption')}
                   >
                     {copiedField === 'caption' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -211,10 +216,10 @@ export default function SocialPage() {
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium font-display">Hashtags</CardTitle>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.social.hashtags')}</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => handleCopy(result.hashtags.join(' '), 'hashtags')}
                   >
                     {copiedField === 'hashtags' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}

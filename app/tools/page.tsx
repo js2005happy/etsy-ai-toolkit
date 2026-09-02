@@ -5,6 +5,7 @@ import Link from 'next/link'
 import Navbar from '@/components/shared/navbar'
 import SiteFooter from '@/components/shared/site-footer'
 import Reveal from '@/components/shared/reveal'
+import { useI18n } from '@/lib/i18n/client'
 
 type Tool = {
   n: string
@@ -14,110 +15,43 @@ type Tool = {
   popular?: boolean
 }
 
-const TOOLS: Tool[] = [
-  {
-    n: '01',
-    cat: 'write',
-    title: 'Listing Writer',
-    desc: 'Turn rough notes and photos into a complete listing: title, description, and materials, in your words.',
-    popular: true,
-  },
-  {
-    n: '02',
-    cat: 'write',
-    title: 'Title Optimizer',
-    desc: 'Ten title variants ranked by search intent and readability. Keep the one that sounds most like you.',
-  },
-  {
-    n: '03',
-    cat: 'write',
-    title: 'Tag Generator',
-    desc: 'Thirteen tags drawn from how real buyers search, not from a thesaurus. No stuffing, no filler.',
-  },
-  {
-    n: '04',
-    cat: 'write',
-    title: 'Variant Copy',
-    desc: 'Twelve colourways, one description template. Change the glaze name, keep the voice intact.',
-  },
-  {
-    n: '05',
-    cat: 'write',
-    title: 'Photo Captions',
-    desc: 'Alt text and photo captions that describe the piece honestly — and help it get found.',
-  },
-  {
-    n: '06',
-    cat: 'sell',
-    title: 'Etsy SEO Audit',
-    desc: 'Paste a live listing. Get a plain-language score and the three edits that move it most.',
-  },
-  {
-    n: '07',
-    cat: 'sell',
-    title: 'Shopify Page Copy',
-    desc: "Product pages with a short opening line, honest specs, and a closing nudge that isn't pushy.",
-  },
-  {
-    n: '08',
-    cat: 'sell',
-    title: 'Amazon Bullets',
-    desc: 'Five benefit bullets written in plain speech, stripped of the usual marketplace shouting.',
-  },
-  {
-    n: '09',
-    cat: 'sell',
-    title: 'Shop Announcement',
-    desc: 'Holiday hours, a kiln delay, a restock — announced warmly, in two sentences.',
-  },
-  {
-    n: '10',
-    cat: 'support',
-    title: 'Buyer Reply',
-    desc: 'Answer sizing, shipping, and custom-order questions using your own policies and past replies.',
-  },
-  {
-    n: '11',
-    cat: 'support',
-    title: 'Review Response',
-    desc: 'Thank people properly. Handle a three-star review without defensiveness or corporate speak.',
-  },
-  {
-    n: '12',
-    cat: 'support',
-    title: 'Shipping Note',
-    desc: 'A short dispatch message with tracking, care instructions, and a human sign-off.',
-  },
-  {
-    n: '13',
-    cat: 'grow',
-    title: 'Instagram Caption',
-    desc: 'Three caption options per photo: a story, a short one, and a question that invites replies.',
-  },
-  {
-    n: '14',
-    cat: 'grow',
-    title: 'Pinterest Pin',
-    desc: 'Keyword-rich pin titles and descriptions that still read like a person wrote them.',
-  },
-  {
-    n: '15',
-    cat: 'grow',
-    title: 'Newsletter Blurb',
-    desc: 'A paragraph for your email list that sounds like the note you would actually send.',
-  },
-]
-
-const FILTERS = [
-  { key: 'all', label: 'All 15' },
-  { key: 'write', label: 'Write' },
-  { key: 'sell', label: 'Sell' },
-  { key: 'support', label: 'Support' },
-  { key: 'grow', label: 'Grow' },
-]
-
 export default function ToolsPage() {
+  const { t } = useI18n()
   const [filter, setFilter] = useState('all')
+
+  const TOOLS: Tool[] = [
+    { n: '01', cat: 'write', title: t('marketing.tools.tool1title'), desc: t('marketing.tools.tool1desc'), popular: true },
+    { n: '02', cat: 'write', title: t('marketing.tools.tool2title'), desc: t('marketing.tools.tool2desc') },
+    { n: '03', cat: 'write', title: t('marketing.tools.tool3title'), desc: t('marketing.tools.tool3desc') },
+    { n: '04', cat: 'write', title: t('marketing.tools.tool4title'), desc: t('marketing.tools.tool4desc') },
+    { n: '05', cat: 'write', title: t('marketing.tools.tool5title'), desc: t('marketing.tools.tool5desc') },
+    { n: '06', cat: 'sell', title: t('marketing.tools.tool6title'), desc: t('marketing.tools.tool6desc') },
+    { n: '07', cat: 'sell', title: t('marketing.tools.tool7title'), desc: t('marketing.tools.tool7desc') },
+    { n: '08', cat: 'sell', title: t('marketing.tools.tool8title'), desc: t('marketing.tools.tool8desc') },
+    { n: '09', cat: 'sell', title: t('marketing.tools.tool9title'), desc: t('marketing.tools.tool9desc') },
+    { n: '10', cat: 'support', title: t('marketing.tools.tool10title'), desc: t('marketing.tools.tool10desc') },
+    { n: '11', cat: 'support', title: t('marketing.tools.tool11title'), desc: t('marketing.tools.tool11desc') },
+    { n: '12', cat: 'support', title: t('marketing.tools.tool12title'), desc: t('marketing.tools.tool12desc') },
+    { n: '13', cat: 'grow', title: t('marketing.tools.tool13title'), desc: t('marketing.tools.tool13desc') },
+    { n: '14', cat: 'grow', title: t('marketing.tools.tool14title'), desc: t('marketing.tools.tool14desc') },
+    { n: '15', cat: 'grow', title: t('marketing.tools.tool15title'), desc: t('marketing.tools.tool15desc') },
+  ]
+
+  const FILTERS = [
+    { key: 'all', label: t('marketing.tools.fAll') },
+    { key: 'write', label: t('marketing.tools.fWrite') },
+    { key: 'sell', label: t('marketing.tools.fSell') },
+    { key: 'support', label: t('marketing.tools.fSupport') },
+    { key: 'grow', label: t('marketing.tools.fGrow') },
+  ]
+
+  const catLabels: Record<Tool['cat'], string> = {
+    write: t('marketing.tools.fWrite'),
+    sell: t('marketing.tools.fSell'),
+    support: t('marketing.tools.fSupport'),
+    grow: t('marketing.tools.fGrow'),
+  }
+
   const count = TOOLS.filter((t) => filter === 'all' || t.cat === filter).length
 
   return (
@@ -126,19 +60,15 @@ export default function ToolsPage() {
       <main className="flex-1">
         <section className="k-wrap k-page-head" style={{ paddingBottom: 34 }}>
           <div className="k-breadcrumb">
-            <Link href="/">Home</Link> / Tools
+            <Link href="/">{t('marketing.tools.bcHome')}</Link> / {t('marketing.tools.bcCurrent')}
           </div>
-          <div className="eyebrow">The studio</div>
+          <div className="eyebrow">{t('marketing.tools.eyebrow')}</div>
           <h1 className="k-h1" style={{ marginTop: 16 }}>
-            Fifteen tools.
+            {t('marketing.tools.h1a')}
             <br />
-            <span className="grad">One voice.</span>
+            <span className="grad">{t('marketing.tools.h1grad')}</span>
           </h1>
-          <p className="k-lead">
-            Every tool reads from the same voice profile, so a listing, a
-            caption, and a reply to a buyer all sound like the same person —
-            you.
-          </p>
+          <p className="k-lead">{t('marketing.tools.lead')}</p>
           <div className="k-chips" style={{ marginTop: 34 }}>
             {FILTERS.map((f) => (
               <button
@@ -155,46 +85,43 @@ export default function ToolsPage() {
 
         <section className="k-wrap" style={{ paddingTop: 10 }}>
           <div className="k-grid k-g3">
-            {TOOLS.map((t, i) => (
+            {TOOLS.map((tool, i) => (
               <Reveal
-                key={t.n}
+                key={tool.n}
                 href="/dashboard"
                 className="k-tool-card"
                 delay={(i % 4) * 70}
                 style={{
-                  display: filter === 'all' || t.cat === filter ? undefined : 'none',
+                  display: filter === 'all' || tool.cat === filter ? undefined : 'none',
                 }}
               >
-                {t.popular && <span className="k-hot">POPULAR</span>}
+                {tool.popular && <span className="k-hot">{t('marketing.tools.popular')}</span>}
                 <div className="k-tool-top">
-                  <div className="k-ico">{t.n}</div>
-                  <span className={`k-cat ${t.cat}`}>{t.cat}</span>
+                  <div className="k-ico">{tool.n}</div>
+                  <span className={`k-cat ${tool.cat}`}>{catLabels[tool.cat]}</span>
                 </div>
-                <h3>{t.title}</h3>
-                <p>{t.desc}</p>
-                <div className="k-go">Open in workspace</div>
+                <h3>{tool.title}</h3>
+                <p>{tool.desc}</p>
+                <div className="k-go">{t('marketing.tools.openInWorkspace')}</div>
               </Reveal>
             ))}
           </div>
           <p className="k-empty" style={{ display: count ? 'none' : 'block' }}>
-            No tools in this category yet.
+            {t('marketing.tools.empty')}
           </p>
         </section>
 
         <section className="k-wrap k-section" style={{ paddingTop: 0 }}>
           <Reveal className="k-cta-band">
-            <h2 className="k-h2">Every tool, in one quiet room.</h2>
-            <p className="k-lead">
-              Free for ten generations a month. No credit card, no onboarding
-              call.
-            </p>
+            <h2 className="k-h2">{t('marketing.tools.ctaH')}</h2>
+            <p className="k-lead">{t('marketing.tools.ctaLead')}</p>
             <div className="k-cta-row">
               <Link href="/dashboard" className="k-btn k-btn-primary">
-                <span>Open the workspace</span>
+                <span>{t('marketing.tools.ctaBtn1')}</span>
                 <i className="k-shine" />
               </Link>
               <Link href="/pricing" className="k-btn">
-                Compare plans
+                {t('marketing.tools.ctaBtn2')}
               </Link>
             </div>
           </Reveal>

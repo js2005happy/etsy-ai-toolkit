@@ -1,39 +1,44 @@
+'use client'
+
 import Link from "next/link";
 import Logo from "@/components/shared/logo";
+import { useI18n } from "@/lib/i18n/client";
 
 export default function SiteFooter() {
+  const { t } = useI18n();
+
   return (
     <footer className="k-footer">
       <div className="k-wrap">
         <div className="k-foot-grid">
           <div>
             <Logo />
-            <p className="k-foot-brand">Words for people who make things by hand.</p>
+            <p className="k-foot-brand">{t("footer.tagline")}</p>
           </div>
           <div>
-            <h5>Product</h5>
-            <Link href="/tools">Tools</Link>
-            <Link href="/dashboard">Workspace</Link>
-            <Link href="/examples">Examples</Link>
-            <Link href="/pricing">Pricing</Link>
+            <h5>{t("footer.product")}</h5>
+            <Link href="/tools">{t("footer.tools")}</Link>
+            <Link href="/dashboard">{t("footer.workspace")}</Link>
+            <Link href="/examples">{t("footer.examples")}</Link>
+            <Link href="/pricing">{t("footer.pricing")}</Link>
           </div>
           <div>
-            <h5>Learn</h5>
-            <Link href="/how-it-works">How it works</Link>
-            <Link href="/faq">FAQ</Link>
-            <Link href="/examples">Templates</Link>
-            <Link href="/how-it-works">Seller guide</Link>
+            <h5>{t("footer.learn")}</h5>
+            <Link href="/how-it-works">{t("footer.howItWorks")}</Link>
+            <Link href="/faq">{t("footer.faq")}</Link>
+            <Link href="/examples">{t("footer.templates")}</Link>
+            <Link href="/how-it-works">{t("footer.sellerGuide")}</Link>
           </div>
           <div>
-            <h5>Company</h5>
-            <Link href="/contact">About</Link>
-            <Link href="/contact">Contact</Link>
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/terms">Terms</Link>
+            <h5>{t("footer.company")}</h5>
+            <Link href="/contact">{t("footer.about")}</Link>
+            <Link href="/contact">{t("footer.contact")}</Link>
+            <Link href="/privacy">{t("footer.privacy")}</Link>
+            <Link href="/terms">{t("footer.terms")}</Link>
           </div>
         </div>
         <div className="k-foot-bottom">
-          <div>2026 Craftly. Made for makers.</div>
+          <div>2026 Craftly. {t("footer.madeFor")}</div>
           <div>Etsy · Shopify · Amazon · Instagram · Pinterest · TikTok · eBay</div>
         </div>
         <div className="k-badges">

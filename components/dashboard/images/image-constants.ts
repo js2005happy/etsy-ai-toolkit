@@ -1,4 +1,5 @@
 import { PLATFORMS as MARKETPLACES } from '@/lib/platforms'
+import { SCENE_TEMPLATES } from '@/lib/image-scenes'
 
 // Product-image size presets, derived from the single source of truth in
 // lib/platforms. Every marketplace maps to the closest gpt-image-supported
@@ -43,6 +44,20 @@ export const LANGUAGES = [
 ]
 
 export const VARIANT_COUNTS = [2, 3, 4]
+
+// Scene / format presets (main image vs detail page vs social media), derived
+// from the single source of truth in lib/image-scenes.
+export const SCENES = Object.entries(SCENE_TEMPLATES).map(([value, t]) => ({
+  value,
+  label: t.label,
+  group: t.group,
+}))
+
+export const SCENE_GROUP_LABELS: Record<string, string> = {
+  main: 'Main image',
+  detail: 'Detail page',
+  social: 'Social media',
+}
 
 export const CATEGORIES = [
   { value: 'jewelry', label: 'Jewelry & Accessories' },

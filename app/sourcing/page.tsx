@@ -5,6 +5,7 @@ import SiteFooter from "@/components/shared/site-footer";
 import CinematicBackground from "@/components/cinematic/cinematic-background";
 import Reveal from "@/components/shared/reveal";
 import SourcingQuoteForm from "@/components/sourcing/sourcing-quote-form";
+import { getServerTranslations } from "@/lib/i18n/server";
 import {
   PackageSearch,
   Handshake,
@@ -19,44 +20,46 @@ export const metadata: Metadata = {
     "Source products from verified Chinese suppliers. We find factories, negotiate prices, inspect quality, and ship to your door.",
 };
 
-const steps = [
-  {
-    icon: PackageSearch,
-    title: "Tell us what you need",
-    desc: "Share your product idea, specs, or a link to something you want to source. No technical knowledge needed.",
-  },
-  {
-    icon: Handshake,
-    title: "We find & negotiate",
-    desc: "Our team sources verified factories, gets samples, and negotiates the best price on your behalf.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Quality check & sampling",
-    desc: "We inspect samples before mass production, so you never ship a bad batch to your customers.",
-  },
-  {
-    icon: Truck,
-    title: "Consolidate & ship",
-    desc: "We consolidate your orders, handle freight and customs, and deliver to your warehouse or door.",
-  },
-];
-
 export default function SourcingPage() {
+  const { t } = getServerTranslations();
+
+  const steps = [
+    {
+      icon: PackageSearch,
+      title: t("marketing.sourcing.step1t"),
+      desc: t("marketing.sourcing.step1"),
+    },
+    {
+      icon: Handshake,
+      title: t("marketing.sourcing.step2t"),
+      desc: t("marketing.sourcing.step2"),
+    },
+    {
+      icon: ShieldCheck,
+      title: t("marketing.sourcing.step3t"),
+      desc: t("marketing.sourcing.step3"),
+    },
+    {
+      icon: Truck,
+      title: t("marketing.sourcing.step4t"),
+      desc: t("marketing.sourcing.step4"),
+    },
+  ];
+
   return (
     <div className="flex min-h-screen flex-col">
       <CinematicBackground />
       <SourcingHeader />
       <main className="flex-1">
         <PageHero
-          eyebrow="Sourcing"
+          eyebrow={t("marketing.sourcing.eyebrow")}
           title={
             <>
-              Source from China,{" "}
-              <span className="grad">without the guesswork</span>
+              {t("marketing.sourcing.title1")}{" "}
+              <span className="grad">{t("marketing.sourcing.title2")}</span>
             </>
           }
-          subtitle="We find, negotiate, and ship products from verified Chinese suppliers — so you can sell with confidence, even if you've never imported before."
+          subtitle={t("marketing.sourcing.subtitle")}
         />
 
         {/* How it works */}
@@ -64,12 +67,12 @@ export default function SourcingPage() {
           <div className="mx-auto max-w-6xl">
             <Reveal>
               <p className="mb-4 text-[13px] uppercase tracking-[0.2em] text-primary">
-                How it works
+                {t("marketing.sourcing.how")}
               </p>
             </Reveal>
             <Reveal delay={60}>
               <h2 className="max-w-2xl font-sans text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
-                Four steps from idea to your warehouse
+                {t("marketing.sourcing.howTitle")}
               </h2>
             </Reveal>
 
@@ -94,26 +97,26 @@ export default function SourcingPage() {
           <div className="mx-auto max-w-4xl">
             <Reveal>
               <p className="mb-4 text-[13px] uppercase tracking-[0.2em] text-primary">
-                Pricing
+                {t("marketing.sourcing.pricing")}
               </p>
             </Reveal>
             <Reveal delay={60}>
               <h2 className="font-sans text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
-                Transparent pricing, no hidden costs
+                {t("marketing.sourcing.pricingTitle")}
               </h2>
             </Reveal>
             <Reveal delay={120}>
               <div className="mt-8 grid gap-4 md:grid-cols-2">
                 <div className="rounded-2xl border border-border bg-card/60 p-6">
-                  <h3 className="font-sans text-lg font-extrabold text-foreground">Commission model</h3>
+                  <h3 className="font-sans text-lg font-extrabold text-foreground">{t("marketing.sourcing.p1t")}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    A 5–10% sourcing fee on the order value. You only pay when you place the order.
+                    {t("marketing.sourcing.p1")}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-border bg-card/60 p-6">
-                  <h3 className="font-sans text-lg font-extrabold text-foreground">Flat project fee</h3>
+                  <h3 className="font-sans text-lg font-extrabold text-foreground">{t("marketing.sourcing.p2t")}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    For complex or one-off projects, we quote a fixed fee upfront after understanding your scope.
+                    {t("marketing.sourcing.p2")}
                   </p>
                 </div>
               </div>
@@ -126,21 +129,19 @@ export default function SourcingPage() {
           <div className="mx-auto max-w-4xl">
             <Reveal>
               <p className="mb-4 text-[13px] uppercase tracking-[0.2em] text-primary">
-                Why trust us
+                {t("marketing.sourcing.trust")}
               </p>
             </Reveal>
             <Reveal delay={60}>
               <h2 className="font-sans text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
-                Direct factory access, real QC
+                {t("marketing.sourcing.trustTitle")}
               </h2>
             </Reveal>
             <Reveal delay={120}>
               <div className="mt-8 flex items-start gap-3 rounded-2xl border border-border bg-card/60 p-6">
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                 <p className="text-sm leading-relaxed text-muted-foreground md:text-base">
-                  We&apos;re based in China and work with a network of verified factories.
-                  We visit suppliers, inspect samples, and handle quality control before anything
-                  ships — so the biggest risk of importing (getting a bad batch) is covered.
+                  {t("marketing.sourcing.trustBody")}
                 </p>
               </div>
             </Reveal>
@@ -152,12 +153,12 @@ export default function SourcingPage() {
           <div className="mx-auto max-w-xl">
             <Reveal>
               <h2 className="mb-2 text-center font-sans text-3xl font-extrabold leading-tight tracking-tight text-foreground md:text-4xl">
-                Get a quote
+                {t("marketing.sourcing.quoteTitle")}
               </h2>
             </Reveal>
             <Reveal delay={60}>
               <p className="mb-8 text-center text-muted-foreground">
-                Tell us what you want to source — we&apos;ll get back within 24 hours.
+                {t("marketing.sourcing.quoteBody")}
               </p>
             </Reveal>
             <div className="rounded-2xl border border-border bg-card p-6 shadow-xl md:p-8">
