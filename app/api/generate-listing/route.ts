@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { authenticateRequest, getBrandPrefs } from '@/lib/auth'
+import { consumeCredits } from '@/lib/quota'
 import { generateListing, type ListingInput } from '@/lib/openai'
 
 // Free users get their first 3 listings without spending credits, so they can
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
     const result = await generateListing({ ...body, brand_tone: brandTone ?? undefined, brand_keywords: brandKeywords ?? undefined })
 
     if (!withinTrial) {
-      await db.from('profiles').update({ credits_remaining: credits - 1 }).eq('id', userId)
+      await consumeCredits(db, userId, 1)
     }
 
     await db.from('generations').insert({

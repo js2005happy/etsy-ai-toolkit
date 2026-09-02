@@ -1,6 +1,6 @@
 # etsy-ai-toolkit-mcp
 
-Model Context Protocol (MCP) server for [Etsy AI Toolkit](https://craftly.world) — the AI copilot for Etsy sellers. Exposes the toolkit's 10 AI tools to any MCP client (Claude Code, Claude Desktop, Cursor, etc.) over **stdio** or **Streamable HTTP**.
+Model Context Protocol (MCP) server for [Craftly](https://craftly.world) — the AI copilot for Etsy sellers. Exposes the toolkit's 10 AI tools to any MCP client (Claude Code, Claude Desktop, Cursor, etc.) over **stdio** or **Streamable HTTP**.
 
 ## Tools
 
@@ -31,7 +31,7 @@ npx -y etsy-ai-toolkit-mcp
 
 ## Configure
 
-The server calls the Etsy AI Toolkit HTTP API, so it needs a base URL and a service-account key. Set them via a `.env` file next to the binary, or as env vars in your MCP client config:
+The server calls the Craftly HTTP API, so it needs a base URL and a service-account key. Set them via a `.env` file next to the binary, or as env vars in your MCP client config:
 
 ```bash
 BASE_URL=https://craftly.world     # omit to use the default

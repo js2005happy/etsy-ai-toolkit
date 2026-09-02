@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
+import { consumeImageCredits } from '@/lib/quota'
 import { generateProductImage, type ProductImageInput } from '@/lib/openai'
 
 export async function POST(request: Request) {
@@ -17,23 +18,14 @@ export async function POST(request: Request) {
 
     if (!hasImageAccess) {
       return NextResponse.json(
-        { error: 'Image generation requires the Pro plan or above. Please upgrade.' },
-        { status: 403 }
-      )
-    }
-    if (imageCredits <= 0) {
-      return NextResponse.json(
-        { error: 'Out of image credits. Please upgrade your plan.' },
+        { error: 'No image credits available. Please upgrade your plan.' },
         { status: 403 }
       )
     }
 
     const result = await generateProductImage(body)
 
-    await db
-      .from('profiles')
-      .update({ images_remaining: imageCredits - 1 })
-      .eq('id', userId)
+    await consumeImageCredits(db, userId, 1)
 
     await db.from('generations').insert({
       user_id: userId,

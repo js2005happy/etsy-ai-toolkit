@@ -50,6 +50,7 @@ export default function AccountPage() {
   const [nicknameMessage, setNicknameMessage] = useState<string | null>(null)
 
   const [mcpKey, setMcpKey] = useState<string | null>(null)
+  const [mcpHasKey, setMcpHasKey] = useState(false)
   const [mcpLoading, setMcpLoading] = useState(true)
   const [mcpCopied, setMcpCopied] = useState(false)
   const [mcpError, setMcpError] = useState<string | null>(null)
@@ -121,7 +122,10 @@ export default function AccountPage() {
     fetch('/api/user/mcp-key')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
-        if (!cancelled && data) setMcpKey(data.mcp_api_key ?? null)
+        if (!cancelled && data) {
+          setMcpKey(data.mcp_api_key ?? null)
+          setMcpHasKey(!!data.has_key)
+        }
       })
       .catch(() => {})
       .finally(() => {
@@ -177,7 +181,8 @@ export default function AccountPage() {
   }
 
   const handleResetMcpKey = async () => {
-    if (!window.confirm(t('account.mcpResetConfirm'))) return
+    const hasExisting = mcpHasKey || !!mcpKey
+    if (hasExisting && !window.confirm(t('account.mcpResetConfirm'))) return
     setMcpResetting(true)
     setMcpError(null)
     setMcpMessage(null)
@@ -186,6 +191,7 @@ export default function AccountPage() {
       const data = await res.json()
       if (res.ok && data.mcp_api_key) {
         setMcpKey(data.mcp_api_key)
+        setMcpHasKey(true)
         setMcpMessage(t('account.mcpResetDone'))
       } else {
         setMcpError(data?.error || t('auth.unexpectedError'))
@@ -516,6 +522,8 @@ export default function AccountPage() {
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : mcpKey ? (
                     <span className="truncate">{mcpKey}</span>
+                  ) : mcpHasKey ? (
+                    <span className="text-muted-foreground">••••••••••••••••••••</span>
                   ) : (
                     <span className="text-muted-foreground">…</span>
                   )}
@@ -546,7 +554,7 @@ export default function AccountPage() {
                   ) : (
                     <RefreshCw className="mr-2 h-4 w-4" />
                   )}
-                  {t('account.mcpReset')}
+                  {mcpHasKey || mcpKey ? t('account.mcpReset') : t('account.mcpGenerate')}
                 </Button>
               </div>
               {mcpError && <p className="text-sm font-medium text-destructive">{mcpError}</p>}

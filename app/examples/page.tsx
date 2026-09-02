@@ -15,7 +15,6 @@ type Example = {
   beforeLabel: string
   before: string
   after: string
-  match: number
   seconds: number
 }
 
@@ -32,7 +31,6 @@ export default function ExamplesPage() {
       beforeLabel: t('marketing.examples.lblMakersNote'),
       before: t('marketing.examples.ex1before'),
       after: t('marketing.examples.ex1after'),
-      match: 96,
       seconds: 41,
     },
     {
@@ -42,7 +40,6 @@ export default function ExamplesPage() {
       beforeLabel: t('marketing.examples.lblMakersNote'),
       before: t('marketing.examples.ex2before'),
       after: t('marketing.examples.ex2after'),
-      match: 95,
       seconds: 38,
     },
     {
@@ -52,7 +49,6 @@ export default function ExamplesPage() {
       beforeLabel: t('marketing.examples.lblMakersNote'),
       before: t('marketing.examples.ex3before'),
       after: t('marketing.examples.ex3after'),
-      match: 97,
       seconds: 33,
     },
     {
@@ -62,7 +58,6 @@ export default function ExamplesPage() {
       beforeLabel: t('marketing.examples.lblMakersNote'),
       before: t('marketing.examples.ex4before'),
       after: t('marketing.examples.ex4after'),
-      match: 94,
       seconds: 22,
     },
     {
@@ -72,7 +67,6 @@ export default function ExamplesPage() {
       beforeLabel: t('marketing.examples.lblMakersNote'),
       before: t('marketing.examples.ex5before'),
       after: t('marketing.examples.ex5after'),
-      match: 96,
       seconds: 24,
     },
     {
@@ -82,7 +76,6 @@ export default function ExamplesPage() {
       beforeLabel: t('marketing.examples.lblMakersNote'),
       before: t('marketing.examples.ex6before'),
       after: t('marketing.examples.ex6after'),
-      match: 92,
       seconds: 27,
     },
     {
@@ -92,7 +85,6 @@ export default function ExamplesPage() {
       beforeLabel: t('marketing.examples.lblBuyersMessage'),
       before: t('marketing.examples.ex7before'),
       after: t('marketing.examples.ex7after'),
-      match: 97,
       seconds: 14,
     },
     {
@@ -102,7 +94,6 @@ export default function ExamplesPage() {
       beforeLabel: t('marketing.examples.lblReview'),
       before: t('marketing.examples.ex8before'),
       after: t('marketing.examples.ex8after'),
-      match: 95,
       seconds: 16,
     },
     {
@@ -112,7 +103,6 @@ export default function ExamplesPage() {
       beforeLabel: t('marketing.examples.lblMakersNote'),
       before: t('marketing.examples.ex9before'),
       after: t('marketing.examples.ex9after'),
-      match: 98,
       seconds: 15,
     },
     {
@@ -122,7 +112,6 @@ export default function ExamplesPage() {
       beforeLabel: t('marketing.examples.lblMakersNote'),
       before: t('marketing.examples.ex10before'),
       after: t('marketing.examples.ex10after'),
-      match: 96,
       seconds: 29,
     },
   ]
@@ -206,7 +195,7 @@ export default function ExamplesPage() {
                 </div>
                 <div className="k-ex-foot">
                   <span className="k-match">
-                    {t('marketing.examples.voiceMatch')} <b>{e.match}%</b> · {e.seconds} {t('marketing.examples.seconds')}
+                    {e.seconds} {t('marketing.examples.seconds')}
                   </span>
                   <button
                     type="button"
@@ -228,7 +217,7 @@ export default function ExamplesPage() {
         <section className="k-wrap k-section" style={{ paddingTop: 0 }}>
           <div className="k-stats">
             <Reveal className="k-stat">
-              <CountUp target={96} suffix="%" />
+              <CountUp target={100} suffix="%" />
               <span>{t('marketing.examples.stat1')}</span>
             </Reveal>
             <Reveal className="k-stat">
@@ -240,7 +229,7 @@ export default function ExamplesPage() {
               <span>{t('marketing.examples.stat3')}</span>
             </Reveal>
             <Reveal className="k-stat">
-              <CountUp target={15} suffix="" />
+              <CountUp target={16} suffix="" />
               <span>{t('marketing.examples.stat4')}</span>
             </Reveal>
           </div>

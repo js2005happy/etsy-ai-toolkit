@@ -1,7 +1,15 @@
+import { createHash } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { isRateLimited } from '@/lib/rate-limit'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { TierName } from '@/lib/pricing'
+
+// MCP keys are stored hashed so a DB leak can't expose live credentials. The
+// plaintext key is only shown to the user once, at generation time.
+export function hashMcpKey(key: string): string {
+  return createHash('sha256').update(key).digest('hex')
+}
 
 export type AuthContext = {
   db: SupabaseClient
@@ -60,14 +68,33 @@ export async function authenticateRequest(request: Request): Promise<AuthResult>
 
   if (mcpKey) {
     const db = createServiceClient()
-    const { data: profile } = await db
+    const keyHash = hashMcpKey(mcpKey)
+    let { data: profile } = await db
       .from('profiles')
       .select('id, credits_remaining, images_remaining, subscription_status')
-      .eq('mcp_api_key', mcpKey)
+      .eq('mcp_api_key', keyHash)
       .maybeSingle()
+
+    // Backward-compat: keys issued before hashing were stored in plaintext.
+    // Match the legacy value once, then upgrade it in place to the hash.
+    if (!profile) {
+      const { data: legacy } = await db
+        .from('profiles')
+        .select('id, credits_remaining, images_remaining, subscription_status')
+        .eq('mcp_api_key', mcpKey)
+        .maybeSingle()
+      if (legacy) {
+        await db.from('profiles').update({ mcp_api_key: keyHash }).eq('id', legacy.id)
+        profile = legacy
+      }
+    }
 
     if (!profile) {
       return { error: 'Invalid MCP key', status: 401 }
+    }
+
+    if (await isRateLimited(db, profile.id)) {
+      return { error: 'Too many requests. Please slow down.', status: 429 }
     }
 
     return buildContext(db, profile.id, profile)
@@ -91,6 +118,10 @@ export async function authenticateRequest(request: Request): Promise<AuthResult>
 
   if (profileError || !profile) {
     return { error: 'Profile not found', status: 404 }
+  }
+
+  if (await isRateLimited(supabase, user.id)) {
+    return { error: 'Too many requests. Please slow down.', status: 429 }
   }
 
   return buildContext(supabase, user.id, profile)

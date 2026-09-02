@@ -41,6 +41,25 @@ const GROQ_CHAT_MODEL = process.env.GROQ_CHAT_MODEL || "llama-3.3-70b-versatile"
 const MOMA_VISION_BASE_URL = process.env.MOMA_VISION_BASE_URL || "https://moma.cmecloud.cn/v1";
 const MOMA_VISION_MODEL = process.env.MOMA_VISION_MODEL || "qwen/qwen3.7-plus";
 
+// Fail loud if mock mode leaks into production — serving canned responses to
+// paying users is worse than an outage.
+const MOCK_ENABLED = process.env.USE_MOCK_AI === "true";
+if (MOCK_ENABLED && process.env.NODE_ENV === "production") {
+  throw new Error("USE_MOCK_AI must not be enabled in production");
+}
+
+// Centralized JSON parsing that tolerates markdown code fences (some relay
+// backends wrap the payload) and turns a bad payload into a clear error
+// instead of an opaque SyntaxError.
+function parseJson(content: string): any {
+  const cleaned = content.replace(/```(?:json)?\s*/gi, "").replace(/```\s*/g, "").trim();
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    throw new Error("AI returned invalid JSON");
+  }
+}
+
 function momaVisionClient(): OpenAI {
   return new OpenAI({ apiKey: process.env.MOMA_VISION_API_KEY, baseURL: MOMA_VISION_BASE_URL });
 }
@@ -111,7 +130,7 @@ export async function generateListing(input: ListingInput): Promise<ListingOutpu
   const p = getPlatform(input.platform);
   const prompt = "You are an expert e-commerce listing writer for " + p.label + ". Create a high-converting product listing.\n\nMarketplace rules to follow:\n" + platformContext(input.platform) + "\n\nProduct details:\n- Product Name: " + input.product_name + "\n- Product Type: " + input.product_type + "\n- Material: " + input.material + "\n- Style: " + input.style + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly three fields:\n1. \"title\": optimized title (max " + p.titleMax + " chars)\n2. \"description\": detailed product description (follow the description rule above; use emojis and line breaks where the tone allows)\n3. \"tags\": array of search keywords/tags following the keyword rule above";
   const content = await chat(prompt, { system: "You are an expert e-commerce listing writer for " + p.label + ". Always return valid JSON.", json: true });
-  return JSON.parse(content) as ListingOutput;
+  return parseJson(content) as ListingOutput;
 }
 
 export async function generateMessageReply(input: MessageReplyInput): Promise<MessageReplyOutput> {
@@ -121,7 +140,7 @@ export async function generateMessageReply(input: MessageReplyInput): Promise<Me
   const p = getPlatform(input.platform);
   const prompt = "You are a customer service assistant for a " + p.label + " seller. Write three professional and " + input.tone + " replies to the following customer message.\n\nCustomer message: " + input.customer_message + (input.product_info ? "\nProduct info: " + input.product_info : "") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly one field:\n\"replies\": array of three strings";
   const content = await chat(prompt, { system: "You are a helpful e-commerce customer service assistant. Always return valid JSON.", json: true });
-  return JSON.parse(content) as MessageReplyOutput;
+  return parseJson(content) as MessageReplyOutput;
 }
 
 export async function generateSocialPost(input: SocialPostInput): Promise<SocialPostOutput> {
@@ -131,7 +150,7 @@ export async function generateSocialPost(input: SocialPostInput): Promise<Social
   const p = getPlatform(input.platform);
   const prompt = "You are a social media expert. Create a high-converting social media post for the following product description, specifically for " + p.label + ". Match the platform's native voice: " + p.tone + "\n\nProduct description: " + input.product_description + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with exactly two fields:\n1. \"caption\": a short, engaging caption (include emojis)\n2. \"hashtags\": an array of 8-10 relevant hashtags (without # symbol)";
   const content = await chat(prompt, { system: "You are a social media expert. Always return valid JSON.", json: true });
-  return JSON.parse(content) as SocialPostOutput;
+  return parseJson(content) as SocialPostOutput;
 }
 
 export async function generateReviewReply(input: ReviewReplyInput): Promise<ReviewReplyOutput> {
@@ -141,7 +160,7 @@ export async function generateReviewReply(input: ReviewReplyInput): Promise<Revi
   const p = getPlatform(input.platform);
   const prompt = "You are a " + p.label + " seller replying to a customer review. The review rating is " + input.rating + " stars. Tone should be " + input.tone + ".\n\nReview text: " + input.review_text + brandContext(input.brand_tone, input.brand_keywords) + "\n\nWrite two or three replies that are professional, polite, and appropriate for the rating.\n\nReturn JSON with exactly one field:\n\"replies\": array of strings";
   const content = await chat(prompt, { system: "You are a helpful e-commerce seller. Always return valid JSON.", json: true });
-  return JSON.parse(content) as ReviewReplyOutput;
+  return parseJson(content) as ReviewReplyOutput;
 }
 
 export async function generateAnnouncement(input: AnnouncementInput): Promise<AnnouncementOutput> {
@@ -151,7 +170,7 @@ export async function generateAnnouncement(input: AnnouncementInput): Promise<An
   const p = getPlatform(input.platform);
   const prompt = "You are a " + p.label + " shop owner. Write a " + input.announcement_type + " announcement for a shop that sells " + input.shop_type + ". Tone should be " + input.tone + brandContext(input.brand_tone, input.brand_keywords) + ".\n\nReturn JSON with exactly one field:\n\"announcement\": a string of the announcement text";
   const content = await chat(prompt, { system: "You are a helpful e-commerce shop owner. Always return valid JSON.", json: true });
-  return JSON.parse(content) as AnnouncementOutput;
+  return parseJson(content) as AnnouncementOutput;
 }
 
 export async function generateKeywords(input: KeywordsInput): Promise<KeywordsOutput> {
@@ -161,7 +180,7 @@ export async function generateKeywords(input: KeywordsInput): Promise<KeywordsOu
   const p = getPlatform(input.platform);
   const prompt = "You are an expert keyword researcher for " + p.label + ". Generate a list of 15 high-search-volume keywords for a product type: " + input.product_type + (input.market ? " targeting market: " + input.market : "") + (input.style ? " with style: " + input.style : "") + ". Include long-tail keywords.\n\nKeyword rule for " + p.label + ": " + p.keywordRule + "\n\nReturn JSON with exactly one field:\n\"keywords\": an array of 15 keyword strings";
   const content = await chat(prompt, { system: "You are an expert e-commerce keyword researcher. Always return valid JSON.", json: true });
-  return JSON.parse(content) as KeywordsOutput;
+  return parseJson(content) as KeywordsOutput;
 }
 
 export async function translateListing(input: TranslateInput): Promise<TranslateOutput> {
@@ -171,7 +190,7 @@ export async function translateListing(input: TranslateInput): Promise<Translate
   const p = getPlatform(input.platform);
   const prompt = "Translate the following " + p.label + " listing text to " + input.target_language + ". Keep SEO-friendly keywords and formatting.\n\nText:\n" + input.text + "\n\nReturn JSON with exactly one field:\n\"translated_text\": the translated text";
   const content = await chat(prompt, { system: "You are a professional translator. Always return valid JSON.", json: true });
-  return JSON.parse(content) as TranslateOutput;
+  return parseJson(content) as TranslateOutput;
 }
 
 export async function translateImage(input: TranslateImageInput): Promise<TranslateImageOutput> {
@@ -220,7 +239,7 @@ export async function optimizeListing(input: OptimizeListingInput): Promise<Opti
   const p = getPlatform(input.platform);
   const prompt = "You are an expert e-commerce listing optimizer for " + p.label + ". Analyze the following existing listing and provide an improved version that follows " + p.label + "'s ranking rules.\n\nMarketplace rules:\n" + platformContext(input.platform) + "\n\nCurrent title: " + (input.current_title || "N/A") + "\nCurrent description: " + (input.current_description || "N/A") + "\nCurrent tags: " + (input.current_tags || "N/A") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nReturn JSON with these fields:\n1. \"title\": optimized title\n2. \"description\": optimized description\n3. \"tags\": array of optimized keywords/tags\n4. \"suggestions\": a short paragraph explaining what was improved";
   const content = await chat(prompt, { system: "You are an expert e-commerce listing optimizer. Always return valid JSON.", json: true });
-  return JSON.parse(content) as OptimizeListingOutput;
+  return parseJson(content) as OptimizeListingOutput;
 }
 
 export interface ProductImageInput { product_name: string; product_description: string; platform: string; size: string; style: string; language?: string; category?: string; scene?: string; style_lock?: boolean; }
@@ -515,7 +534,7 @@ export async function generatePricingAdvice(input: PricingInput): Promise<Pricin
   const p = getPlatform(input.platform);
   const prompt = "You are a pricing expert for " + p.label + " sellers. Given the following costs and optional competitor prices, suggest a price and profit.\n\nMaterial cost: " + input.material_cost + "\nLabor cost: " + input.labor_cost + "\nShipping cost: " + input.shipping_cost + "\nCompetitor price range: " + (input.competitor_price_min || "unknown") + " to " + (input.competitor_price_max || "unknown") + "\nDesired profit margin: " + (input.desired_profit_margin || "not specified") + "\n\nConsider " + p.label + "'s typical commission/fee structure in your strategy.\n\nReturn JSON with these fields:\n1. \"suggested_price\": a number\n2. \"estimated_profit\": a number\n3. \"pricing_strategy\": a short explanation";
   const content = await chat(prompt, { system: "You are a pricing expert. Always return valid JSON.", json: true });
-  return JSON.parse(content) as PricingOutput;
+  return parseJson(content) as PricingOutput;
 }
 
 export interface GlobalPricingInput { product_name?: string; base_price_usd: number; markets: string[]; }
@@ -533,7 +552,7 @@ export async function generateGlobalPricingStrategy(input: GlobalPricingInput): 
     "Give 3-5 concrete, actionable pricing recommendations for going global — cover how to set a local landed price, how to absorb marketplace fees and VAT/duties, and how to keep the same product profitable across markets. Write in a warm, direct, founder-to-founder tone. No corporate clichés, no AI-sounding platitudes.\n\n" +
     "Return JSON with exactly one field:\n\"strategy\": a string with the recommendations (use line breaks between points)";
   const content = await chat(prompt, { system: "You are a cross-border pricing strategist. Always return valid JSON.", json: true });
-  return JSON.parse(content) as GlobalPricingOutput;
+  return parseJson(content) as GlobalPricingOutput;
 }
 
 // ===== New e-commerce tool functions =====
@@ -546,7 +565,7 @@ export async function generateBulletPoints(input: BulletPointsInput): Promise<Bu
   const count = input.count || 5;
   const prompt = "You are an expert e-commerce copywriter for " + p.label + ". Write " + count + " benefit-led bullet points for this product.\n\nMarketplace rules:\n" + platformContext(input.platform) + "\n\nProduct: " + input.product_name + "\nDescription: " + input.product_description + brandContext(input.brand_tone, input.brand_keywords) + "\n\nEach bullet must lead with a clear benefit and answer a buyer objection (size, material, use case, warranty, what's included).\n\nReturn JSON with exactly one field:\n\"bullets\": array of " + count + " strings";
   const content = await chat(prompt, { system: "You are an expert e-commerce copywriter. Always return valid JSON.", json: true });
-  return JSON.parse(content) as BulletPointsOutput;
+  return parseJson(content) as BulletPointsOutput;
 }
 
 export async function generateAdCopy(input: AdCopyInput): Promise<AdCopyOutput> {
@@ -556,7 +575,7 @@ export async function generateAdCopy(input: AdCopyInput): Promise<AdCopyOutput> 
   const p = getPlatform(input.platform);
   const prompt = "You are a performance marketing copywriter writing ads for " + p.label + " and paid social (Meta, TikTok, Google). Create high-converting ad copy.\n\nGoal: " + input.goal + "\nProduct: " + input.product_name + "\nDescription: " + input.product_description + (input.audience ? "\nTarget audience: " + input.audience : "") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nMarketplace tone to respect: " + p.tone + "\n\nReturn JSON with exactly four fields:\n1. \"headlines\": array of 5 headline options\n2. \"primary_text\": the main ad body text\n3. \"description\": a short supporting description\n4. \"cta\": a strong call-to-action phrase";
   const content = await chat(prompt, { system: "You are a performance marketing copywriter. Always return valid JSON.", json: true });
-  return JSON.parse(content) as AdCopyOutput;
+  return parseJson(content) as AdCopyOutput;
 }
 
 export async function generateEmail(input: EmailInput): Promise<EmailOutput> {
@@ -566,7 +585,7 @@ export async function generateEmail(input: EmailInput): Promise<EmailOutput> {
   const typeLabel = input.email_type.replace(/_/g, " ");
   const prompt = "You are an e-commerce email marketing copywriter. Write a " + typeLabel + " email.\n\nProduct: " + input.product_name + "\nDescription: " + input.product_description + (input.audience ? "\nAudience: " + input.audience : "") + brandContext(input.brand_tone, input.brand_keywords) + "\n\nWrite for a real customer, no spammy or clickbait language. Keep it warm, concise, and actionable.\n\nReturn JSON with exactly three fields:\n1. \"subject\": email subject line\n2. \"preview_text\": 1-sentence preview text\n3. \"body\": the email body in plain text with line breaks";
   const content = await chat(prompt, { system: "You are an e-commerce email marketing copywriter. Always return valid JSON.", json: true });
-  return JSON.parse(content) as EmailOutput;
+  return parseJson(content) as EmailOutput;
 }
 
 export async function generateCompetitorAnalysis(input: CompetitorAnalysisInput): Promise<CompetitorAnalysisOutput> {
@@ -576,7 +595,7 @@ export async function generateCompetitorAnalysis(input: CompetitorAnalysisInput)
   const p = getPlatform(input.platform);
   const prompt = "You are an e-commerce competitive analyst. Perform a SWOT analysis of a competitor on " + p.label + " to help a seller differentiate.\n\nYour product: " + input.product_name + "\nYour product description: " + input.product_description + "\nCompetitor: " + (input.competitor_name || "a comparable product") + "\nCompetitor description: " + (input.competitor_description || "not provided — infer typical weaknesses") + "\n\nReturn JSON with exactly five fields:\n1. \"strengths\": array of competitor strengths\n2. \"weaknesses\": array of competitor weaknesses\n3. \"opportunities\": array of opportunities for your product to win\n4. \"threats\": array of threats to watch\n5. \"differentiation\": a short paragraph on how to position against this competitor";
   const content = await chat(prompt, { system: "You are an e-commerce competitive analyst. Always return valid JSON.", json: true });
-  return JSON.parse(content) as CompetitorAnalysisOutput;
+  return parseJson(content) as CompetitorAnalysisOutput;
 }
 
 export async function generateBrandStory(input: BrandStoryInput): Promise<BrandStoryOutput> {
@@ -585,5 +604,5 @@ export async function generateBrandStory(input: BrandStoryInput): Promise<BrandS
   }
   const prompt = "You are a brand storyteller for an e-commerce business. Write a compelling brand story.\n\nBrand name: " + input.brand_name + "\nProduct type: " + input.product_type + (input.origin_story ? "\nOrigin story: " + input.origin_story : "") + (input.values ? "\nCore values: " + input.values : "") + (input.audience ? "\nTarget audience: " + input.audience : "") + "\n\nWrite authentically — no corporate clichés, no AI-sounding platitudes. Make it sound like a real founder telling their story.\n\nReturn JSON with exactly three fields:\n1. \"story\": the brand story (2-3 paragraphs)\n2. \"mission\": a one-sentence mission statement\n3. \"tagline\": a short memorable tagline";
   const content = await chat(prompt, { system: "You are a brand storyteller. Always return valid JSON.", json: true });
-  return JSON.parse(content) as BrandStoryOutput;
+  return parseJson(content) as BrandStoryOutput;
 }

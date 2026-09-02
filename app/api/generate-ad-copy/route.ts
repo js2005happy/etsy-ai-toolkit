@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { authenticateRequest, getBrandPrefs } from '@/lib/auth'
+import { consumeCredits } from '@/lib/quota'
 import { generateAdCopy } from '@/lib/openai'
 
 export async function POST(request: Request) {
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
       brand_keywords: brandKeywords ?? undefined,
     })
 
-    await db.from('profiles').update({ credits_remaining: credits - 1 }).eq('id', userId)
+    await consumeCredits(db, userId, 1)
 
     await db.from('generations').insert({
       user_id: userId,

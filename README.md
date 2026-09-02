@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="public/banner.webp" alt="Etsy AI Toolkit" width="1280" />
+  <img src="public/banner.webp" alt="Craftly" width="1280" />
 </p>
 
-<h1 align="center">Etsy AI Toolkit</h1>
+<h1 align="center">Craftly</h1>
 
 <p align="center">
   <strong>The AI copilot for Etsy sellers.</strong><br />
@@ -18,14 +18,14 @@
   <a href="https://paddle.com"><img src="https://img.shields.io/badge/Paddle-billing-6633ee" alt="Paddle" /></a>
   <a href="https://vercel.com"><img src="https://img.shields.io/badge/Vercel-deployed-000000?logo=vercel&logoColor=white" alt="Vercel" /></a>
   <img src="https://img.shields.io/badge/MCP-server-ED8106" alt="MCP server" />
-  <img src="https://img.shields.io/badge/i18n-7_languages-16a34a" alt="7 languages" />
+  <img src="https://img.shields.io/badge/i18n-9_languages-16a34a" alt="9 languages" />
 </p>
 
 ---
 
 ## What it is
 
-Etsy AI Toolkit is a production SaaS (live at **[craftly.world](https://craftly.world)**) that removes the busywork from running an Etsy shop. Ten AI tools cover the full listing lifecycle — from first draft, through buyer conversation and reviews, to SEO, translation, and product photography. Free tier gives you **10 credits + 3 generated images** with no card, so you can try everything before paying.
+Craftly is a production SaaS (live at **[craftly.world](https://craftly.world)**) that removes the busywork from running an Etsy shop. Sixteen AI tools cover the full listing lifecycle — from first draft, through buyer conversation and reviews, to SEO, translation, and product photography. Free tier gives you **10 credits + 3 generated images** with no card, so you can try everything before paying.
 
 - **OTP sign-in** — passwordless email login via Supabase Auth (6-digit code).
 - **Credit + image quotas** — every generation is metered; tiers unlock more.
@@ -33,13 +33,13 @@ Etsy AI Toolkit is a production SaaS (live at **[craftly.world](https://craftly.
 - **Multi-provider AI** — a primary chat relay with automatic fallback, a vision model for image translation, and a dedicated image-generation model for posters.
 - **MCP server** — a Model Context Protocol server exposes the toolkit to Claude and other MCP clients.
 - **Batch image generation** — poster variants, per-platform sizes, or a bulk product list, all generated in one run.
-- **One-click language switcher** — flip the entire UI between 7 languages (en / de / fr / es / zh / ja / it) instantly.
+- **One-click language switcher** — flip the entire UI between 9 languages (en / de / fr / es / zh / ja / it / ko / pt) instantly.
 
 <p align="center">
-  <img src="public/dashboard.webp" alt="Dashboard — ten tools and credits" width="1280" />
+  <img src="public/dashboard.webp" alt="Dashboard — sixteen tools and credits" width="1280" />
 </p>
 
-## The 10 tools
+## The 16 tools
 
 | Tool | What it does |
 | --- | --- |
@@ -53,6 +53,12 @@ Etsy AI Toolkit is a production SaaS (live at **[craftly.world](https://craftly.
 | **Pricing Advisor** | Suggested price and profit margin from your costs and competitors |
 | **Translate** | Translates listing text **or images** (vision OCR) while preserving SEO keywords |
 | **Product Image Generator** | AI-generated product posters and banners (see below) |
+| **Ad Copy** | Etsy Ads and promoted-listing copy from your product details |
+| **Brand Story** | A shop "about" section and brand narrative written in your voice |
+| **Bullets** | Benefit-led bullet points (Amazon-style) for listings and pages |
+| **Competitor Analysis** | A side-by-side breakdown of competing listings and where you stand |
+| **Email** | Customer emails and newsletter drafts in your brand voice |
+| **Global Pricing** | Per-market price suggestions with currency and localization |
 
 ### Product image generator
 
@@ -153,7 +159,7 @@ The server sends the key as the `x-mcp-key` header; the site maps it back to you
 | Billing | Paddle (checkout, portal, webhooks) |
 | Email | Resend (welcome, subscription lifecycle) |
 | AI | Multi-provider — primary chat relay with automatic fallback · vision model · image-generation model |
-| i18n | Lightweight custom framework, 7 locales (en / de / fr / es / zh / ja / it) |
+| i18n | Lightweight custom framework, 9 locales (en / de / fr / es / zh / ja / it / ko / pt) |
 | MCP | @modelcontextprotocol/sdk, 10 tools |
 
 ## Getting started
@@ -222,7 +228,7 @@ Schema lives in `supabase/migrations/`:
 app/
   (auth)/             # OTP login / signup
   api/                # AI generation, billing, image routes
-  dashboard/          # the 10 tool pages
+  dashboard/          # the 16 tool pages
 components/
   dashboard/images/   # image generator (hook, panels, result grid)
   ui/                 # shadcn/ui primitives

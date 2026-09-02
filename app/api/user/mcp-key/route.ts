@@ -2,12 +2,14 @@ import { NextResponse } from 'next/server'
 import { randomBytes } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { hashMcpKey } from '@/lib/auth'
 
 function generateMcpKey(): string {
   return 'mcp_' + randomBytes(24).toString('hex')
 }
 
-// GET — return the caller's key, generating one on first use.
+// GET — report whether a key exists; only a freshly-generated key can return
+// its plaintext (keys are stored hashed, so the plaintext is shown once).
 export async function GET() {
   try {
     const supabase = createClient()
@@ -25,13 +27,13 @@ export async function GET() {
       .eq('id', user.id)
       .maybeSingle()
 
-    let key = profile?.mcp_api_key
-    if (!key) {
-      key = generateMcpKey()
-      await service.from('profiles').update({ mcp_api_key: key }).eq('id', user.id)
+    if (profile?.mcp_api_key) {
+      return NextResponse.json({ has_key: true, mcp_api_key: null })
     }
 
-    return NextResponse.json({ mcp_api_key: key })
+    const key = generateMcpKey()
+    await service.from('profiles').update({ mcp_api_key: hashMcpKey(key) }).eq('id', user.id)
+    return NextResponse.json({ has_key: true, mcp_api_key: key })
   } catch (error: any) {
     console.error('API Error:', error)
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
@@ -51,7 +53,7 @@ export async function POST() {
 
     const key = generateMcpKey()
     const service = createServiceClient()
-    await service.from('profiles').update({ mcp_api_key: key }).eq('id', user.id)
+    await service.from('profiles').update({ mcp_api_key: hashMcpKey(key) }).eq('id', user.id)
 
     return NextResponse.json({ mcp_api_key: key })
   } catch (error: any) {

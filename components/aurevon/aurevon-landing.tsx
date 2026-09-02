@@ -942,13 +942,13 @@ export default function AurevonLanding() {
               href="https://www.producthunt.com/products/etsy-ai-toolkit?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-etsy-ai-toolkit"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Etsy AI Toolkit on Product Hunt"
+              aria-label="Craftly on Product Hunt"
               className="inline-block transition-opacity hover:opacity-80"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1236192&theme=dark"
-                alt="Etsy AI Toolkit - Made by you. Written by AI. | Product Hunt"
+                alt="Craftly - Made by you. Written by AI. | Product Hunt"
                 width={250}
                 height={54}
                 className="h-[54px] w-auto"
