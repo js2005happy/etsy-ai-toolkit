@@ -13,6 +13,9 @@ tsconfig.tsbuildinfo
 .vercel
 .env*
 
+# env template is tracked (contains no secrets); .env.local / .env.prod.tmp stay ignored
+!.env.example
+
 # one-off scripts with hardcoded Paddle API keys (never commit)
 paddle_notif.cjs
 paddle_preflight.cjs
