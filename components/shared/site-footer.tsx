@@ -85,6 +85,20 @@ export default function SiteFooter() {
               height={54}
             />
           </a>
+          <a
+            href="https://techbasedirectory.com/product/craftly?utm_source=featured_embed"
+            target="_blank"
+            rel="dofollow noopener"
+            aria-label="Craftly on TechBase Directory"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://techbasedirectory.com/api/featured-embed"
+              alt="Craftly | Techbasedirectory.com"
+              width={200}
+              height={60}
+            />
+          </a>
         </div>
       </div>
     </footer>
