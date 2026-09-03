@@ -217,7 +217,7 @@ export default function ExamplesPage() {
         <section className="k-wrap k-section" style={{ paddingTop: 0 }}>
           <div className="k-stats">
             <Reveal className="k-stat">
-              <CountUp target={100} suffix="%" />
+              <CountUp target={10} suffix="" />
               <span>{t('marketing.examples.stat1')}</span>
             </Reveal>
             <Reveal className="k-stat">

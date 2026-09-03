@@ -33,7 +33,7 @@ export default function HomeClient() {
 
   const stats: { target: number; suffix: string; label: string }[] = [
     { target: 4200, suffix: '+', label: t('home.stat1') },
-    { target: 100, suffix: '%', label: t('home.stat2') },
+    { target: 16, suffix: '', label: t('home.stat2') },
     { target: 11, suffix: 'x', label: t('home.stat3') },
     { target: 40, suffix: '', label: t('home.stat4') },
   ]

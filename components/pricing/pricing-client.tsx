@@ -176,26 +176,26 @@ export default function PricingClient({
       label: t('marketing.pricing.cmp4'),
       cells: [
         { text: '2', cls: '' },
-        { text: t('marketing.pricing.cmpAll7'), cls: 'hl' },
-        { text: t('marketing.pricing.cmpAll7'), cls: 'yes' },
-        { text: t('marketing.pricing.cmpAll7'), cls: 'yes' },
+        { text: '2', cls: 'hl' },
+        { text: '2', cls: 'yes' },
+        { text: '2', cls: 'yes' },
       ],
     },
     {
       label: t('marketing.pricing.cmp5'),
       cells: [
         { text: '1', cls: '' },
-        { text: '2', cls: '' },
-        { text: '5', cls: 'hl' },
-        { text: t('marketing.pricing.cmpPerSeat'), cls: 'yes' },
+        { text: '1', cls: '' },
+        { text: '1', cls: 'hl' },
+        { text: '1', cls: 'yes' },
       ],
     },
     {
       label: t('marketing.pricing.cmp6'),
       cells: [
         { text: '—', cls: 'no' },
-        { text: '✓', cls: 'yes hl' },
-        { text: '✓', cls: 'yes' },
+        { text: '—', cls: 'no' },
+        { text: '—', cls: 'no' },
         { text: '✓', cls: 'yes' },
       ],
     },
@@ -210,15 +210,6 @@ export default function PricingClient({
     },
     {
       label: t('marketing.pricing.cmp8'),
-      cells: [
-        { text: '—', cls: 'no' },
-        { text: '—', cls: 'no' },
-        { text: '—', cls: 'no' },
-        { text: '✓', cls: 'yes' },
-      ],
-    },
-    {
-      label: t('marketing.pricing.cmp9'),
       cells: [
         { text: '—', cls: 'no' },
         { text: '—', cls: 'no' },

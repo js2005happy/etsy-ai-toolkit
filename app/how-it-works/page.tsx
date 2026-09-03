@@ -9,7 +9,7 @@ import { getServerTranslations } from '@/lib/i18n/server'
 export const metadata: Metadata = {
   title: 'How it works — Craftly',
   description:
-    "Craftly learns how you write from twenty of your own messages, then drafts listings, posts, and replies inside that voice. Here's exactly what happens, step by step.",
+    "Set your tone once, and Craftly drafts listings, posts, and replies that stay in your voice. Here's exactly what happens, step by step.",
 }
 
 export default function HowItWorksPage() {

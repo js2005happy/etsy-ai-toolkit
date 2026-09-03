@@ -23,8 +23,8 @@ export default function ToolsPage() {
     { n: '01', cat: 'write', title: t('marketing.tools.tool1title'), desc: t('marketing.tools.tool1desc'), popular: true },
     { n: '02', cat: 'write', title: t('marketing.tools.tool2title'), desc: t('marketing.tools.tool2desc') },
     { n: '03', cat: 'write', title: t('marketing.tools.tool3title'), desc: t('marketing.tools.tool3desc') },
-    { n: '04', cat: 'write', title: t('marketing.tools.tool4title'), desc: t('marketing.tools.tool4desc') },
-    { n: '05', cat: 'write', title: t('marketing.tools.tool5title'), desc: t('marketing.tools.tool5desc') },
+    { n: '04', cat: 'sell', title: t('marketing.tools.tool4title'), desc: t('marketing.tools.tool4desc') },
+    { n: '05', cat: 'sell', title: t('marketing.tools.tool5title'), desc: t('marketing.tools.tool5desc') },
     { n: '06', cat: 'sell', title: t('marketing.tools.tool6title'), desc: t('marketing.tools.tool6desc') },
     { n: '07', cat: 'sell', title: t('marketing.tools.tool7title'), desc: t('marketing.tools.tool7desc') },
     { n: '08', cat: 'sell', title: t('marketing.tools.tool8title'), desc: t('marketing.tools.tool8desc') },
@@ -35,6 +35,7 @@ export default function ToolsPage() {
     { n: '13', cat: 'grow', title: t('marketing.tools.tool13title'), desc: t('marketing.tools.tool13desc') },
     { n: '14', cat: 'grow', title: t('marketing.tools.tool14title'), desc: t('marketing.tools.tool14desc') },
     { n: '15', cat: 'grow', title: t('marketing.tools.tool15title'), desc: t('marketing.tools.tool15desc') },
+    { n: '16', cat: 'grow', title: t('marketing.tools.tool16title'), desc: t('marketing.tools.tool16desc') },
   ]
 
   const FILTERS = [
