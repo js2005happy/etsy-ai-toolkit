@@ -35,7 +35,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://craftly.world";
 
 export const metadata: Metadata = {
   title:
-    "Free Etsy Title Generator — SEO Titles & 13 Tags in Seconds (2026) | Craftly",
+    "Free Etsy Title Generator — SEO Titles & 13 Tags in Seconds (2026)",
   description:
     "Type what you made → get an SEO-optimized Etsy title, all 13 tags, and a description preview in seconds. Free, no signup, no card — 3 generations a day. The same prompt that powers Craftly Pro.",
   keywords: [
