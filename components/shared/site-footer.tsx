@@ -99,6 +99,20 @@ export default function SiteFooter() {
               height={60}
             />
           </a>
+          <a
+            href="https://launchnest.io/p/craftly"
+            target="_blank"
+            rel="noopener"
+            aria-label="Craftly on LaunchNest"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="https://launchnest.io/badge/craftly.svg?variant=listed"
+              alt="Craftly on LaunchNest"
+              width={220}
+              height={56}
+            />
+          </a>
         </div>
       </div>
     </footer>
