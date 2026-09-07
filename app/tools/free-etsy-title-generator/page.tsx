@@ -505,7 +505,7 @@ export default function FreeEtsyTitleGeneratorPage() {
                 </BrowserFrame>
                 <p className="mt-4 text-center text-sm leading-relaxed text-muted-foreground">
                   <span className="font-semibold text-foreground">Step 1.</span>{" "}
-                  Type what you made like you'd text a friend.
+                  Type what you made like you&apos;d text a friend.
                 </p>
               </Reveal>
 

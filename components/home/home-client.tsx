@@ -2,9 +2,9 @@
 
 import Link from 'next/link'
 import Reveal from '@/components/shared/reveal'
-import CountUp from '@/components/shared/count-up'
 import Faq from '@/components/shared/faq'
 import { useI18n } from '@/lib/i18n/client'
+import { PLANS } from '@/lib/pricing'
 
 function MarqueeItems() {
   return (
@@ -31,60 +31,47 @@ const HOME_MARKETS = [
 export default function HomeClient() {
   const { t } = useI18n()
 
-  const stats: { target: number; suffix: string; label: string }[] = [
-    { target: 4200, suffix: '+', label: t('home.stat1') },
-    { target: 16, suffix: '', label: t('home.stat2') },
-    { target: 11, suffix: 'x', label: t('home.stat3') },
-    { target: 40, suffix: '', label: t('home.stat4') },
-  ]
-
   return (
     <>
       {/* hero */}
       <header className="k-wrap k-hero">
         <div className="k-hero-grid">
           <div>
-            <div className="k-pill">
-              <b>{t('home.hero.badge')}</b> {t('home.hero.pill')}
-            </div>
+            <div className="k-pill"><b>Craftly for Etsy sellers</b></div>
             <h1 className="k-h1-hero">
-              {t('home.hero.h1_pre')}
+              Connect your Etsy shop.
               <br />
-              <span className="grad">{t('home.hero.h1_grad')}</span>{' '}
-              <em className="serif-accent">{t('home.hero.h1_em')}</em>
+              <span className="grad">Find what needs fixing.</span>{' '}
+              <em className="serif-accent">Improve listings.</em>
             </h1>
-            <p className="k-sub">{t('home.hero.sub')}</p>
+            <p className="k-sub">Craftly analyzes your Etsy listings, suggests improvements to titles, descriptions, tags and images, then lets you review every change before publishing.</p>
             <div className="k-cta-row">
               <Link href="/signup" className="k-btn k-btn-primary">
-                <span>{t('home.hero.cta1')}</span>
+                <span>Connect Etsy</span>
                 <i className="k-shine" />
               </Link>
               <Link href="/how-it-works" className="k-btn">
-                {t('home.hero.cta2')}
+                Try free tools
               </Link>
             </div>
-            <p className="k-trust">{t('home.hero.trust')}</p>
+            <p className="k-trust">Review first. Publish only when you are ready.</p>
           </div>
 
           <div className="k-stack">
             <div className="k-fcard k-c1">
-              <h4>{t('home.card1.title')}</h4>
-              <p>{t('home.card1.body')}</p>
+              <h4>Your Etsy shop</h4><p>Listing health highlights what needs attention.</p>
               <div className="k-tag-row">
-                <span className="k-tag">{t('home.card1.tag1')}</span>
-                <span className="k-tag">{t('home.card1.tag2')}</span>
+                <span className="k-tag">Connected</span><span className="k-tag">Shop Health</span>
               </div>
             </div>
             <div className="k-fcard k-c2">
-              <h4>{t('home.card2.title')}</h4>
-              <p>{t('home.card2.body')}</p>
+              <h4>Review AI suggestions</h4><p>Accept, reject, or edit every field.</p>
               <div className="k-meter">
                 <i />
               </div>
             </div>
             <div className="k-fcard k-c3">
-              <h4>{t('home.card3.title')}</h4>
-              <p>{t('home.card3.body')}</p>
+              <h4>Draft → review → publish</h4><p>Keep your live Etsy listings in your control.</p>
               <div className="k-tag-row">
                 <span className="k-tag">Etsy</span>
                 <span className="k-tag">Shopify</span>
@@ -186,13 +173,8 @@ export default function HomeClient() {
             <p>{t('home.step3.desc')}</p>
           </Reveal>
         </div>
-        <div className="k-stats" style={{ marginTop: 58 }}>
-          {stats.map((s, i) => (
-            <Reveal className="k-stat" key={i}>
-              <CountUp target={s.target} suffix={s.suffix} />
-              <span>{s.label}</span>
-            </Reveal>
-          ))}
+        <div className="k-grid k-g3" style={{ marginTop: 58 }}>
+          {PLANS.map((plan) => <Reveal className="k-cell" key={plan.id}><h3>{plan.name}</h3><p>{plan.credits} credits · {plan.imageCredits} image credits</p></Reveal>)}
         </div>
       </section>
 

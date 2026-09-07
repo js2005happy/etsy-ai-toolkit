@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     const { db, userId, credits } = auth
 
     const body = await request.json()
-    const { current_title, current_description, current_tags, platform } = body
+    const { current_title, current_description, current_tags, platform, listing_id } = body
 
     if (!current_title && !current_description && !current_tags) {
       return NextResponse.json({ error: 'At least one field is required' }, { status: 400 })
@@ -24,6 +24,13 @@ export async function POST(request: Request) {
 
     const { brandTone, brandKeywords } = await getBrandPrefs(db, userId)
     const result = await optimizeListing({ current_title, current_description, current_tags, platform, brand_tone: brandTone ?? undefined, brand_keywords: brandKeywords ?? undefined })
+
+    // A workspace optimization never overwrites the imported listing. Preserve
+    // the current user-owned snapshot before a later reviewed apply action.
+    if (Number.isSafeInteger(Number(listing_id))) {
+      const { data: listing } = await db.from('etsy_listings').select('id, title, description, tags, images, attributes, variations, price, quantity, taxonomy_id, state').eq('id', Number(listing_id)).eq('user_id', userId).maybeSingle()
+      if (listing) await db.from('etsy_listing_versions').insert({ listing_id: listing.id, user_id: userId, source: 'ai', snapshot: listing })
+    }
 
     await consumeCredits(db, userId, 1)
 

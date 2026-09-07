@@ -121,6 +121,16 @@ export async function getUserShops(accessToken: string): Promise<EtsyShop[]> {
   return shops.map((s) => ({ shop_id: s.shop_id, shop_name: s.shop_name }))
 }
 
+export type EtsyRemoteListing = Record<string, unknown> & { listing_id: number; title?: string; description?: string; state?: string }
+
+export async function getShopListings(shopId: number, accessToken: string, offset = 0): Promise<{ listings: EtsyRemoteListing[]; count: number }> {
+  const params = new URLSearchParams({ limit: '100', offset: String(offset), includes: 'Images' })
+  const res = await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings?${params}`, { headers: apiHeaders(accessToken) })
+  if (!res.ok) throw new Error(`Etsy listings request failed (${res.status})`)
+  const data = await res.json()
+  return { listings: (data?.results ?? []) as EtsyRemoteListing[], count: Number(data?.count ?? 0) }
+}
+
 async function getShippingProfileId(shopId: number, accessToken: string): Promise<number | null> {
   const res = await fetch(`${ETSY_API_BASE}/shops/${shopId}/shipping-profiles`, {
     headers: apiHeaders(accessToken),
@@ -131,39 +141,18 @@ async function getShippingProfileId(shopId: number, accessToken: string): Promis
   return profiles[0]?.shipping_profile_id ?? null
 }
 
-interface TaxNode {
+export interface EtsyTaxonomyNode {
   id: number
   name: string
-  children?: TaxNode[]
+  children?: EtsyTaxonomyNode[]
 }
-
-function findLeafId(nodes: TaxNode[], predicate: (name: string) => boolean): number | null {
-  for (const node of nodes) {
-    if (node.children && node.children.length > 0) {
-      const found = findLeafId(node.children, predicate)
-      if (found) return found
-    } else if (predicate(node.name ?? '')) {
-      return node.id
-    }
-  }
-  return null
-}
-
-// Best-effort: walk the seller taxonomy for a leaf node whose name matches a
-// word in the title. Returns null when nothing matches — the caller should
-// then surface a clear error so the user can pass taxonomy_id explicitly.
-async function findTaxonomyId(title: string, accessToken: string): Promise<number | null> {
+export async function getSellerTaxonomy(accessToken: string): Promise<EtsyTaxonomyNode[]> {
   const res = await fetch(`${ETSY_API_BASE}/seller-taxonomy/nodes?limit=100`, {
     headers: apiHeaders(accessToken),
   })
-  if (!res.ok) return null
+  if (!res.ok) throw new Error(`Etsy taxonomy request failed (${res.status})`)
   const data = await res.json()
-  const nodes = (data?.results ?? []) as TaxNode[]
-  const needles = title
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter((w) => w.length > 2)
-  return findLeafId(nodes, (name) => needles.some((n) => name.toLowerCase().includes(n)))
+  return (data?.results ?? []) as EtsyTaxonomyNode[]
 }
 
 export interface EtsyListingInput {
@@ -176,6 +165,7 @@ export interface EtsyListingInput {
   type?: string
   taxonomyId?: number
   images?: string[]
+  tags?: string[]
 }
 
 export async function createListing(
@@ -188,14 +178,8 @@ export async function createListing(
     throw new Error('No shipping profile found for this shop. Create one in Etsy first.')
   }
 
-  let taxonomyId: number | null | undefined = input.taxonomyId
-  if (!taxonomyId) {
-    taxonomyId = await findTaxonomyId(input.title, accessToken)
-  }
-  if (!taxonomyId) {
-    throw new Error(
-      'Could not determine a listing category. Pass taxonomy_id or set up the Etsy shop taxonomy.'
-    )
+  if (!input.taxonomyId) {
+    throw new Error('A confirmed Etsy taxonomy category is required before creating a draft.')
   }
 
   const body: Record<string, any> = {
@@ -205,9 +189,10 @@ export async function createListing(
     price: input.price,
     who_made: input.who_made ?? 'i_did',
     when_made: input.when_made ?? 'made_to_order',
-    taxonomy_id: taxonomyId,
+    taxonomy_id: input.taxonomyId,
     shipping_profile_id: shippingProfileId,
     type: input.type ?? 'physical',
+    ...(input.tags?.length ? { tags: input.tags.slice(0, 13) } : {}),
   }
 
   const res = await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings`, {
@@ -224,21 +209,49 @@ export async function createListing(
     throw new Error(`Etsy listing create failed (${res.status}): ${msg}`)
   }
 
-  // Etsy uploads images via a separate endpoint after the listing exists.
+  // Etsy uploads images via a separate multipart endpoint after the draft exists.
   if (input.images && input.images.length) {
     const listingId = data.listing_id as number
-    for (const src of input.images.slice(0, 10)) {
-      try {
-        await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings/${listingId}/images`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...apiHeaders(accessToken) },
-          body: JSON.stringify({ image: src }),
-        })
-      } catch {
-        // Non-fatal: a missing image shouldn't fail the whole push.
-      }
+    for (const [rank, src] of Array.from(input.images.slice(0, 10).entries())) {
+      await uploadListingImage(shopId, listingId, accessToken, src, rank + 1)
     }
   }
 
   return data
+}
+
+const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
+
+export async function uploadListingImage(
+  shopId: number,
+  listingId: number,
+  accessToken: string,
+  source: string,
+  rank: number,
+  altText?: string
+): Promise<Record<string, unknown>> {
+  const image = await fetch(source)
+  if (!image.ok) throw new Error(`Unable to download listing image (${image.status})`)
+  const type = image.headers.get('content-type')?.split(';')[0].toLowerCase() ?? ''
+  if (!IMAGE_TYPES.has(type)) throw new Error('Listing images must be JPEG, PNG, or WebP.')
+  const bytes = await image.arrayBuffer()
+  if (bytes.byteLength === 0 || bytes.byteLength > 20 * 1024 * 1024) {
+    throw new Error('Listing image must be between 1 byte and 20 MB.')
+  }
+  const extension = type === 'image/jpeg' ? 'jpg' : type.split('/')[1]
+  const form = new FormData()
+  form.append('image', new Blob([bytes], { type }), `listing-image-${rank}.${extension}`)
+  form.append('rank', String(rank))
+  if (altText) form.append('alt_text', altText.slice(0, 250))
+
+  let response: Response | undefined
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    response = await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings/${listingId}/images`, {
+      method: 'POST', headers: apiHeaders(accessToken), body: form,
+    })
+    if (response.ok || (response.status !== 429 && response.status < 500)) break
+    await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt))
+  }
+  if (!response?.ok) throw new Error(`Etsy image upload failed (${response?.status ?? 500})`)
+  return response.json()
 }

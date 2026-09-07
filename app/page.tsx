@@ -4,9 +4,9 @@ import SiteFooter from '@/components/shared/site-footer'
 import HomeClient from '@/components/home/home-client'
 
 export const metadata: Metadata = {
-  title: 'Craftly — Words that sell your craft',
+  title: 'Craftly — The AI workspace for your Etsy shop',
   description:
-    'Craftly turns rough notes and phone photos into listings, posts, and buyer replies that sound like you — for Etsy, Shopify, Instagram and more. Free for ten listings a month.',
+    'Connect your Etsy shop, find listing issues, review AI improvements, and publish approved changes from one workspace.',
 }
 
 export default function Home() {

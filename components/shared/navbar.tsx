@@ -15,6 +15,7 @@ const LINKS = [
   { key: 'examples', href: '/examples' },
   { key: 'pricing', href: '/pricing' },
   { key: 'openApp', href: '/dashboard' },
+  { key: 'shop', href: '/dashboard/shop' },
 ]
 
 export default function Navbar() {
@@ -60,7 +61,7 @@ export default function Navbar() {
               className={isActive(l.href) ? 'active' : ''}
               onClick={() => setMenuOpen(false)}
             >
-              {t(`nav.${l.key}`)}
+              {l.key === 'shop' ? 'My Shop' : t(`nav.${l.key}`)}
             </Link>
           ))}
         </div>

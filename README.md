@@ -5,8 +5,8 @@
 <h1 align="center">Craftly</h1>
 
 <p align="center">
-  <strong>The AI copilot for Etsy sellers.</strong><br />
-  Write listings, reply to buyers, generate product posters, and price to profit — from one dashboard.
+  <strong>The AI workspace for your Etsy shop.</strong><br />
+  Connect a shop, find listing issues, review AI improvements, and publish approved changes from one dashboard.
 </p>
 
 <p align="center">
@@ -25,7 +25,7 @@
 
 ## What it is
 
-Craftly is a production SaaS (live at **[craftly.world](https://craftly.world)**) that removes the busywork from running an Etsy shop. Sixteen AI tools cover the full listing lifecycle — from first draft, through buyer conversation and reviews, to SEO, translation, and product photography. Free tier gives you **10 credits + 3 generated images** with no card, so you can try everything before paying.
+Craftly is a production SaaS (live at **[craftly.world](https://craftly.world)**) that helps Etsy sellers work through a listing workflow: connect, inspect, improve, review, and publish. Its AI tools support listing creation, buyer communication, SEO, translation, and product photography. The Free plan includes **10 credits + 3 generated images** with no card.
 
 - **OTP sign-in** — passwordless email login via Supabase Auth (6-digit code).
 - **Credit + image quotas** — every generation is metered; tiers unlock more.
@@ -39,7 +39,7 @@ Craftly is a production SaaS (live at **[craftly.world](https://craftly.world)**
   <img src="public/dashboard.webp" alt="Dashboard — sixteen tools and credits" width="1280" />
 </p>
 
-## The 16 tools
+## Included AI tools
 
 | Tool | What it does |
 | --- | --- |
@@ -76,12 +76,7 @@ Each poster consumes 1 image credit, deducted per generated image.
 
 ## Pricing
 
-| Tier | Monthly | Yearly | Credits | Images |
-| --- | --- | --- | --- | --- |
-| **Free** | — | — | 10 | 3 |
-| **Basic** | $9 | $79 | 100 | 20 |
-| **Pro** | $19 | $179 | 300 | 60 |
-| **Scale** | $39 | $349 | 1000 | 300 |
+`lib/pricing.ts` is the single source of truth for plans, Paddle price IDs, credits, image credits, and prices. The pricing page, dashboard, checkout validation, and webhook plan mapping all import from that module. Do not copy pricing values into this README.
 
 ## Affiliate program
 
@@ -228,14 +223,14 @@ Schema lives in `supabase/migrations/`:
 app/
   (auth)/             # OTP login / signup
   api/                # AI generation, billing, image routes
-  dashboard/          # the 16 tool pages
+  dashboard/          # AI tools and shop workspace pages
 components/
   dashboard/images/   # image generator (hook, panels, result grid)
   ui/                 # shadcn/ui primitives
 lib/
   auth.ts             # request auth + tier/image access
   openai.ts           # multi-provider AI + image generation
-  pricing.ts          # tier/price definitions
+  pricing.ts          # canonical plan, quota, and Paddle price definitions
   email.ts            # Resend email helpers
   i18n/               # lightweight i18n framework
 mcp-server/           # MCP server (stdio + Streamable HTTP)

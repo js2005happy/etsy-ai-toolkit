@@ -2,11 +2,12 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createListing, refreshAccessToken } from '@/lib/etsy'
+import { etsyUserMessage } from '@/lib/etsy-errors'
 
 export const dynamic = 'force-dynamic'
 
-// POST /api/etsy/push — push a generated listing to a connected Etsy shop.
-// Body: { connection_id, title, description, price?, images?, taxonomy_id? }
+// POST /api/etsy/push — creates an Etsy *draft*. Publishing is deliberately a
+// separate reviewed action; this endpoint never changes an active listing.
 export async function POST(request: Request) {
   const supabase = createClient()
   const {
@@ -17,9 +18,9 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json()
-  const { connection_id, title, description, price, images, taxonomy_id } = body ?? {}
-  if (!connection_id || !title || !description) {
-    return NextResponse.json({ error: 'Missing connection_id, title or description' }, { status: 400 })
+  const { connection_id, title, description, price, images, taxonomy_id, tags } = body ?? {}
+  if (!connection_id || !title || !description || !taxonomy_id || !Number.isFinite(Number(price)) || Number(price) <= 0) {
+    return NextResponse.json({ error: 'A title, description, positive price, and confirmed Etsy category are required to create a draft.' }, { status: 400 })
   }
 
   const service = createServiceClient()
@@ -56,10 +57,12 @@ export async function POST(request: Request) {
       price: typeof price === 'number' ? price : Number(price) || 0,
       taxonomyId: typeof taxonomy_id === 'number' ? taxonomy_id : undefined,
       images: Array.isArray(images) ? images : undefined,
+      tags: Array.isArray(tags) ? tags.filter((tag): tag is string => typeof tag === 'string') : undefined,
     })
     return NextResponse.json({ listing })
   } catch (error: any) {
     console.error('Etsy push error:', error)
-    return NextResponse.json({ error: error.message || 'Failed to push listing' }, { status: 500 })
+    const mapped = etsyUserMessage(error)
+    return NextResponse.json({ error: mapped.message }, { status: mapped.status })
   }
 }
