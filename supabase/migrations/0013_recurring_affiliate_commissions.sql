@@ -1,27 +1,38 @@
 -- Craftly — recurring affiliate commissions
 --
--- The original referral schema allowed only one commission row per referred
--- user. Recurring affiliate payouts need one row per successful Paddle
--- subscription transaction instead, while preserving legacy first-payment rows.
+-- Keep the original affiliate_commissions table unchanged so the currently
+-- deployed first-payment flow remains valid while this additive migration is
+-- applied. Normal subscription renewals are stored separately and deduplicated
+-- by Paddle transaction ID.
 
-alter table public.affiliate_commissions
-  add column if not exists paddle_transaction_id text;
+create table if not exists public.affiliate_renewal_commissions (
+  id bigint generated always as identity primary key,
+  affiliate_id uuid not null references public.profiles (id) on delete cascade,
+  referred_user_id uuid not null references public.profiles (id) on delete cascade,
+  tier text not null,
+  amount numeric(10,2) not null default 0,
+  currency text not null default 'USD',
+  status text not null default 'paid',
+  paddle_transaction_id text not null unique,
+  paddle_subscription_id text,
+  created_at timestamptz not null default now()
+);
 
-alter table public.affiliate_commissions
-  add column if not exists paddle_subscription_id text;
+alter table public.affiliate_renewal_commissions enable row level security;
 
-alter table public.affiliate_commissions
-  drop constraint if exists affiliate_commissions_referred_user_id_key;
+drop policy if exists "affiliates read own renewal commissions"
+  on public.affiliate_renewal_commissions;
 
--- A normal UNIQUE index still allows multiple NULL values in Postgres. That
--- keeps legacy rows valid while giving Supabase upsert a concrete conflict
--- target for every new Paddle transaction.
-create unique index if not exists affiliate_commissions_paddle_transaction_idx
-  on public.affiliate_commissions (paddle_transaction_id);
+create policy "affiliates read own renewal commissions"
+  on public.affiliate_renewal_commissions for select
+  using (auth.uid() = affiliate_id);
 
-create index if not exists affiliate_commissions_referred_user_idx
-  on public.affiliate_commissions (referred_user_id);
+create index if not exists affiliate_renewal_commissions_affiliate_idx
+  on public.affiliate_renewal_commissions (affiliate_id);
 
-create index if not exists affiliate_commissions_subscription_idx
-  on public.affiliate_commissions (paddle_subscription_id)
+create index if not exists affiliate_renewal_commissions_referred_user_idx
+  on public.affiliate_renewal_commissions (referred_user_id);
+
+create index if not exists affiliate_renewal_commissions_subscription_idx
+  on public.affiliate_renewal_commissions (paddle_subscription_id)
   where paddle_subscription_id is not null;
