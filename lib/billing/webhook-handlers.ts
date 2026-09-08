@@ -1,7 +1,12 @@
 import { createServiceClient } from '@/lib/supabase/service'
 import { hasPaidAccess } from './access'
-import { PRICE_TO_TIER, tierQuota, isYearlyPrice, type TierName } from '@/lib/pricing'
-import { commissionForTier } from '@/lib/referral'
+import {
+  PRICE_TO_TIER,
+  tierQuota,
+  isYearlyPrice,
+  type TierName,
+} from '@/lib/pricing'
+import { commissionForPriceId } from '@/lib/referral'
 import {
   sendNewSaleEmail,
   sendSubscriptionActiveEmail,
@@ -59,19 +64,8 @@ async function resolveEmail(userId: string): Promise<string | undefined> {
   return data?.user?.email ?? undefined
 }
 
-/**
- * Credit the referrer 30% of the referred user's first-month price when the
- * referred user upgrades to a paid plan. Idempotent: the unique constraint on
- * `referred_user_id` (upsert ignoreDuplicates) guarantees one payout per
- * referred user, so a re-fired webhook can't double-credit.
- */
-async function maybeCreditReferral(userId: string, tier: TierName): Promise<void> {
-  if (tier === 'Free') return
-  const amount = commissionForTier(tier)
-  if (amount <= 0) return
-
+async function resolveReferrer(userId: string): Promise<string | undefined> {
   const db = getSupabase()
-
   const { data: profile } = await db
     .from('profiles')
     .select('referred_by')
@@ -79,7 +73,7 @@ async function maybeCreditReferral(userId: string, tier: TierName): Promise<void
     .maybeSingle()
 
   const code = profile?.referred_by
-  if (!code) return
+  if (!code) return undefined
 
   const { data: referrer } = await db
     .from('profiles')
@@ -87,11 +81,29 @@ async function maybeCreditReferral(userId: string, tier: TierName): Promise<void
     .eq('referral_code', code)
     .maybeSingle()
 
-  if (!referrer || referrer.id === userId) return
+  if (!referrer || referrer.id === userId) return undefined
+  return referrer.id
+}
 
-  await db.from('affiliate_commissions').upsert(
+/**
+ * Keep the existing first-payment ledger intact. The row is unique per referred
+ * user, so repeated subscription activation events cannot double-credit.
+ */
+async function maybeCreditInitialReferral(
+  userId: string,
+  tier: TierName,
+  priceId?: string
+): Promise<void> {
+  if (tier === 'Free') return
+  const amount = commissionForPriceId(priceId)
+  if (amount <= 0) return
+
+  const affiliateId = await resolveReferrer(userId)
+  if (!affiliateId) return
+
+  await getSupabase().from('affiliate_commissions').upsert(
     {
-      affiliate_id: referrer.id,
+      affiliate_id: affiliateId,
       referred_user_id: userId,
       tier,
       amount,
@@ -99,6 +111,55 @@ async function maybeCreditReferral(userId: string, tier: TierName): Promise<void
       status: 'paid',
     },
     { onConflict: 'referred_user_id', ignoreDuplicates: true }
+  )
+}
+
+/**
+ * Record 30% commission for a normal successful subscription renewal.
+ *
+ * Paddle also creates transactions for upgrades, downgrades, proration and
+ * one-time subscription charges. Only `subscription_recurring` qualifies here,
+ * preventing a mid-cycle plan change from paying a full extra commission.
+ * The Paddle transaction ID is unique, so webhook retries are idempotent.
+ */
+async function maybeCreditRenewalReferral(args: {
+  userId: string
+  tier: TierName
+  priceId?: string
+  transactionId?: string
+  subscriptionId?: string | null
+  origin?: string
+}): Promise<void> {
+  const {
+    userId,
+    tier,
+    priceId,
+    transactionId,
+    subscriptionId,
+    origin,
+  } = args
+
+  if (origin !== 'subscription_recurring') return
+  if (tier === 'Free' || !transactionId || !subscriptionId) return
+
+  const amount = commissionForPriceId(priceId)
+  if (amount <= 0) return
+
+  const affiliateId = await resolveReferrer(userId)
+  if (!affiliateId) return
+
+  await getSupabase().from('affiliate_renewal_commissions').upsert(
+    {
+      affiliate_id: affiliateId,
+      referred_user_id: userId,
+      tier,
+      amount,
+      currency: 'USD',
+      status: 'paid',
+      paddle_transaction_id: transactionId,
+      paddle_subscription_id: subscriptionId,
+    },
+    { onConflict: 'paddle_transaction_id', ignoreDuplicates: true }
   )
 }
 
@@ -137,7 +198,7 @@ export async function handleSubscription(
   const tier = await syncUserPlan(userId, priceId, data.status)
 
   if (eventType === 'subscription.activated') {
-    await maybeCreditReferral(userId, tier)
+    await maybeCreditInitialReferral(userId, tier, priceId)
     const email = await resolveEmail(userId)
     if (email) await sendSubscriptionActiveEmail(email, tier.toLowerCase())
   } else if (eventType === 'subscription.canceled') {
@@ -149,6 +210,8 @@ export async function handleSubscription(
 /**
  * transaction.completed backfills the customer/subscription links and — in case
  * subscription events were missed — recomputes tier from the line-item price.
+ * Paddle emits a completed `subscription_recurring` transaction for each
+ * successful renewal, which is the source of truth for recurring commissions.
  */
 export async function handleTransactionCompleted(
   data: TransactionNotification
@@ -170,14 +233,23 @@ export async function handleTransactionCompleted(
   }
 
   const priceId = data.items?.[0]?.price?.id
+  let tier: TierName = 'Free'
   if (priceId) {
-    await syncUserPlan(userId, priceId, 'active')
+    tier = await syncUserPlan(userId, priceId, 'active')
   }
 
   if (data.status === 'completed') {
+    await maybeCreditRenewalReferral({
+      userId,
+      tier,
+      priceId,
+      transactionId: data.id,
+      subscriptionId: data.subscriptionId,
+      origin: data.origin,
+    })
+
     const total = data.details?.totals?.total
     if (total) {
-      const tier = resolveTier(priceId, 'active')
       const buyerEmail = await resolveEmail(userId)
       await sendNewSaleEmail({
         buyerEmail,

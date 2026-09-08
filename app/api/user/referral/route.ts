@@ -30,12 +30,26 @@ export async function GET() {
       await service.from('profiles').update({ referral_code: code }).eq('id', user.id)
     }
 
-    const { data: commissions } = await service
-      .from('affiliate_commissions')
-      .select('amount')
-      .eq('affiliate_id', user.id)
+    const [{ data: initialCommissions }, { data: renewalCommissions }] = await Promise.all([
+      service
+        .from('affiliate_commissions')
+        .select('amount')
+        .eq('affiliate_id', user.id),
+      service
+        .from('affiliate_renewal_commissions')
+        .select('amount')
+        .eq('affiliate_id', user.id),
+    ])
 
-    const earned = (commissions ?? []).reduce((sum, c) => sum + Number(c.amount ?? 0), 0)
+    const initialEarned = (initialCommissions ?? []).reduce(
+      (sum, c) => sum + Number(c.amount ?? 0),
+      0
+    )
+    const renewalEarned = (renewalCommissions ?? []).reduce(
+      (sum, c) => sum + Number(c.amount ?? 0),
+      0
+    )
+    const earned = initialEarned + renewalEarned
 
     const origin =
       process.env.NEXT_PUBLIC_SITE_URL || 'https://craftly.world'
@@ -45,7 +59,7 @@ export async function GET() {
       referral_code: code,
       referral_link: link,
       commission_earned: Math.round(earned * 100) / 100,
-      signups: (commissions ?? []).length,
+      signups: (initialCommissions ?? []).length,
     })
   } catch (error: any) {
     console.error('API Error:', error)

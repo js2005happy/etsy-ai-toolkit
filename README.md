@@ -80,9 +80,10 @@ Each poster consumes 1 image credit, deducted per generated image.
 
 ## Affiliate program
 
-Earn **30% of every paid plan** you refer. The program is for creators, bloggers, and newsletter authors with an audience of Etsy sellers or handmade-shop owners.
+Earn **30% recurring commission** on eligible paid subscriptions you refer. The program is for creators, bloggers, and newsletter authors with an audience of Etsy sellers or handmade-shop owners.
 
-- **30% commission** on the first month of every paid plan you refer.
+- **30% recurring commission** on successful initial subscription payments and normal renewals.
+- **Monthly and annual plans** both qualify; annual commissions recur on successful annual renewals.
 - **Free tier** makes it easy for your audience to try before they buy.
 - **Ready-made assets** — tracking links, banners, and copy.
 
