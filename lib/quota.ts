@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase/service'
 
 // Atomic quota decrements. These call SECURITY DEFINER RPCs (see migration
 // 0012) so the decrement is a single guarded write. Returns false when quota
@@ -35,12 +36,17 @@ export async function consumeImageCredits(
   return data === true
 }
 
+// Refund RPCs are intentionally service-role only. An authenticated browser
+// must never be able to increase its own quota by calling these functions
+// directly. The caller-provided db argument is retained for API compatibility,
+// but compensation always uses the server-only service client.
 export async function refundCredits(
-  db: SupabaseClient,
+  _db: SupabaseClient,
   userId: string,
   amount: number
 ): Promise<boolean> {
-  const { data, error } = await db.rpc('refund_credits', {
+  const service = createServiceClient()
+  const { data, error } = await service.rpc('refund_credits', {
     p_user_id: userId,
     p_amount: amount,
   })
@@ -52,11 +58,12 @@ export async function refundCredits(
 }
 
 export async function refundImageCredits(
-  db: SupabaseClient,
+  _db: SupabaseClient,
   userId: string,
   amount: number
 ): Promise<boolean> {
-  const { data, error } = await db.rpc('refund_image_credits', {
+  const service = createServiceClient()
+  const { data, error } = await service.rpc('refund_image_credits', {
     p_user_id: userId,
     p_amount: amount,
   })
