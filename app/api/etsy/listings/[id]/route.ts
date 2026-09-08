@@ -8,7 +8,12 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const id = Number(params.id)
   if (!Number.isSafeInteger(id)) return NextResponse.json({ error: 'Invalid listing id' }, { status: 400 })
-  const { data: listing, error } = await supabase.from('etsy_listings').select('id, title, description, tags, images, attributes, state, taxonomy_id, price, quantity').eq('id', id).eq('user_id', user.id).maybeSingle()
+  const { data: listing, error } = await supabase
+    .from('etsy_listings')
+    .select('id, connection_id, etsy_listing_id, title, description, tags, images, attributes, state, taxonomy_id, price, quantity')
+    .eq('id', id)
+    .eq('user_id', user.id)
+    .maybeSingle()
   if (error) return NextResponse.json({ error: 'Unable to load listing.' }, { status: 500 })
   if (!listing) return NextResponse.json({ error: 'Listing not found' }, { status: 404 })
   return NextResponse.json({ listing: {
