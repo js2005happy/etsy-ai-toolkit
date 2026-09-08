@@ -4,6 +4,7 @@ import {
   PRICE_TO_TIER,
   tierQuota,
   isYearlyPrice,
+  getPlan,
   type TierName,
 } from '@/lib/pricing'
 import { commissionForPriceId } from '@/lib/referral'
@@ -25,6 +26,17 @@ function getSupabase() {
   if (!serviceClient) serviceClient = createServiceClient()
   return serviceClient
 }
+
+type EntitlementSyncResult = {
+  tier: TierName
+  applied: boolean
+}
+
+const ENTITLEMENT_TRANSACTION_ORIGINS = new Set([
+  'web',
+  'subscription_recurring',
+  'subscription_update',
+])
 
 // Map a subscription's price + status into the tier it should grant. Only
 // active/trialing grant access. Unknown active price IDs never grant a paid
@@ -83,6 +95,20 @@ async function resolveReferrer(userId: string): Promise<string | undefined> {
 
   if (!referrer || referrer.id === userId) return undefined
   return referrer.id
+}
+
+async function currentStoredTier(userId: string): Promise<TierName> {
+  const { data, error } = await getSupabase()
+    .from('profiles')
+    .select('subscription_status')
+    .eq('id', userId)
+    .maybeSingle()
+
+  if (error) throw new Error(`Failed to read current plan for user ${userId}`)
+
+  const status = data?.subscription_status
+  if (status === 'active' || status === 'trialing') return 'Pro'
+  return getPlan(status).name
 }
 
 /**
@@ -178,13 +204,15 @@ export async function handleCustomer(data: CustomerNotification): Promise<void> 
 }
 
 /**
- * Store the subscription id (for the portal) and recompute the user's tier +
- * quota from the subscription's price and status. Emits lifecycle emails on
- * activation and cancellation.
+ * Store the subscription id and apply entitlement changes only when the event
+ * actually changes the user's tier/status. Generic `subscription.updated`
+ * events are common for metadata, scheduled cancellation, and billing-detail
+ * changes, so a same-tier update must never refill quota.
  */
 export async function handleSubscription(
   data: SubscriptionNotification,
-  eventType?: string
+  eventType?: string,
+  occurredAt?: string
 ): Promise<void> {
   const userId = await resolveUserId(data.customerId, data.customData?.user_id)
   if (!userId) return
@@ -195,7 +223,26 @@ export async function handleSubscription(
     .eq('id', userId)
 
   const priceId = data.items?.[0]?.price?.id
-  const tier = await syncUserPlan(userId, priceId, data.status)
+  const nextTier = resolveTier(priceId, data.status)
+
+  // `subscription.updated` is a catch-all. Only apply it when the effective
+  // entitlement actually changed; otherwise a cancel-at-period-end or metadata
+  // update could refill the user's entire quota without a payment.
+  if (eventType === 'subscription.updated') {
+    const currentTier = await currentStoredTier(userId)
+    if (currentTier === nextTier) return
+  }
+
+  const { tier, applied } = await syncUserPlan(
+    userId,
+    priceId,
+    data.status,
+    occurredAt
+  )
+
+  // A newer Paddle event has already won. Do not emit stale lifecycle emails or
+  // affiliate side effects when an out-of-order event arrives later.
+  if (!applied) return
 
   if (eventType === 'subscription.activated') {
     await maybeCreditInitialReferral(userId, tier, priceId)
@@ -208,13 +255,14 @@ export async function handleSubscription(
 }
 
 /**
- * transaction.completed backfills the customer/subscription links and — in case
- * subscription events were missed — recomputes tier from the line-item price.
- * Paddle emits a completed `subscription_recurring` transaction for each
- * successful renewal, which is the source of truth for recurring commissions.
+ * transaction.completed backfills the customer/subscription links and — for
+ * checkout, renewal, and subscription-change transactions only — recomputes the
+ * user's entitlement. One-time subscription charges and payment-method-change
+ * transactions must not modify plan access or refill quota.
  */
 export async function handleTransactionCompleted(
-  data: TransactionNotification
+  data: TransactionNotification,
+  occurredAt?: string
 ): Promise<void> {
   const userId = data.customData?.user_id as string | undefined
   if (!userId) return
@@ -233,9 +281,20 @@ export async function handleTransactionCompleted(
   }
 
   const priceId = data.items?.[0]?.price?.id
-  let tier: TierName = 'Free'
-  if (priceId) {
-    tier = await syncUserPlan(userId, priceId, 'active')
+  let tier: TierName = priceId ? resolveTier(priceId, 'active') : 'Free'
+
+  if (
+    priceId &&
+    data.origin &&
+    ENTITLEMENT_TRANSACTION_ORIGINS.has(data.origin)
+  ) {
+    const result = await syncUserPlan(
+      userId,
+      priceId,
+      'active',
+      occurredAt
+    )
+    tier = result.tier
   }
 
   if (data.status === 'completed') {
@@ -249,11 +308,12 @@ export async function handleTransactionCompleted(
     })
 
     const total = data.details?.totals?.total
-    if (total) {
+    const totalMinor = total == null ? 0 : Number(total)
+    if (Number.isFinite(totalMinor) && totalMinor > 0) {
       const buyerEmail = await resolveEmail(userId)
       await sendNewSaleEmail({
         buyerEmail,
-        amount: total,
+        amount: total!,
         currency: data.currencyCode,
         tier,
       })
@@ -264,12 +324,17 @@ export async function handleTransactionCompleted(
 /**
  * Recompute a user's tier and reset their credit/image quota. Writes the
  * denormalized `profiles.subscription_status` flag (free | basic | pro | scale).
+ *
+ * Paddle webhook delivery is at-least-once and not ordered. When occurredAt is
+ * provided, the database update is conditional on this event being newer than
+ * the last entitlement-changing event already applied to the profile.
  */
 export async function syncUserPlan(
   userId: string,
   priceId?: string,
-  status?: string
-): Promise<TierName> {
+  status?: string,
+  occurredAt?: string
+): Promise<EntitlementSyncResult> {
   const tier = resolveTier(priceId, status)
   const quota = tierQuota(tier)
 
@@ -278,18 +343,38 @@ export async function syncUserPlan(
   // not monthly-reset subscriptions.
   const multiplier = isYearlyPrice(priceId) ? 12 : 1
 
-  const { error } = await getSupabase()
+  const update = {
+    subscription_status: tier.toLowerCase(),
+    credits_remaining: quota.credits * multiplier,
+    images_remaining: quota.images * multiplier,
+    ...(occurredAt ? { paddle_entitlement_event_at: occurredAt } : {}),
+  }
+
+  let query = getSupabase()
     .from('profiles')
-    .update({
-      subscription_status: tier.toLowerCase(),
-      credits_remaining: quota.credits * multiplier,
-      images_remaining: quota.images * multiplier,
-    })
+    .update(update)
     .eq('id', userId)
+
+  if (occurredAt) {
+    query = query.or(
+      `paddle_entitlement_event_at.is.null,paddle_entitlement_event_at.lt.${occurredAt}`
+    )
+  }
+
+  const { data, error } = await query.select('id').maybeSingle()
 
   if (error) {
     throw new Error(`Failed to sync Paddle entitlement for user ${userId}`)
   }
 
-  return tier
+  if (occurredAt && !data) {
+    console.info('Skipped stale Paddle entitlement event', {
+      userId,
+      occurredAt,
+      tier,
+    })
+    return { tier, applied: false }
+  }
+
+  return { tier, applied: true }
 }
