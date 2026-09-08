@@ -37,7 +37,7 @@ jobs:
       - name: Normalize ESLint flat config
         run: |
           rm -f .eslintrc.json
-          python -c "from pathlib import Path; Path('eslint.config.mjs').write_text(\"import { defineConfig, globalIgnores } from 'eslint/config'\\nimport nextVitals from 'eslint-config-next/core-web-vitals'\\nimport nextTs from 'eslint-config-next/typescript'\\n\\nexport default defineConfig([\\n  ...nextVitals,\\n  ...nextTs,\\n  { rules: { 'react-hooks/set-state-in-effect': 'off' } },\\n  globalIgnores(['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts']),\\n])\\n\")"
+          python -c "from pathlib import Path; Path('eslint.config.mjs').write_text(\"import { defineConfig, globalIgnores } from 'eslint/config'\\nimport nextVitals from 'eslint-config-next/core-web-vitals'\\n\\nexport default defineConfig([\\n  ...nextVitals,\\n  { rules: { 'react-hooks/set-state-in-effect': 'off' } },\\n  globalIgnores(['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts']),\\n])\\n\")"
       - name: Verify migrated app
         run: |
           npm run lint
@@ -48,7 +48,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git reset .github/workflows/next16-migration-once.yml .github/workflows/next16-migration-once-v2.yml
+          git reset .github/workflows/next16-migration-once.yml
           if git diff --cached --quiet; then
             echo "No migration changes"
           else
