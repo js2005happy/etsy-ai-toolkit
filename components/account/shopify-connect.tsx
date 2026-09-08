@@ -57,7 +57,9 @@ export default function ShopifyConnect() {
     }
     setConnecting(true)
     setError(null)
-    window.location.href = `/api/shopify/connect?shop=${encodeURIComponent(shop)}`
+    const connectUrl = new URL('/api/shopify/connect', window.location.origin)
+    connectUrl.searchParams.set('shop', shop)
+    window.location.assign(connectUrl.toString())
   }
 
   const handleDisconnect = async (id: number) => {
