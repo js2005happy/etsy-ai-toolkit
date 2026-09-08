@@ -15,6 +15,18 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | null>(null)
 
+const recurringReferralDescription: Record<Locale, string> = {
+  en: 'Earn 30% recurring commission on every successful subscription payment from people you refer.',
+  de: 'Verdiene 30 % wiederkehrende Provision auf jede erfolgreiche Abonnementzahlung von Personen, die du empfiehlst.',
+  fr: 'Gagnez 30 % de commission récurrente sur chaque paiement d’abonnement réussi des personnes que vous parrainez.',
+  es: 'Gana un 30 % de comisión recurrente por cada pago de suscripción completado de las personas que recomiendes.',
+  zh: '你推荐的用户每次成功支付订阅费用，你都可获得 30% 的持续佣金。',
+  ja: '紹介したユーザーのサブスクリプション決済が成功するたびに、30%の継続報酬を獲得できます。',
+  it: 'Guadagna una commissione ricorrente del 30% su ogni pagamento di abbonamento riuscito degli utenti che presenti.',
+  ko: '추천한 사용자의 구독 결제가 성공할 때마다 30%의 반복 커미션을 받습니다.',
+  pt: 'Ganhe 30% de comissão recorrente em cada pagamento de assinatura bem-sucedido das pessoas que você indicar.',
+}
+
 function getByPath(dict: Dict | undefined, key: string): unknown {
   if (!dict) return undefined
   return key.split('.').reduce<unknown>((acc, part) => {
@@ -51,6 +63,9 @@ export function I18nProvider({
 
   const t = useCallback(
     (key: string): string => {
+      if (key === 'account.referralDesc') {
+        return recurringReferralDescription[locale]
+      }
       const translated = asString(getByPath(messages[locale], key))
       if (translated !== undefined) return translated
       const fallback = asString(getByPath(messages[defaultLocale], key))
