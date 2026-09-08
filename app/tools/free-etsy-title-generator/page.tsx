@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   title:
     "Free Etsy Title Generator — SEO Titles & 13 Tags in Seconds (2026)",
   description:
-    "Type what you made → get an SEO-optimized Etsy title, all 13 tags, and a description preview in seconds. Free, no signup, no card — 3 generations a day. The same prompt that powers Craftly Pro.",
+    "Type what you made → get a search-friendly Etsy title, all 13 tags, and a description preview in seconds. Free, no signup, no card — 3 generations a day.",
   keywords: [
     "etsy title generator",
     "free etsy title generator",
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Free Etsy Title Generator — SEO Titles & 13 Tags in Seconds",
     description:
-      "Free AI Etsy title generator with all 13 tags. No signup, no card, 3 generations a day.",
+      "Free Etsy title generator with all 13 tags. No signup, no card, 3 generations a day.",
     type: "website",
     url: `${SITE_URL}/tools/free-etsy-title-generator`,
     siteName: "Craftly",
@@ -68,7 +68,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Free Etsy Title Generator — Craftly",
     description:
-      "Free AI Etsy title generator with all 13 tags. No signup, no card.",
+      "Free Etsy title generator with all 13 tags. No signup, no card.",
   },
 };
 
@@ -79,28 +79,28 @@ export const metadata: Metadata = {
 // half-translated article. Translatable chrome (FAQ, tool, CTAs)
 // still flows through t().
 // ----------------------------------------------------------------
-const ARTICLE_INTRO = `Etsy search has changed more in the last 18 months than in the previous five years. Etsy's 2025 redesign introduced AI-assisted query understanding, the marketplace crossed 4.5 million active sellers in early 2026, and new private-label competition has compressed every keyword pool. The result: the buyers you want are still searching, but the competition for every long-tail phrase has never been tougher. Yet 70% of Etsy buyers never click past page 1, and roughly 90% of all marketplace traffic starts with on-site search. That means ranking well for even five or ten carefully chosen keyword phrases can drive more sales than a beautiful listing stuck on page 7. This guide shows you exactly how Etsy's 2026 algorithm weighs titles, tags, and listing quality — and how to use this free tool to ship listings that rank in days, not months.`;
+const ARTICLE_INTRO = `A strong Etsy listing makes it easy for shoppers to understand what you sell and gives Etsy clear, relevant information about the product. Titles, tags, categories, attributes, photos, descriptions, price, and the overall shopper experience can all matter. There is no reliable shortcut that guarantees a particular search position, so this guide focuses on practical listing hygiene: describe the product accurately, use specific buyer-friendly phrases, fill the available listing fields, and review performance over time. Use the generator as a drafting assistant, then edit its suggestions so they match the item you actually sell.`;
 
 const ARTICLE_SECTIONS: { heading: string; body: string }[] = [
   {
-    heading: "The three factors Etsy actually weighs in 2026",
-    body: `In 2026, Etsy's ranking model is built around three pillars: relevance, quality, and recency. Relevance is determined almost entirely by your title and tags — Etsy's AI now matches buyer queries semantically, not just by exact keywords, but it still uses your title's first 40 characters as the primary signal. Quality is measured by conversion rate, review velocity, and Etsy's quietly weighted "listing quality score" that downranks listings with thin descriptions or missing attributes. Recency is the most underrated factor — Etsy's algorithm gives a measurable boost to listings that have sold recently, been edited, or trend in a buyer's session. The implication is brutal and liberating: a brand-new listing with perfect SEO can outrank an old best-seller in week one, but it needs to convert on its first few visits to keep the boost. Treat SEO as the door, not the destination — every visitor who lands and bounces is a vote against you.`,
+    heading: "Start with accurate, specific product language",
+    body: `Lead with the clearest description of the item instead of filler adjectives. Include useful details a shopper may care about, such as material, style, recipient, occasion, size, or personalization, when they genuinely apply. Keep the wording readable and avoid repeating phrases only to chase search visibility. Etsy can change how search works over time, so durable listing quality is more useful than trying to reverse-engineer a fixed formula.`,
   },
   {
-    heading: "Anatomy of an Etsy title that ranks",
-    body: `Your Etsy title can hold up to 140 characters, but only the first 40 carry most of the ranking weight. Think of it as a newspaper headline: the primary keyword phrase — what buyers actually type — must lead. A great title follows a formula: Primary long-tail keyword, secondary descriptor, material or craft, occasion or audience. Real example: "Personalized Name Necklace, Sterling Silver Initial Pendant, Birthday Gift for Her, Handmade." That title puts "Personalized Name Necklace" in position 1, complements it with "Birthday Gift for Her" in the tags, and stays inside 140 characters. The most common mistake is stuffing adjectives — "Beautiful Amazing Handmade Unique" — which burn characters without adding search signal. Every word in your title should be a phrase a buyer might actually type into the Etsy search bar on her phone at 11pm.`,
+    heading: "Write titles for shoppers first",
+    body: `Use the title to communicate what the product is in natural language. Put the most important product phrase early when that improves clarity, then add distinguishing details without turning the title into a wall of keywords. Stay within Etsy's current field limits and review the finished title on mobile as well as desktop. The generator gives you a draft; you remain responsible for checking that every claim, material, occasion, and personalization detail is accurate.`,
   },
   {
-    heading: "The 13-tag strategy most sellers get wrong",
-    body: `Etsy gives every listing 13 tags, each up to 20 characters. Most sellers waste them. They repeat words from the title (Etsy de-duplicates them, so the second occurrence is silently discarded) or target generic single words like "gift", "handmade", "women" — terms dominated by massive sellers where you will never rank. The right strategy is to use all 13 slots with long-tail, multi-word phrases that real buyers type: "initial letter necklace", "silver bar necklace", "gift for best friend", "personalized jewelry women". Aim for phrases of 2–4 words, mixing product-specific terms (your actual niche), occasion terms (who it's for, when), and material or process terms (how it's made). Optimize for what your customer would actually search, not what sounds impressive. Run a tag through Etsy's search bar before you commit to it — if the autocomplete shows thousands of results, your tag is too generic.`,
+    heading: "Use tags to cover relevant ways shoppers describe the item",
+    body: `Use the available tag slots for specific phrases that genuinely describe the product. Mix product type, style, material, recipient, and occasion concepts where appropriate instead of relying on broad single-word terms. Avoid adding irrelevant phrases just because they appear popular. Search behavior and Etsy guidance can evolve, so treat tags as descriptive metadata rather than a promise of ranking.`,
   },
   {
-    heading: "Why this free tool writes better titles than most humans",
-    body: `This free Etsy title generator was built on the same prompt that powers our paid Craftly Pro listing tool. It follows the front-load-first-40-character formula above, generates multi-word phrases that match real Etsy search patterns, and produces all 13 tags at once — saving you the 30–45 minutes it usually takes to write a fully optimized listing by hand. Every title it generates stays inside Etsy's 140-character limit, balances primary and secondary keywords, and avoids the duplicate-with-title trap that catches most beginners. Try it on three of your current listings and compare what comes out — most sellers see a measurable ranking lift within two weeks of switching. The free tier gives you three generations a day with no signup; the Pro tier unlocks unlimited generations plus 15 other AI tools that handle the rest of your shop.`,
+    heading: "Use Craftly as a drafting assistant, not a ranking guarantee",
+    body: `The free generator turns a short product note into a title and tag draft so you can get to an editable starting point quickly. Check the result against the real item before using it on Etsy, especially materials, dimensions, personalization, safety claims, and intended audience. Craftly does not control Etsy search placement or sales, and generated copy should be reviewed before publishing.`,
   },
   {
-    heading: "What to do in the next ten minutes",
-    body: `Open the generator above, type a description of your best-selling product, and copy the title and 13 tags straight into your Etsy draft. Run the same prompt on a product you've been struggling to rank — you'll usually see the difference within the first ten seconds. If you want the full description, image prompts, and bulk optimization for your whole shop, create a free Craftly account — no card required, 10 credits a month, and you can keep using every other AI tool we make. SEO is a compounding game: every listing you fix today is a small asset that pays off for the next 18 months. Start with three, measure for two weeks, then come back for the rest.`,
+    heading: "A simple workflow for your next listing",
+    body: `Describe the product in the generator above, review the suggested title and tags, and edit anything that is inaccurate or unnatural. Compare the draft with the rest of your listing so the photos, category, attributes, description, price, and shipping information tell a consistent story. A free Craftly account includes a finite monthly credit allowance for the wider toolkit; paid plans add larger finite allowances and additional seller workflows.`,
   },
 ];
 
@@ -296,20 +296,15 @@ export default function FreeEtsyTitleGeneratorPage() {
         "Free tier: 3 Etsy title + tag generations per day. No signup, no card.",
     },
     description:
-      "Free AI Etsy title and tag generator. Produces an SEO-optimized title under 140 characters and all 13 Etsy tags from a short product note.",
+      "Free Etsy title and tag generator. Produces an editable title and up to 13 Etsy tag suggestions from a short product note.",
     featureList: [
-      "SEO-optimized title in under 140 characters",
-      "All 13 Etsy tags generated at once",
-      "Multi-word long-tail keyword targeting",
-      "Front-load first-40-character formula",
+      "Editable Etsy title draft",
+      "Up to 13 Etsy tag suggestions",
+      "Specific multi-word phrase suggestions",
+      "Readable, product-focused wording",
       "Description preview",
       "No signup required",
     ],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      reviewCount: "312",
-    },
   };
 
   const faqJsonLd = {
