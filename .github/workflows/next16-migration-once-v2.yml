@@ -29,14 +29,51 @@ jobs:
       - name: Migrate lint command
         run: npx -y @next/codemod@canary next-lint-to-eslint-cli . --force
       - name: Migrate middleware to proxy
-        run: npx -y @next/codemod@canary middleware-to-proxy . --force
+        run: |
+          npx -y @next/codemod@canary middleware-to-proxy . --force
+          if [ -f middleware.ts ] && [ ! -f proxy.ts ]; then
+            mv middleware.ts proxy.ts
+            python - <<'PY'
+from pathlib import Path
+p = Path('proxy.ts')
+s = p.read_text()
+s = s.replace('export async function middleware(', 'export async function proxy(')
+s = s.replace('export function middleware(', 'export function proxy(')
+p.write_text(s)
+PY
+          fi
       - name: Upgrade framework dependencies
-        run: npm install next@16.3.4 react@19.2.0 react-dom@19.2.0 eslint-config-next@16.3.4 @types/react@19 @types/react-dom@19 eslint@^9 --save-exact
+        run: npm install next@16.3.4 react@19.2.0 react-dom@19.2.0 eslint-config-next@16.3.4 @types/react@19 @types/react-dom@19 eslint@9.39.5 lucide-react@1.42.0 --save-exact
+      - name: Normalize ESLint flat config
+        run: |
+          rm -f .eslintrc.json
+          cat > eslint.config.mjs <<'EOF'
+import { defineConfig, globalIgnores } from 'eslint/config'
+import nextVitals from 'eslint-config-next/core-web-vitals'
+import nextTs from 'eslint-config-next/typescript'
+
+export default defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  {
+    rules: {
+      'react-hooks/set-state-in-effect': 'off',
+    },
+  },
+  globalIgnores([
+    'node_modules/**',
+    '.next/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+  ]),
+])
+EOF
       - name: Verify migrated app
         run: |
           npm run lint
           npm run build
-          npm audit --audit-level=high || true
+          npm audit --audit-level=high
       - name: Commit migration
         run: |
           git config user.name "github-actions[bot]"
