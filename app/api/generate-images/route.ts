@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
-import { consumeImageCredits } from '@/lib/quota'
+import { withImageCreditCharge } from '@/lib/quota'
 import { generateProductImages, type ProductImageInput } from '@/lib/openai'
 
 const MAX_ITEMS = 10
@@ -12,9 +12,7 @@ function isValidInput(item: ProductImageInput): boolean {
 export async function POST(request: Request) {
   try {
     const auth = await authenticateRequest(request)
-    if ('error' in auth) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status })
-    }
+    if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status })
     const { db, userId, hasImageAccess, imageCredits } = auth
 
     const body = await request.json()
@@ -29,13 +27,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required fields on one or more items' }, { status: 400 })
     }
 
-    if (!hasImageAccess) {
-      return NextResponse.json(
-        { error: 'No image credits available. Please upgrade your plan.' },
-        { status: 403 }
-      )
-    }
-    if (imageCredits < items.length) {
+    if (!hasImageAccess || imageCredits < items.length) {
       return NextResponse.json(
         {
           error: `Insufficient image credits. Need ${items.length}, have ${imageCredits}.`,
@@ -46,9 +38,14 @@ export async function POST(request: Request) {
       )
     }
 
-    const images = await generateProductImages(items)
-
-    await consumeImageCredits(db, userId, items.length)
+    const charged = await withImageCreditCharge(db, userId, items.length, () => generateProductImages(items))
+    if (!charged.ok) {
+      return NextResponse.json(
+        { error: 'Insufficient image credits. Your quota may have changed; refresh and try again.' },
+        { status: 403 }
+      )
+    }
+    const images = charged.value
 
     await Promise.all(
       items.map((item, i) =>
@@ -62,8 +59,8 @@ export async function POST(request: Request) {
     )
 
     return NextResponse.json({ images })
-  } catch (error: any) {
-    console.error('API Error:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+  } catch (error) {
+    console.error('Error in generate-images:', error)
+    return NextResponse.json({ error: "We couldn't generate these images. Please try again." }, { status: 500 })
   }
 }
