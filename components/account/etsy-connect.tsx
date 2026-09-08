@@ -41,7 +41,7 @@ export default function EtsyConnect() {
   const handleConnect = () => {
     setConnecting(true)
     setError(null)
-    window.location.href = '/api/etsy/connect'
+    window.location.assign(new URL('/api/etsy/connect', window.location.origin).toString())
   }
 
   const handleDisconnect = async (id: number) => {
