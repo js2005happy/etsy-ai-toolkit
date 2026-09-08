@@ -1,15 +1,15 @@
-// Etsy Open API v3 client — OAuth 2.0 PKCE + listing push.
-// The app is registered at etsy.com/developers (keystring + redirect_uri).
-// Etsy v3 uses PKCE (code_verifier + code_challenge S256) — there is no
-// client_secret exchange like Shopify.
+// Etsy Open API v3 client — OAuth 2.0 PKCE + draft-first listing workflow.
 
 import crypto from 'crypto'
+import { lookup } from 'node:dns/promises'
+import { isIP } from 'node:net'
 
 const ETSY_AUTHORIZE_URL = 'https://www.etsy.com/oauth/connect'
 const ETSY_TOKEN_URL = 'https://api.etsy.com/v3/public/oauth/token'
 const ETSY_API_BASE = 'https://openapi.etsy.com/v3/application'
-
 const ETSY_SCOPES = 'listings_w listings_r shops_r'
+const MAX_IMAGE_BYTES = 20 * 1024 * 1024
+const MAX_REDIRECTS = 4
 
 function getEtsyClient() {
   const apiKey = process.env.ETSY_API_KEY
@@ -21,8 +21,6 @@ function getEtsyClient() {
   return { apiKey, redirectUri, sharedSecret }
 }
 
-// Etsy v3 requires x-api-key: <keystring>:<shared_secret> on every API request
-// (since 2026-01-18 the shared secret suffix is mandatory, not just keystring).
 function apiHeaders(accessToken: string): Record<string, string> {
   const { apiKey, sharedSecret } = getEtsyClient()
   return {
@@ -60,7 +58,7 @@ export function buildAuthorizeUrl(state: string, codeChallenge: string): string 
 export interface EtsyToken {
   accessToken: string
   refreshToken: string
-  expiresAt: number // epoch ms
+  expiresAt: number
 }
 
 async function requestToken(params: Record<string, string>): Promise<EtsyToken> {
@@ -71,7 +69,8 @@ async function requestToken(params: Record<string, string>): Promise<EtsyToken> 
   })
   if (!res.ok) {
     const text = await res.text().catch(() => '')
-    throw new Error(`Etsy token exchange failed (${res.status}): ${text}`)
+    console.error('Etsy token exchange failed', { status: res.status, body: text.slice(0, 500) })
+    throw new Error(`Etsy token exchange failed (${res.status})`)
   }
   const data = await res.json()
   const expiresIn = typeof data.expires_in === 'number' ? data.expires_in : 3600
@@ -95,11 +94,7 @@ export async function exchangeCode(code: string, codeVerifier: string): Promise<
 
 export async function refreshAccessToken(refreshToken: string): Promise<EtsyToken> {
   const { apiKey } = getEtsyClient()
-  return requestToken({
-    grant_type: 'refresh_token',
-    client_id: apiKey,
-    refresh_token: refreshToken,
-  })
+  return requestToken({ grant_type: 'refresh_token', client_id: apiKey, refresh_token: refreshToken })
 }
 
 export interface EtsyShop {
@@ -108,22 +103,26 @@ export interface EtsyShop {
 }
 
 export async function getUserShops(accessToken: string): Promise<EtsyShop[]> {
-  // Etsy v3 access tokens are "<user_id>.<token>"; the user id is the prefix.
   const userId = accessToken.split('.')[0]
-  const res = await fetch(`${ETSY_API_BASE}/users/${userId}/shops`, {
-    headers: apiHeaders(accessToken),
-  })
-  if (!res.ok) {
-    throw new Error(`Etsy getShops failed (${res.status})`)
-  }
+  const res = await fetch(`${ETSY_API_BASE}/users/${userId}/shops`, { headers: apiHeaders(accessToken) })
+  if (!res.ok) throw new Error(`Etsy getShops failed (${res.status})`)
   const data = await res.json()
   const shops = (data?.results ?? []) as Array<{ shop_id: number; shop_name: string }>
   return shops.map((s) => ({ shop_id: s.shop_id, shop_name: s.shop_name }))
 }
 
-export type EtsyRemoteListing = Record<string, unknown> & { listing_id: number; title?: string; description?: string; state?: string }
+export type EtsyRemoteListing = Record<string, unknown> & {
+  listing_id: number
+  title?: string
+  description?: string
+  state?: string
+}
 
-export async function getShopListings(shopId: number, accessToken: string, offset = 0): Promise<{ listings: EtsyRemoteListing[]; count: number }> {
+export async function getShopListings(
+  shopId: number,
+  accessToken: string,
+  offset = 0
+): Promise<{ listings: EtsyRemoteListing[]; count: number }> {
   const params = new URLSearchParams({ limit: '100', offset: String(offset), includes: 'Images' })
   const res = await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings?${params}`, { headers: apiHeaders(accessToken) })
   if (!res.ok) throw new Error(`Etsy listings request failed (${res.status})`)
@@ -132,9 +131,7 @@ export async function getShopListings(shopId: number, accessToken: string, offse
 }
 
 async function getShippingProfileId(shopId: number, accessToken: string): Promise<number | null> {
-  const res = await fetch(`${ETSY_API_BASE}/shops/${shopId}/shipping-profiles`, {
-    headers: apiHeaders(accessToken),
-  })
+  const res = await fetch(`${ETSY_API_BASE}/shops/${shopId}/shipping-profiles`, { headers: apiHeaders(accessToken) })
   if (!res.ok) return null
   const data = await res.json()
   const profiles = (data?.results ?? []) as Array<{ shipping_profile_id: number }>
@@ -146,10 +143,9 @@ export interface EtsyTaxonomyNode {
   name: string
   children?: EtsyTaxonomyNode[]
 }
+
 export async function getSellerTaxonomy(accessToken: string): Promise<EtsyTaxonomyNode[]> {
-  const res = await fetch(`${ETSY_API_BASE}/seller-taxonomy/nodes?limit=100`, {
-    headers: apiHeaders(accessToken),
-  })
+  const res = await fetch(`${ETSY_API_BASE}/seller-taxonomy/nodes?limit=100`, { headers: apiHeaders(accessToken) })
   if (!res.ok) throw new Error(`Etsy taxonomy request failed (${res.status})`)
   const data = await res.json()
   return (data?.results ?? []) as EtsyTaxonomyNode[]
@@ -168,22 +164,18 @@ export interface EtsyListingInput {
   tags?: string[]
 }
 
+/** Create an Etsy draft only. Image upload is a separate reviewed step. */
 export async function createListing(
   shopId: number,
   accessToken: string,
   input: EtsyListingInput
 ): Promise<Record<string, any>> {
   const shippingProfileId = await getShippingProfileId(shopId, accessToken)
-  if (!shippingProfileId) {
-    throw new Error('No shipping profile found for this shop. Create one in Etsy first.')
-  }
-
-  if (!input.taxonomyId) {
-    throw new Error('A confirmed Etsy taxonomy category is required before creating a draft.')
-  }
+  if (!shippingProfileId) throw new Error('No shipping profile found for this shop. Create one in Etsy first.')
+  if (!input.taxonomyId) throw new Error('A confirmed Etsy taxonomy category is required before creating a draft.')
 
   const body: Record<string, any> = {
-    quantity: input.quantity ?? 999,
+    quantity: input.quantity ?? 1,
     title: input.title,
     description: input.description,
     price: input.price,
@@ -197,47 +189,140 @@ export async function createListing(
 
   const res = await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...apiHeaders(accessToken),
-    },
+    headers: { 'Content-Type': 'application/json', ...apiHeaders(accessToken) },
     body: JSON.stringify(body),
   })
-  const data = await res.json()
+  const data = await res.json().catch(() => ({}))
   if (!res.ok) {
-    const msg = data?.error ?? JSON.stringify(data)
-    throw new Error(`Etsy listing create failed (${res.status}): ${msg}`)
+    console.error('Etsy draft creation failed', { status: res.status, response: data })
+    throw new Error(`Etsy listing create failed (${res.status})`)
   }
-
-  // Etsy uploads images via a separate multipart endpoint after the draft exists.
-  if (input.images && input.images.length) {
-    const listingId = data.listing_id as number
-    for (const [rank, src] of Array.from(input.images.slice(0, 10).entries())) {
-      await uploadListingImage(shopId, listingId, accessToken, src, rank + 1)
-    }
-  }
-
   return data
 }
 
 const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
+function isPrivateIpv4(address: string): boolean {
+  const parts = address.split('.').map(Number)
+  if (parts.length !== 4 || parts.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) return true
+  const [a, b] = parts
+  return (
+    a === 0 ||
+    a === 10 ||
+    a === 127 ||
+    (a === 169 && b === 254) ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168) ||
+    (a === 100 && b >= 64 && b <= 127) ||
+    a >= 224
+  )
+}
+
+function isPrivateAddress(address: string): boolean {
+  if (isIP(address) === 4) return isPrivateIpv4(address)
+  const normalized = address.toLowerCase()
+  if (normalized === '::1' || normalized === '::') return true
+  if (normalized.startsWith('fc') || normalized.startsWith('fd') || normalized.startsWith('fe8') || normalized.startsWith('fe9') || normalized.startsWith('fea') || normalized.startsWith('feb')) return true
+  if (normalized.startsWith('::ffff:')) return isPrivateIpv4(normalized.slice(7))
+  return false
+}
+
+async function assertSafeRemoteUrl(url: URL): Promise<void> {
+  if (url.protocol !== 'https:') throw new Error('Listing image URLs must use HTTPS.')
+  const host = url.hostname.toLowerCase()
+  if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local')) {
+    throw new Error('Private image hosts are not allowed.')
+  }
+  const addresses = await lookup(host, { all: true, verbatim: true })
+  if (!addresses.length || addresses.some(({ address }) => isPrivateAddress(address))) {
+    throw new Error('Private image hosts are not allowed.')
+  }
+}
+
+async function readResponseWithLimit(response: Response, maxBytes: number): Promise<Uint8Array> {
+  const declared = Number(response.headers.get('content-length') ?? '0')
+  if (Number.isFinite(declared) && declared > maxBytes) throw new Error('Listing image exceeds 20 MB.')
+  if (!response.body) return new Uint8Array(await response.arrayBuffer())
+
+  const reader = response.body.getReader()
+  const chunks: Uint8Array[] = []
+  let total = 0
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.byteLength
+    if (total > maxBytes) {
+      await reader.cancel()
+      throw new Error('Listing image exceeds 20 MB.')
+    }
+    chunks.push(value)
+  }
+  const bytes = new Uint8Array(total)
+  let offset = 0
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  return bytes
+}
+
+async function fetchRemoteImage(source: string): Promise<{ bytes: Uint8Array; type: string }> {
+  let current = new URL(source)
+  for (let redirect = 0; redirect <= MAX_REDIRECTS; redirect += 1) {
+    await assertSafeRemoteUrl(current)
+    const response = await fetch(current, {
+      method: 'GET',
+      redirect: 'manual',
+      headers: { Accept: 'image/jpeg,image/png,image/webp' },
+    })
+
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('location')
+      if (!location || redirect === MAX_REDIRECTS) throw new Error('Too many image redirects.')
+      current = new URL(location, current)
+      continue
+    }
+    if (!response.ok) throw new Error(`Unable to download listing image (${response.status})`)
+
+    const type = response.headers.get('content-type')?.split(';')[0].toLowerCase() ?? ''
+    if (!IMAGE_TYPES.has(type)) throw new Error('Listing images must be JPEG, PNG, or WebP.')
+    const bytes = await readResponseWithLimit(response, MAX_IMAGE_BYTES)
+    if (bytes.byteLength === 0) throw new Error('Listing image is empty.')
+    return { bytes, type }
+  }
+  throw new Error('Unable to download listing image.')
+}
+
+export type EtsyImageSource = string | Blob | Uint8Array
+
 export async function uploadListingImage(
   shopId: number,
   listingId: number,
   accessToken: string,
-  source: string,
+  source: EtsyImageSource,
   rank: number,
-  altText?: string
+  altText?: string,
+  sourceMimeType?: string
 ): Promise<Record<string, unknown>> {
-  const image = await fetch(source)
-  if (!image.ok) throw new Error(`Unable to download listing image (${image.status})`)
-  const type = image.headers.get('content-type')?.split(';')[0].toLowerCase() ?? ''
-  if (!IMAGE_TYPES.has(type)) throw new Error('Listing images must be JPEG, PNG, or WebP.')
-  const bytes = await image.arrayBuffer()
-  if (bytes.byteLength === 0 || bytes.byteLength > 20 * 1024 * 1024) {
-    throw new Error('Listing image must be between 1 byte and 20 MB.')
+  let bytes: Uint8Array
+  let type: string
+
+  if (typeof source === 'string') {
+    const remote = await fetchRemoteImage(source)
+    bytes = remote.bytes
+    type = remote.type
+  } else if (source instanceof Blob) {
+    type = source.type.toLowerCase()
+    if (!IMAGE_TYPES.has(type)) throw new Error('Listing images must be JPEG, PNG, or WebP.')
+    if (source.size <= 0 || source.size > MAX_IMAGE_BYTES) throw new Error('Listing image must be between 1 byte and 20 MB.')
+    bytes = new Uint8Array(await source.arrayBuffer())
+  } else {
+    type = (sourceMimeType ?? '').toLowerCase()
+    if (!IMAGE_TYPES.has(type)) throw new Error('A valid image MIME type is required for binary uploads.')
+    if (source.byteLength <= 0 || source.byteLength > MAX_IMAGE_BYTES) throw new Error('Listing image must be between 1 byte and 20 MB.')
+    bytes = source
   }
+
   const extension = type === 'image/jpeg' ? 'jpg' : type.split('/')[1]
   const form = new FormData()
   form.append('image', new Blob([bytes], { type }), `listing-image-${rank}.${extension}`)
@@ -247,11 +332,17 @@ export async function uploadListingImage(
   let response: Response | undefined
   for (let attempt = 0; attempt < 3; attempt += 1) {
     response = await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings/${listingId}/images`, {
-      method: 'POST', headers: apiHeaders(accessToken), body: form,
+      method: 'POST',
+      headers: apiHeaders(accessToken),
+      body: form,
     })
     if (response.ok || (response.status !== 429 && response.status < 500)) break
     await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt))
   }
-  if (!response?.ok) throw new Error(`Etsy image upload failed (${response?.status ?? 500})`)
+  if (!response?.ok) {
+    const body = await response?.text().catch(() => '')
+    console.error('Etsy image upload failed', { listingId, rank, status: response?.status, body: body?.slice(0, 500) })
+    throw new Error(`Etsy image upload failed (${response?.status ?? 500})`)
+  }
   return response.json()
 }
