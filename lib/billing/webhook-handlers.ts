@@ -64,23 +64,65 @@ async function resolveEmail(userId: string): Promise<string | undefined> {
   return data?.user?.email ?? undefined
 }
 
-function isCommissionableTransactionOrigin(origin: string | undefined): boolean {
-  return origin === 'web' || origin === 'subscription_recurring'
+async function resolveReferrer(userId: string): Promise<string | undefined> {
+  const db = getSupabase()
+  const { data: profile } = await db
+    .from('profiles')
+    .select('referred_by')
+    .eq('id', userId)
+    .maybeSingle()
+
+  const code = profile?.referred_by
+  if (!code) return undefined
+
+  const { data: referrer } = await db
+    .from('profiles')
+    .select('id')
+    .eq('referral_code', code)
+    .maybeSingle()
+
+  if (!referrer || referrer.id === userId) return undefined
+  return referrer.id
 }
 
 /**
- * Credit the referrer for each successful subscription payment.
- *
- * Only initial web checkouts and normal subscription renewals qualify. Paddle
- * creates separate `subscription_update` transactions for upgrades/downgrades
- * and proration; excluding those prevents a mid-cycle plan change from paying
- * a full extra affiliate commission.
- *
- * Idempotency is per Paddle transaction ID. Legacy first-payment rows have no
- * transaction ID, so an old initial checkout is detected separately before a
- * new recurring row is created.
+ * Keep the existing first-payment ledger intact. The row is unique per referred
+ * user, so repeated subscription activation events cannot double-credit.
  */
-async function maybeCreditReferral(args: {
+async function maybeCreditInitialReferral(
+  userId: string,
+  tier: TierName,
+  priceId?: string
+): Promise<void> {
+  if (tier === 'Free') return
+  const amount = commissionForPriceId(priceId)
+  if (amount <= 0) return
+
+  const affiliateId = await resolveReferrer(userId)
+  if (!affiliateId) return
+
+  await getSupabase().from('affiliate_commissions').upsert(
+    {
+      affiliate_id: affiliateId,
+      referred_user_id: userId,
+      tier,
+      amount,
+      currency: 'USD',
+      status: 'paid',
+    },
+    { onConflict: 'referred_user_id', ignoreDuplicates: true }
+  )
+}
+
+/**
+ * Record 30% commission for a normal successful subscription renewal.
+ *
+ * Paddle also creates transactions for upgrades, downgrades, proration and
+ * one-time subscription charges. Only `subscription_recurring` qualifies here,
+ * preventing a mid-cycle plan change from paying a full extra commission.
+ * The Paddle transaction ID is unique, so webhook retries are idempotent.
+ */
+async function maybeCreditRenewalReferral(args: {
   userId: string
   tier: TierName
   priceId?: string
@@ -97,48 +139,18 @@ async function maybeCreditReferral(args: {
     origin,
   } = args
 
+  if (origin !== 'subscription_recurring') return
   if (tier === 'Free' || !transactionId || !subscriptionId) return
-  if (!isCommissionableTransactionOrigin(origin)) return
 
   const amount = commissionForPriceId(priceId)
   if (amount <= 0) return
 
-  const db = getSupabase()
+  const affiliateId = await resolveReferrer(userId)
+  if (!affiliateId) return
 
-  const { data: profile } = await db
-    .from('profiles')
-    .select('referred_by')
-    .eq('id', userId)
-    .maybeSingle()
-
-  const code = profile?.referred_by
-  if (!code) return
-
-  const { data: referrer } = await db
-    .from('profiles')
-    .select('id')
-    .eq('referral_code', code)
-    .maybeSingle()
-
-  if (!referrer || referrer.id === userId) return
-
-  // Before recurring commissions existed, the initial subscription activation
-  // wrote one row with no Paddle transaction ID. If Paddle retries that old
-  // checkout after the migration, do not create a duplicate initial payout.
-  if (origin === 'web') {
-    const { data: legacyInitial } = await db
-      .from('affiliate_commissions')
-      .select('id')
-      .eq('referred_user_id', userId)
-      .is('paddle_transaction_id', null)
-      .limit(1)
-
-    if (legacyInitial?.length) return
-  }
-
-  await db.from('affiliate_commissions').upsert(
+  await getSupabase().from('affiliate_renewal_commissions').upsert(
     {
-      affiliate_id: referrer.id,
+      affiliate_id: affiliateId,
       referred_user_id: userId,
       tier,
       amount,
@@ -186,6 +198,7 @@ export async function handleSubscription(
   const tier = await syncUserPlan(userId, priceId, data.status)
 
   if (eventType === 'subscription.activated') {
+    await maybeCreditInitialReferral(userId, tier, priceId)
     const email = await resolveEmail(userId)
     if (email) await sendSubscriptionActiveEmail(email, tier.toLowerCase())
   } else if (eventType === 'subscription.canceled') {
@@ -197,8 +210,8 @@ export async function handleSubscription(
 /**
  * transaction.completed backfills the customer/subscription links and — in case
  * subscription events were missed — recomputes tier from the line-item price.
- * It is also the source of truth for recurring affiliate commissions because
- * Paddle emits a completed transaction for every successful renewal.
+ * Paddle emits a completed `subscription_recurring` transaction for each
+ * successful renewal, which is the source of truth for recurring commissions.
  */
 export async function handleTransactionCompleted(
   data: TransactionNotification
@@ -226,7 +239,7 @@ export async function handleTransactionCompleted(
   }
 
   if (data.status === 'completed') {
-    await maybeCreditReferral({
+    await maybeCreditRenewalReferral({
       userId,
       tier,
       priceId,
