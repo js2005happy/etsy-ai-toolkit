@@ -1,6 +1,6 @@
 # Craftly Next 16 migration notes
 
-This branch is based on `craftly-reliability-conversion` and intentionally keeps the framework migration separate from the release-candidate PR.
+This branch was originally based on `craftly-reliability-conversion` and has now been retargeted to `main` after PR #2 was merged. The framework migration remains isolated from the release-candidate work.
 
 ## Migrated
 
@@ -22,6 +22,10 @@ This branch is based on `craftly-reliability-conversion` and intentionally keeps
 - TypeScript: success
 - 74 static/dynamic app routes generated successfully
 - `npm audit --audit-level=high`: 0 vulnerabilities
+
+## Final pre-merge verification
+
+After PR #2 landed on `main`, PR #3 was retargeted to the merged `main` baseline. This documentation-only commit intentionally triggers the repository's normal Quality workflow again so the final merge decision is based on the actual post-PR-#2 base.
 
 ## Deliberate compatibility choice
 
