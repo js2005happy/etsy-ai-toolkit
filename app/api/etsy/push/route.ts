@@ -109,7 +109,8 @@ export async function POST(request: Request) {
 
     let uploaded = 0
     const warnings: string[] = []
-    for (const [index, source] of images.entries()) {
+    for (let index = 0; index < images.length; index += 1) {
+      const source = images[index]
       try {
         await uploadListingImage(conn.shop_id, listingId, accessToken, source, index + 1)
         uploaded += 1
