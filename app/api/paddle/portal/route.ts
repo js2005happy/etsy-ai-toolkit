@@ -5,7 +5,7 @@ import { getPaddle } from '@/lib/paddle'
 
 export async function POST() {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const service = createServiceClient()
     const paddle = getPaddle()
 

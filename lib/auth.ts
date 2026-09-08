@@ -100,7 +100,7 @@ export async function authenticateRequest(request: Request): Promise<AuthResult>
     return buildContext(db, profile.id, profile)
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
     error: authError,

@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic'
 // never self-attributes, and validates the code resolves to a real user.
 export async function POST() {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -18,7 +18,7 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const code = cookies().get('referral_code')?.value
+    const code = (await cookies()).get('referral_code')?.value
     if (!code) {
       return NextResponse.json({ applied: false })
     }

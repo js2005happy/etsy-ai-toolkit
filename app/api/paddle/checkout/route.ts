@@ -6,7 +6,7 @@ import { PLANS } from '@/lib/pricing'
 
 export async function POST(request: Request) {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const service = createServiceClient()
     const paddle = getPaddle()
 

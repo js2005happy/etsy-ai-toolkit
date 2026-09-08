@@ -12,8 +12,8 @@ export const metadata: Metadata = {
     "Set your tone once, and Craftly drafts listings, posts, and replies that stay in your voice. Here's exactly what happens, step by step.",
 }
 
-export default function HowItWorksPage() {
-  const { t } = getServerTranslations()
+export default async function HowItWorksPage() {
+  const { t } = await getServerTranslations()
 
   return (
     <div className="flex min-h-screen flex-col">

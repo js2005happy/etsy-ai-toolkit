@@ -6,8 +6,8 @@ import ContactForm from "@/components/contact/contact-form";
 import { Mail } from "lucide-react";
 import { getServerTranslations } from "@/lib/i18n/server";
 
-export default function ContactPage() {
-  const { t } = getServerTranslations();
+export default async function ContactPage() {
+  const { t } = await getServerTranslations();
   return (
     <div className="flex min-h-screen flex-col">
       <CinematicBackground />

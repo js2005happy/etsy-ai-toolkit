@@ -7,8 +7,8 @@ import { getServerTranslations } from "@/lib/i18n/server";
 
 const FAQ_COUNT = 10;
 
-export default function FaqPage() {
-  const { t } = getServerTranslations();
+export default async function FaqPage() {
+  const { t } = await getServerTranslations();
 
   const faqs = Array.from({ length: FAQ_COUNT }, (_, i) => ({
     q: t(`faq.q${i + 1}`),

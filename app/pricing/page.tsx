@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 const INVALID_COUNTRIES = new Set(['XX', 'ZZ'])
 
 export default async function PricingPage() {
-  const rawCountry = headers().get('x-vercel-ip-country')
+  const rawCountry = (await headers()).get('x-vercel-ip-country')
 
   let countryCode: string | null = null
   if (rawCountry) {
@@ -25,7 +25,7 @@ export default async function PricingPage() {
     }
   }
 
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

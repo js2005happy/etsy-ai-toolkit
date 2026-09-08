@@ -11,8 +11,8 @@ type Section = {
   content: React.ReactNode;
 };
 
-export default function TermsPage() {
-  const { t } = getServerTranslations();
+export default async function TermsPage() {
+  const { t } = await getServerTranslations();
 
   const sections: Section[] = [
     {

@@ -11,8 +11,8 @@ type Section = {
   content: React.ReactNode;
 };
 
-export default function PrivacyPage() {
-  const { t } = getServerTranslations();
+export default async function PrivacyPage() {
+  const { t } = await getServerTranslations();
 
   const sections: Section[] = [
     {

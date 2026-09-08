@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic'
 // their share link, and total commission earned so far.
 export async function GET() {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const {
       data: { user },
     } = await supabase.auth.getUser()

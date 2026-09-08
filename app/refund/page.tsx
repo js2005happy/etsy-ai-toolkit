@@ -11,8 +11,8 @@ type Section = {
   content: React.ReactNode;
 };
 
-export default function RefundPage() {
-  const { t } = getServerTranslations();
+export default async function RefundPage() {
+  const { t } = await getServerTranslations();
 
   const sections: Section[] = [
     {

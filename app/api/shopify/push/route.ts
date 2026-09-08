@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 // POST /api/shopify/push — push a generated listing to a connected store as a
 // draft product. Body: { connection_id, title, description?, tags?, price?, images? }
 export async function POST(request: Request) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

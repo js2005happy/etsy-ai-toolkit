@@ -5,8 +5,8 @@ import CinematicBackground from "@/components/cinematic/cinematic-background";
 import Reveal from "@/components/shared/reveal";
 import { getServerTranslations } from "@/lib/i18n/server";
 
-export default function WelcomePage() {
-  const { t } = getServerTranslations();
+export default async function WelcomePage() {
+  const { t } = await getServerTranslations();
   return (
     <div className="flex min-h-screen flex-col">
       <CinematicBackground />

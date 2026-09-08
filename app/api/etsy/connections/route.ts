@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 // GET /api/etsy/connections — list the user's connected Etsy shops (no tokens).
 export async function GET() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

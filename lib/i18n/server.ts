@@ -5,36 +5,30 @@ import { messages, type NestedDict } from './messages'
 function getByPath(dict: NestedDict | undefined, key: string): unknown {
   if (!dict) return undefined
   return key.split('.').reduce<unknown>((acc, part) => {
-    if (acc && typeof acc === 'object') {
-      return (acc as NestedDict)[part]
-    }
+    if (acc && typeof acc === 'object') return (acc as NestedDict)[part]
     return undefined
   }, dict)
 }
 
-export function getServerLocale(): Locale {
-  const lang = cookies().get('lang')?.value
+export async function getServerLocale(): Promise<Locale> {
+  const cookieStore = await cookies()
+  const lang = cookieStore.get('lang')?.value
   return isLocale(lang) ? lang : defaultLocale
 }
 
-export function getServerTranslations() {
-  const locale = getServerLocale()
-
+export async function getServerTranslations() {
+  const locale = await getServerLocale()
   const t = (key: string): string => {
     const translated = getByPath(messages[locale], key)
     if (typeof translated === 'string') return translated
     const fallback = getByPath(messages[defaultLocale], key)
-    if (typeof fallback === 'string') return fallback
-    return key
+    return typeof fallback === 'string' ? fallback : key
   }
-
   const ta = (key: string): string[] => {
     const translated = getByPath(messages[locale], key)
     if (Array.isArray(translated)) return translated as string[]
     const fallback = getByPath(messages[defaultLocale], key)
-    if (Array.isArray(fallback)) return fallback as string[]
-    return []
+    return Array.isArray(fallback) ? fallback as string[] : []
   }
-
   return { locale, t, ta }
 }

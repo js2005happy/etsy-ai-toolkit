@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 
 // POST /api/etsy/disconnect { id } — remove a connected Etsy shop.
 export async function POST(request: Request) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

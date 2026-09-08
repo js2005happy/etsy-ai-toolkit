@@ -5,8 +5,9 @@ import { refreshAccessToken } from '@/lib/etsy'
 import { updateEtsyDraftReview } from '@/lib/etsy-draft'
 import { etsyUserMessage } from '@/lib/etsy-errors'
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
-  const supabase = createClient()
+export async function POST(request: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
