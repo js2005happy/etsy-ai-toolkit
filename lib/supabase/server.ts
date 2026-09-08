@@ -10,16 +10,16 @@ export const createClient = async () => {
     {
       cookies: {
         getAll() {
-return cookieStore.getAll()
+          return cookieStore.getAll()
         },
         setAll(cookiesToSet) {
-try {
-  cookiesToSet.forEach(({ name, value, options }) =>
-    cookieStore.set(name, value, options)
-  )
-} catch {
-  // Server Components cannot always write cookies; proxy refresh handles sessions.
-}
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // Server Components cannot always write cookies; proxy refresh handles sessions.
+          }
         },
       },
     }
