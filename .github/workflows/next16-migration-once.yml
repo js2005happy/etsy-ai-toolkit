@@ -27,9 +27,9 @@ jobs:
       - name: Migrate async request APIs
         run: npx -y @next/codemod@canary next-async-request-api .
       - name: Migrate lint command
-        run: npx -y @next/codemod@canary next-lint-to-eslint-cli .
+        run: npx -y @next/codemod@canary next-lint-to-eslint-cli . --force
       - name: Migrate middleware to proxy
-        run: npx -y @next/codemod@canary middleware-to-proxy .
+        run: npx -y @next/codemod@canary middleware-to-proxy . --force
       - name: Upgrade framework dependencies
         run: npm install next@16.3.4 react@19.2.0 react-dom@19.2.0 eslint-config-next@16.3.4 @types/react@19 @types/react-dom@19 eslint@^9 --save-exact
       - name: Verify migrated app
