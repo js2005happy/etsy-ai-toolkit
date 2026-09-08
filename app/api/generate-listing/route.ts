@@ -1,20 +1,18 @@
 import { NextResponse } from 'next/server'
 import { authenticateRequest, getBrandPrefs } from '@/lib/auth'
-import { consumeCredits } from '@/lib/quota'
+import { withCreditCharge } from '@/lib/quota'
 import { generateListing, type ListingInput } from '@/lib/openai'
 
 // Free users get their first 3 listings without spending credits, so they can
 // run the full "notes → publishable listing" loop before the monthly quota
-// kicks in (see lib/pricing — Free is a milestone, not a meter).
+// kicks in. Trial generations deliberately bypass the paid quota reservation.
 const FREE_LISTING_TRIAL = 3
 
 export async function POST(request: Request) {
   try {
     const auth = await authenticateRequest(request)
-    if ('error' in auth) {
-      return NextResponse.json({ error: auth.error }, { status: auth.status })
-    }
-    const { db, userId, credits, tier } = auth
+    if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status })
+    const { db, userId, tier } = auth
 
     const body: ListingInput = await request.json()
     if (!body.product_name || !body.product_type || !body.material || !body.style) {
@@ -28,16 +26,22 @@ export async function POST(request: Request) {
       .eq('tool_type', 'listing')
 
     const withinTrial = tier === 'Free' && (count ?? 0) < FREE_LISTING_TRIAL
-
-    if (!withinTrial && credits <= 0) {
-      return NextResponse.json({ error: 'Insufficient credits. Please upgrade your plan.' }, { status: 403 })
-    }
-
     const { brandTone, brandKeywords } = await getBrandPrefs(db, userId)
-    const result = await generateListing({ ...body, brand_tone: brandTone ?? undefined, brand_keywords: brandKeywords ?? undefined })
+    const generate = () => generateListing({
+      ...body,
+      brand_tone: brandTone ?? undefined,
+      brand_keywords: brandKeywords ?? undefined,
+    })
 
-    if (!withinTrial) {
-      await consumeCredits(db, userId, 1)
+    let result
+    if (withinTrial) {
+      result = await generate()
+    } else {
+      const charged = await withCreditCharge(db, userId, 1, generate)
+      if (!charged.ok) {
+        return NextResponse.json({ error: 'Insufficient credits. Please upgrade your plan.' }, { status: 403 })
+      }
+      result = charged.value
     }
 
     await db.from('generations').insert({
@@ -48,8 +52,8 @@ export async function POST(request: Request) {
     })
 
     return NextResponse.json(result)
-  } catch (error: any) {
-    console.error('API Error:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+  } catch (error) {
+    console.error('Error in generate-listing:', error)
+    return NextResponse.json({ error: "We couldn't generate this listing. Please try again." }, { status: 500 })
   }
 }
