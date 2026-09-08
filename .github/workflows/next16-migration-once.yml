@@ -1,0 +1,51 @@
+name: Next 16 migration once
+
+on:
+  push:
+    branches:
+      - craftly-next16-migration
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: craftly-next16-migration
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install current dependencies
+        run: npm ci
+      - name: Migrate async request APIs
+        run: npx -y @next/codemod@canary next-async-request-api .
+      - name: Migrate lint command
+        run: npx -y @next/codemod@canary next-lint-to-eslint-cli .
+      - name: Migrate middleware to proxy
+        run: npx -y @next/codemod@canary middleware-to-proxy .
+      - name: Upgrade framework dependencies
+        run: npm install next@16.3.4 react@19.2.0 react-dom@19.2.0 eslint-config-next@16.3.4 @types/react@19 @types/react-dom@19 eslint@^9 --save-exact
+      - name: Verify migrated app
+        run: |
+          npm run lint
+          npm run build
+          npm audit --audit-level=high || true
+      - name: Commit migration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git reset .github/workflows/next16-migration-once.yml
+          if git diff --cached --quiet; then
+            echo "No migration changes"
+          else
+            git commit -m "chore: migrate Craftly to Next 16"
+            git push origin HEAD:craftly-next16-migration
+          fi
