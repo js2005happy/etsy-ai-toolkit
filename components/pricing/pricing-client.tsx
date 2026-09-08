@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { initializePaddle, CheckoutEventNames } from '@paddle/paddle-js'
 import type { Paddle } from '@paddle/paddle-js'
 import Reveal from '@/components/shared/reveal'
@@ -35,6 +36,7 @@ export default function PricingClient({
   userId,
 }: PricingClientProps) {
   const { t } = useI18n()
+  const router = useRouter()
   const [period, setPeriod] = useState<BillingPeriod>('month')
   const [paddle, setPaddle] = useState<Paddle | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -63,7 +65,7 @@ export default function PricingClient({
           !redirectedRef.current
         ) {
           redirectedRef.current = true
-          window.location.href = '/welcome'
+          router.push('/welcome')
         }
       },
     }).then((instance) => {
@@ -75,12 +77,12 @@ export default function PricingClient({
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [router])
 
   const handleSubscribe = useCallback(
     (tier: Tier) => {
       if (!userId) {
-        window.location.href = '/signup'
+        router.push('/signup')
         return
       }
       if (!paddle || !tier.priceId) return
@@ -97,7 +99,7 @@ export default function PricingClient({
         ...(userId ? { customData: { user_id: userId } } : {}),
       })
     },
-    [paddle, period, userEmail, userId]
+    [paddle, period, router, userEmail, userId]
   )
 
   const ctaLabel = (tier: Tier) => {
