@@ -12,7 +12,7 @@ function generateMcpKey(): string {
 // its plaintext (keys are stored hashed, so the plaintext is shown once).
 export async function GET() {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const {
       data: { user },
     } = await supabase.auth.getUser()
@@ -43,7 +43,7 @@ export async function GET() {
 // POST — reset the key (invalidates any previously-issued key).
 export async function POST() {
   try {
-    const supabase = createClient()
+    const supabase = await createClient()
     const {
       data: { user },
     } = await supabase.auth.getUser()

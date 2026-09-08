@@ -14,7 +14,7 @@ const MAX_TAGS = 13
 // POST /api/etsy/push — creates an Etsy draft and attempts image uploads. This
 // endpoint never activates/publishes a listing; users review the draft first.
 export async function POST(request: Request) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

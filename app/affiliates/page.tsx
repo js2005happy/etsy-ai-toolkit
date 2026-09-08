@@ -6,8 +6,8 @@ import CinematicBackground from "@/components/cinematic/cinematic-background";
 import { ArrowRight, Link2, Percent, Wallet } from "lucide-react";
 import { getServerTranslations } from "@/lib/i18n/server";
 
-export default function AffiliatesPage() {
-  const { t } = getServerTranslations();
+export default async function AffiliatesPage() {
+  const { t } = await getServerTranslations();
 
   const steps = [
     {

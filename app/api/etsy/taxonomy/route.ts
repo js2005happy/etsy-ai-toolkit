@@ -6,7 +6,7 @@ import { etsyUserMessage } from '@/lib/etsy-errors'
 
 /** Returns verified Etsy taxonomy data for the current user's connected shop. */
 export async function GET(request: Request) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const connectionId = new URL(request.url).searchParams.get('connection_id')

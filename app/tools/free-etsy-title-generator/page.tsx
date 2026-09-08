@@ -133,8 +133,8 @@ function BrowserFrame({
   );
 }
 
-export default function FreeEtsyTitleGeneratorPage() {
-  const { t } = getServerTranslations();
+export default async function FreeEtsyTitleGeneratorPage() {
+  const { t } = await getServerTranslations();
 
   // All 16 dashboard tools — used for internal linking
   const allTools = [

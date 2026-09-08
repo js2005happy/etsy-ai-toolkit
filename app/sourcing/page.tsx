@@ -20,8 +20,8 @@ export const metadata: Metadata = {
     "Source products from verified Chinese suppliers. We find factories, negotiate prices, inspect quality, and ship to your door.",
 };
 
-export default function SourcingPage() {
-  const { t } = getServerTranslations();
+export default async function SourcingPage() {
+  const { t } = await getServerTranslations();
 
   const steps = [
     {
