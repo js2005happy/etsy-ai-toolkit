@@ -20,12 +20,19 @@ create table if not exists public.affiliate_renewal_commissions (
 
 alter table public.affiliate_renewal_commissions enable row level security;
 
+-- Renewal rows are written only by the server-side service role. Signed-in
+-- affiliates may read only their own rows; anonymous users have no table access.
+revoke all on table public.affiliate_renewal_commissions from anon, authenticated;
+grant select on table public.affiliate_renewal_commissions to authenticated;
+
 drop policy if exists "affiliates read own renewal commissions"
   on public.affiliate_renewal_commissions;
 
 create policy "affiliates read own renewal commissions"
-  on public.affiliate_renewal_commissions for select
-  using (auth.uid() = affiliate_id);
+  on public.affiliate_renewal_commissions
+  for select
+  to authenticated
+  using ((select auth.uid()) = affiliate_id);
 
 create index if not exists affiliate_renewal_commissions_affiliate_idx
   on public.affiliate_renewal_commissions (affiliate_id);
