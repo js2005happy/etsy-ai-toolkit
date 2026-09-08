@@ -1,0 +1,75 @@
+from pathlib import Path
+import re
+
+path = Path('app/tools/free-etsy-title-generator/page.tsx')
+text = path.read_text()
+
+text = text.replace(
+    '"Type what you made → get an SEO-optimized Etsy title, all 13 tags, and a description preview in seconds. Free, no signup, no card — 3 generations a day. The same prompt that powers Craftly Pro.",',
+    '"Type what you made → get a search-friendly Etsy title, all 13 tags, and a description preview in seconds. Free, no signup, no card — 3 generations a day.",',
+)
+text = text.replace(
+    '"Free AI Etsy title generator with all 13 tags. No signup, no card, 3 generations a day.",',
+    '"Free Etsy title generator with all 13 tags. No signup, no card, 3 generations a day.",',
+)
+text = text.replace(
+    '"Free AI Etsy title generator with all 13 tags. No signup, no card.",',
+    '"Free Etsy title generator with all 13 tags. No signup, no card.",',
+)
+
+article = '''const ARTICLE_INTRO = `A strong Etsy listing makes it easy for shoppers to understand what you sell and gives Etsy clear, relevant information about the product. Titles, tags, categories, attributes, photos, descriptions, price, and the overall shopper experience can all matter. There is no reliable shortcut that guarantees a particular search position, so this guide focuses on practical listing hygiene: describe the product accurately, use specific buyer-friendly phrases, fill the available listing fields, and review performance over time. Use the generator as a drafting assistant, then edit its suggestions so they match the item you actually sell.`;
+
+const ARTICLE_SECTIONS: { heading: string; body: string }[] = [
+  {
+    heading: "Start with accurate, specific product language",
+    body: `Lead with the clearest description of the item instead of filler adjectives. Include useful details a shopper may care about, such as material, style, recipient, occasion, size, or personalization, when they genuinely apply. Keep the wording readable and avoid repeating phrases only to chase search visibility. Etsy can change how search works over time, so durable listing quality is more useful than trying to reverse-engineer a fixed formula.`,
+  },
+  {
+    heading: "Write titles for shoppers first",
+    body: `Use the title to communicate what the product is in natural language. Put the most important product phrase early when that improves clarity, then add distinguishing details without turning the title into a wall of keywords. Stay within Etsy's current field limits and review the finished title on mobile as well as desktop. The generator gives you a draft; you remain responsible for checking that every claim, material, occasion, and personalization detail is accurate.`,
+  },
+  {
+    heading: "Use tags to cover relevant ways shoppers describe the item",
+    body: `Use the available tag slots for specific phrases that genuinely describe the product. Mix product type, style, material, recipient, and occasion concepts where appropriate instead of relying on broad single-word terms. Avoid adding irrelevant phrases just because they appear popular. Search behavior and Etsy guidance can evolve, so treat tags as descriptive metadata rather than a promise of ranking.`,
+  },
+  {
+    heading: "Use Craftly as a drafting assistant, not a ranking guarantee",
+    body: `The free generator turns a short product note into a title and tag draft so you can get to an editable starting point quickly. Check the result against the real item before using it on Etsy, especially materials, dimensions, personalization, safety claims, and intended audience. Craftly does not control Etsy search placement or sales, and generated copy should be reviewed before publishing.`,
+  },
+  {
+    heading: "A simple workflow for your next listing",
+    body: `Describe the product in the generator above, review the suggested title and tags, and edit anything that is inaccurate or unnatural. Compare the draft with the rest of your listing so the photos, category, attributes, description, price, and shipping information tell a consistent story. A free Craftly account includes a finite monthly credit allowance for the wider toolkit; paid plans add larger finite allowances and additional seller workflows.`,
+  },
+];
+
+function BrowserFrame'''
+
+text, count = re.subn(
+    r'const ARTICLE_INTRO = `.*?\n\];\n\nfunction BrowserFrame',
+    article,
+    text,
+    count=1,
+    flags=re.S,
+)
+if count != 1:
+    raise SystemExit(f'expected one article block, replaced {count}')
+
+text = text.replace(
+    '"Free AI Etsy title and tag generator. Produces an SEO-optimized title under 140 characters and all 13 Etsy tags from a short product note.",',
+    '"Free Etsy title and tag generator. Produces an editable title and up to 13 Etsy tag suggestions from a short product note.",',
+)
+text = text.replace('"SEO-optimized title in under 140 characters",', '"Editable Etsy title draft",')
+text = text.replace('"All 13 Etsy tags generated at once",', '"Up to 13 Etsy tag suggestions",')
+text = text.replace('"Multi-word long-tail keyword targeting",', '"Specific multi-word phrase suggestions",')
+text = text.replace('"Front-load first-40-character formula",', '"Readable, product-focused wording",')
+
+text, rating_count = re.subn(
+    r'\n    aggregateRating: \{\n      "@type": "AggregateRating",\n      ratingValue: "4\.8",\n      reviewCount: "312",\n    \},',
+    '',
+    text,
+    count=1,
+)
+if rating_count != 1:
+    raise SystemExit(f'expected one aggregateRating block, removed {rating_count}')
+
+path.write_text(text)
