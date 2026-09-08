@@ -46,13 +46,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Describe your product in a few words.' }, { status: 400 })
     }
 
-    const detailParts = [description, targetBuyer && `Target buyer: ${targetBuyer}`, occasion && `Occasion: ${occasion}`].filter(Boolean)
+    const context = [
+      targetBuyer && `for ${targetBuyer}`,
+      occasion && `for ${occasion}`,
+    ].filter(Boolean).join(', ')
+
     const result = await generateListing({
       product_name: description.slice(0, 120),
-      product_type: 'handmade product',
+      product_type: context ? `handmade product ${context}`.slice(0, 160) : 'handmade product',
       material: material || 'not specified',
       style: style || 'handmade',
-      description: detailParts.join('. '),
       platform: 'etsy',
     })
 
