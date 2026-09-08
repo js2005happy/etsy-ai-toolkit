@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { Inter_Tight, Fraunces, Caveat } from "next/font/google";
 import { cookies } from "next/headers";
 import AnimatedBackground from "@/components/shared/animated-background";
 import SiteEffects from "@/components/shared/site-effects";
@@ -8,24 +7,6 @@ import PostHogProvider from "@/components/shared/posthog-provider";
 import { I18nProvider } from "@/lib/i18n/client";
 import { defaultLocale, isLocale, type Locale } from "@/lib/i18n/locales";
 import "./globals.css";
-
-const inter = Inter_Tight({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  variable: "--font-fraunces",
-  display: "swap",
-});
-
-const caveat = Caveat({
-  subsets: ["latin"],
-  variable: "--font-caveat",
-  display: "swap",
-});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://craftly.world";
 
@@ -82,15 +63,9 @@ export default function RootLayout({
     <html
       lang={locale}
       translate="no"
-      className={`notranslate ${inter.variable} ${fraunces.variable} ${caveat.variable}`}
+      className="notranslate"
     >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap"
-          rel="stylesheet"
-        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

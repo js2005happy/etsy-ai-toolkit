@@ -1,95 +1,77 @@
-import { NextResponse } from "next/server";
-import { generateListing } from "@/lib/openai";
+import { NextResponse } from 'next/server'
+import { generateListing } from '@/lib/openai'
 
-// Anonymous free tool: the lead-gen entry point of the free-tool SEO matrix.
-// No auth, no credits — visitors get a real Etsy listing (title + 13 tags +
-// a description preview) so they can feel the value before signing up.
-//
-// Rate limit: 3 generations per IP per day. The in-memory Map is per
-// serverless instance — enough to stop casual abuse and scrapers; if abuse
-// shows up in logs, move the counter to Upstash Redis or a Supabase table
-// before scaling the matrix to hundreds of pages.
-const DAILY_LIMIT = 3;
-const DESCRIPTION_PREVIEW_CHARS = 180;
-
-const hits = new Map<string, { day: string; count: number }>();
+const DAILY_LIMIT = 3
+const DESCRIPTION_PREVIEW_CHARS = 260
+const MAX_DESCRIPTION = 500
+const hits = new Map<string, { day: string; count: number }>()
 
 function today(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Date().toISOString().slice(0, 10)
 }
 
 function allowRequest(ip: string): boolean {
-  const day = today();
-  const rec = hits.get(ip);
-  if (!rec || rec.day !== day) {
-    hits.set(ip, { day, count: 1 });
-    return true;
+  const day = today()
+  const record = hits.get(ip)
+  if (!record || record.day !== day) {
+    hits.set(ip, { day, count: 1 })
+    return true
   }
-  if (rec.count >= DAILY_LIMIT) return false;
-  rec.count += 1;
-  return true;
+  if (record.count >= DAILY_LIMIT) return false
+  record.count += 1
+  return true
 }
 
 export async function POST(request: Request) {
   try {
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip") ||
-      "unknown";
-
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown'
     if (!allowRequest(ip)) {
       return NextResponse.json(
         {
-          error:
-            "You've used all 3 free generations for today. Create a free account for 10 credits every month — no card needed.",
+          error: "You've used all 3 free generations for today. Create a free account for 10 credits — no card needed.",
           limitReached: true,
         },
         { status: 429 }
-      );
+      )
     }
 
-    const body = await request.json().catch(() => ({}));
-    const productName = String(body.product_name || "").trim().slice(0, 120);
-    const productType = String(body.product_type || "").trim().slice(0, 80);
-    const material = String(body.material || "").trim().slice(0, 80);
-    const style = String(body.style || "").trim().slice(0, 80) || "handmade";
+    const body = await request.json().catch(() => ({}))
+    const description = String(body.description || '').trim().slice(0, MAX_DESCRIPTION)
+    const material = String(body.material || '').trim().slice(0, 80)
+    const style = String(body.style || '').trim().slice(0, 80)
+    const targetBuyer = String(body.target_buyer || '').trim().slice(0, 100)
+    const occasion = String(body.occasion || '').trim().slice(0, 100)
 
-    if (!productName || !productType || !material) {
-      return NextResponse.json(
-        {
-          error:
-            "Please fill in the product name, product type, and material.",
-        },
-        { status: 400 }
-      );
+    if (description.length < 3) {
+      return NextResponse.json({ error: 'Describe your product in a few words.' }, { status: 400 })
     }
+
+    const context = [
+      targetBuyer && `for ${targetBuyer}`,
+      occasion && `for ${occasion}`,
+    ].filter(Boolean).join(', ')
 
     const result = await generateListing({
-      product_name: productName,
-      product_type: productType,
-      material,
-      style,
-      platform: "etsy",
-    });
+      product_name: description.slice(0, 120),
+      product_type: context ? `handmade product ${context}`.slice(0, 160) : 'handmade product',
+      material: material || 'not specified',
+      style: style || 'handmade',
+      platform: 'etsy',
+    })
 
-    // Full title + tags are the real value — give them completely.
-    // The description is the hook: preview only, full version after signup.
-    const truncated = result.description.length > DESCRIPTION_PREVIEW_CHARS;
+    const truncated = result.description.length > DESCRIPTION_PREVIEW_CHARS
     const descriptionPreview = truncated
-      ? result.description.slice(0, DESCRIPTION_PREVIEW_CHARS).trimEnd() + "…"
-      : result.description;
+      ? `${result.description.slice(0, DESCRIPTION_PREVIEW_CHARS).trimEnd()}…`
+      : result.description
 
     return NextResponse.json({
       title: result.title,
       tags: result.tags,
       description_preview: descriptionPreview,
       truncated,
-    });
-  } catch (error: any) {
-    console.error("free-title API error:", error);
-    return NextResponse.json(
-      { error: error.message || "Generation failed. Please try again." },
-      { status: 500 }
-    );
+    })
+  } catch (error) {
+    console.error('free-title API error:', error)
+    return NextResponse.json({ error: "We couldn't generate Etsy titles right now. Please try again." }, { status: 500 })
   }
 }

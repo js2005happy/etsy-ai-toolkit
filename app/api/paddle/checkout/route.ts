@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getPaddle } from '@/lib/paddle'
+import { PLANS } from '@/lib/pricing'
 
 export async function POST(request: Request) {
   try {
@@ -18,6 +19,12 @@ export async function POST(request: Request) {
     }
 
     const { priceId } = await request.json().catch(() => ({}))
+    const allowedPriceIds = new Set(
+      PLANS.flatMap((plan) => [plan.paddlePriceIdMonthly, plan.paddlePriceIdYearly].filter(Boolean))
+    )
+    if (!priceId || typeof priceId !== 'string' || !allowedPriceIds.has(priceId)) {
+      return NextResponse.json({ error: 'Select a valid Craftly plan.' }, { status: 400 })
+    }
 
     let customerId: string | null = null
     const { data: profile } = await service
@@ -41,7 +48,7 @@ export async function POST(request: Request) {
     }
 
     const transaction = await paddle.transactions.create({
-      items: [{ priceId: priceId || process.env.PADDLE_PRO_PRICE_ID!, quantity: 1 }],
+      items: [{ priceId, quantity: 1 }],
       customerId,
       customData: { user_id: user.id },
     })

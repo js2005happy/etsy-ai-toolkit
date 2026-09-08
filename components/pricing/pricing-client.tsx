@@ -18,6 +18,17 @@ interface PricingClientProps {
   userId: string | null
 }
 
+function annualSavings(tier: Tier): number {
+  if (!tier.priceUsd) return 0
+  return tier.priceUsd.month * 12 - tier.priceUsd.year
+}
+
+function quotaSummary(tier: Tier, period: BillingPeriod): string {
+  if (tier.name === 'Free') return `${tier.credits} credits · ${tier.images} images`
+  if (period === 'year') return `${tier.credits * 12} credits/year · ${tier.images * 12} images/year`
+  return `${tier.credits} credits/month · ${tier.images} images/month`
+}
+
 export default function PricingClient({
   countryCode,
   userEmail,
@@ -90,9 +101,10 @@ export default function PricingClient({
   )
 
   const ctaLabel = (tier: Tier) => {
-    if (tier.name === 'Free') return t('marketing.pricing.startFree')
-    if (tier.name === 'Pro') return t('marketing.pricing.startPro')
-    return `${t('marketing.pricing.startPrefix')} ${tier.name}`
+    if (tier.name === 'Free') return 'Start free — no card'
+    if (!tier.priceUsd) return `Get ${tier.name}`
+    const amount = period === 'month' ? tier.priceUsd.month : tier.priceUsd.year
+    return `Get ${tier.name} — $${amount}/${period === 'month' ? 'mo' : 'yr'}`
   }
 
   const planCopy: Record<string, { who: string; features: string[] }> = {
@@ -146,22 +158,18 @@ export default function PricingClient({
 
   const comparison: { label: string; cells: { text: string; cls: string }[] }[] = [
     {
-      label: t('marketing.pricing.cmp1'),
-      cells: [
-        { text: '10', cls: '' },
-        { text: '100', cls: '' },
-        { text: '300', cls: 'yes hl' },
-        { text: '1000', cls: 'yes' },
-      ],
+      label: period === 'year' ? 'Credits / year' : t('marketing.pricing.cmp1'),
+      cells: TIERS.map((tier) => ({
+        text: String(tier.name === 'Free' || period === 'month' ? tier.credits : tier.credits * 12),
+        cls: tier.name === 'Pro' ? 'yes hl' : tier.name === 'Scale' ? 'yes' : '',
+      })),
     },
     {
-      label: t('marketing.pricing.cmp2'),
-      cells: [
-        { text: '3', cls: '' },
-        { text: '50', cls: '' },
-        { text: '120', cls: 'hl' },
-        { text: '300', cls: 'yes' },
-      ],
+      label: period === 'year' ? 'Images / year' : t('marketing.pricing.cmp2'),
+      cells: TIERS.map((tier) => ({
+        text: String(tier.name === 'Free' || period === 'month' ? tier.images : tier.images * 12),
+        cls: tier.name === 'Pro' ? 'hl' : tier.name === 'Scale' ? 'yes' : '',
+      })),
     },
     {
       label: t('marketing.pricing.cmp3'),
@@ -254,87 +262,50 @@ export default function PricingClient({
 
         <div className="k-toggle">
           <div className="k-chips">
-            <button
-              type="button"
-              className={`k-chip${period === 'month' ? ' on' : ''}`}
-              onClick={() => setPeriod('month')}
-            >
+            <button type="button" className={`k-chip${period === 'month' ? ' on' : ''}`} onClick={() => setPeriod('month')}>
               {t('marketing.pricing.monthly')}
             </button>
-            <button
-              type="button"
-              className={`k-chip${period === 'year' ? ' on' : ''}`}
-              onClick={() => setPeriod('year')}
-            >
+            <button type="button" className={`k-chip${period === 'year' ? ' on' : ''}`} onClick={() => setPeriod('year')}>
               {t('marketing.pricing.yearly')}
             </button>
           </div>
-          <span className="k-save">{t('marketing.pricing.yearlySaves')}</span>
+          <span className="k-save">Prices shown in USD</span>
         </div>
       </section>
 
       <section className="k-wrap" id="plans" style={{ paddingTop: 0 }}>
-        {error && <p className="k-muted">{error}</p>}
+        {error && <p role="alert" className="k-muted">{error}</p>}
         <div className="k-plans-4">
           {TIERS.map((tier, i) => {
             const copy = planCopy[tier.name]
-            const price = tier.priceUsd
-              ? period === 'month'
-                ? `$${tier.priceUsd.month}`
-                : `$${tier.priceUsd.year}`
-              : '$0'
-            const unit = !tier.priceUsd
-              ? t('marketing.pricing.forever')
-              : period === 'month'
-                ? t('marketing.pricing.perMonth')
-                : t('marketing.pricing.perYear')
-            const billed = !tier.priceUsd
-              ? ' '
-              : period === 'month'
-                ? t('marketing.pricing.billedMonthly')
-                : t('marketing.pricing.billedYearly')
+            const price = tier.priceUsd ? period === 'month' ? `$${tier.priceUsd.month}` : `$${tier.priceUsd.year}` : '$0'
+            const unit = !tier.priceUsd ? t('marketing.pricing.forever') : period === 'month' ? t('marketing.pricing.perMonth') : t('marketing.pricing.perYear')
+            const billed = !tier.priceUsd ? ' ' : period === 'month' ? t('marketing.pricing.billedMonthly') : `Billed yearly · Save $${annualSavings(tier)}/year`
             const hot = tier.name === 'Pro'
 
             return (
-              <Reveal
-                key={tier.name}
-                className={`k-plan${hot ? ' hot' : ''}`}
-                delay={i * 100}
-              >
+              <Reveal key={tier.name} className={`k-plan${hot ? ' hot' : ''}`} delay={i * 100}>
                 {hot && <div className="k-badge">{t('marketing.pricing.mostPopular')}</div>}
                 <h3>{tier.name}</h3>
                 <p className="k-who">{copy.who}</p>
                 <div className="k-price">
                   <b>{price}</b>
-                  <span>{unit}</span>
+                  <span>USD {unit}</span>
                 </div>
                 <p className="k-billed">{billed}</p>
+                <p className="k-who" style={{ marginTop: 10 }}>{quotaSummary(tier, period)}</p>
                 <ul>
-                  {copy.features.map((f) => (
-                    <li key={f}>{f}</li>
-                  ))}
+                  {copy.features.map((f) => <li key={f}>{f}</li>)}
                 </ul>
                 {tier.name === 'Free' ? (
-                  <Link href="/signup" className="k-btn k-btn-block">
-                    {t('marketing.pricing.startFree')}
-                  </Link>
+                  <Link href="/signup" className="k-btn k-btn-block whitespace-nowrap">Start free — no card</Link>
                 ) : hot ? (
-                  <button
-                    type="button"
-                    className="k-btn k-btn-primary k-btn-block"
-                    onClick={() => handleSubscribe(tier)}
-                    disabled={!paddle}
-                  >
-                    <span>{t('marketing.pricing.startPro')}</span>
+                  <button type="button" className="k-btn k-btn-primary k-btn-block whitespace-nowrap" onClick={() => handleSubscribe(tier)} disabled={!paddle}>
+                    <span>{ctaLabel(tier)}</span>
                     <i className="k-shine" />
                   </button>
                 ) : (
-                  <button
-                    type="button"
-                    className="k-btn k-btn-block"
-                    onClick={() => handleSubscribe(tier)}
-                    disabled={!paddle}
-                  >
+                  <button type="button" className="k-btn k-btn-block whitespace-nowrap" onClick={() => handleSubscribe(tier)} disabled={!paddle}>
                     {ctaLabel(tier)}
                   </button>
                 )}
@@ -352,23 +323,13 @@ export default function PricingClient({
         <div className="k-table-wrap">
           <table className="k-table">
             <thead>
-              <tr>
-                <th>&nbsp;</th>
-                <th>Free</th>
-                <th>Basic</th>
-                <th>Pro</th>
-                <th>Scale</th>
-              </tr>
+              <tr><th>&nbsp;</th><th>Free</th><th>Basic</th><th>Pro</th><th>Scale</th></tr>
             </thead>
             <tbody>
               {comparison.map((row) => (
                 <tr key={row.label}>
                   <td>{row.label}</td>
-                  {row.cells.map((c, j) => (
-                    <td key={j} className={c.cls}>
-                      {c.text}
-                    </td>
-                  ))}
+                  {row.cells.map((c, j) => <td key={j} className={c.cls}>{c.text}</td>)}
                 </tr>
               ))}
             </tbody>
@@ -381,29 +342,22 @@ export default function PricingClient({
           <div className="eyebrow">{t('marketing.pricing.faqEyebrow')}</div>
           <h2 className="k-h2">{t('marketing.pricing.faqH')}</h2>
         </Reveal>
-        <Faq
-          items={[
-            { q: t('marketing.pricing.faq1q'), a: t('marketing.pricing.faq1a') },
-            { q: t('marketing.pricing.faq2q'), a: t('marketing.pricing.faq2a') },
-            { q: t('marketing.pricing.faq3q'), a: t('marketing.pricing.faq3a') },
-            { q: t('marketing.pricing.faq4q'), a: t('marketing.pricing.faq4a') },
-            { q: t('marketing.pricing.faq5q'), a: t('marketing.pricing.faq5a') },
-            { q: t('marketing.pricing.faq6q'), a: t('marketing.pricing.faq6a') },
-            { q: t('marketing.pricing.faq7q'), a: t('marketing.pricing.faq7a') },
-          ]}
-        />
+        <Faq items={[
+          { q: t('marketing.pricing.faq1q'), a: t('marketing.pricing.faq1a') },
+          { q: t('marketing.pricing.faq2q'), a: t('marketing.pricing.faq2a') },
+          { q: t('marketing.pricing.faq3q'), a: t('marketing.pricing.faq3a') },
+          { q: t('marketing.pricing.faq4q'), a: t('marketing.pricing.faq4a') },
+          { q: t('marketing.pricing.faq5q'), a: t('marketing.pricing.faq5a') },
+          { q: t('marketing.pricing.faq6q'), a: t('marketing.pricing.faq6a') },
+          { q: t('marketing.pricing.faq7q'), a: t('marketing.pricing.faq7a') },
+        ]} />
 
         <Reveal className="k-cta-band" style={{ marginTop: 80 }}>
           <h2 className="k-h2">{t('marketing.pricing.ctaH')}</h2>
           <p className="k-lead">{t('marketing.pricing.ctaLead')}</p>
           <div className="k-cta-row">
-            <Link href="/dashboard" className="k-btn k-btn-primary">
-              <span>{t('marketing.pricing.ctaBtn1')}</span>
-              <i className="k-shine" />
-            </Link>
-            <Link href="/how-it-works" className="k-btn">
-              {t('marketing.pricing.ctaBtn2')}
-            </Link>
+            <Link href="/dashboard" className="k-btn k-btn-primary"><span>{t('marketing.pricing.ctaBtn1')}</span><i className="k-shine" /></Link>
+            <Link href="/how-it-works" className="k-btn">{t('marketing.pricing.ctaBtn2')}</Link>
           </div>
         </Reveal>
       </section>

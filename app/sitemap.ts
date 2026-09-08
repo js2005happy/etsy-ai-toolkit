@@ -12,8 +12,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/terms",
     "/privacy",
     "/refund",
-    "/login",
-    "/signup",
+    "/tools",
+    "/how-it-works",
   ];
 
   const staticEntries: MetadataRoute.Sitemap = routes.map((route) => ({
@@ -23,15 +23,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route === "" ? 1 : 0.7,
   }));
 
-  // SEO-targeted landing page — boosted priority + weekly cadence.
-  const toolEntry: MetadataRoute.Sitemap = [
-    {
-      url: `${siteUrl}/tools/free-etsy-title-generator`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 0.9,
-    },
-  ];
+  const toolEntry: MetadataRoute.Sitemap = ["free-etsy-title-generator"].map((slug) => ({
+    url: `${siteUrl}/tools/${slug}`,
+    lastModified: new Date(), changeFrequency: "weekly", priority: 0.9,
+  }));
 
   return [...staticEntries, ...toolEntry];
 }

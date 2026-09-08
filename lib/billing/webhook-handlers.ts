@@ -22,16 +22,21 @@ function getSupabase() {
 }
 
 // Map a subscription's price + status into the tier it should grant. Only
-// active/trialing grant access; anything else downgrades to free. An unknown
-// active price_id (legacy rows) defaults to Pro so existing subscribers keep
-// image access.
-function resolveTier(
+// active/trialing grant access. Unknown active price IDs never grant a paid
+// entitlement: legitimate legacy prices must be explicitly allowlisted in
+// PRICE_TO_TIER so a typo or foreign Paddle product cannot silently become Pro.
+export function resolveTier(
   priceId: string | undefined,
   status: string | undefined
 ): TierName {
   if (!hasPaidAccess(status)) return 'Free'
   if (priceId && PRICE_TO_TIER[priceId]) return PRICE_TO_TIER[priceId]
-  return 'Pro'
+
+  console.error('Unknown active Paddle price id; refusing paid entitlement', {
+    priceId: priceId ?? null,
+    status: status ?? null,
+  })
+  return 'Free'
 }
 
 async function resolveUserId(
@@ -196,12 +201,12 @@ export async function syncUserPlan(
   const tier = resolveTier(priceId, status)
   const quota = tierQuota(tier)
 
-  // Yearly subs grant the monthly quota as a 12× lump at purchase (no monthly
-  // renew webhook fires), so a yearly buyer gets a full year's allowance up
-  // front. Monthly subs re-grant a single month's worth on every renew.
+  // Yearly subs intentionally grant the monthly quota as a 12× lump at purchase.
+  // Keep website copy aligned with this behavior: yearly plans are annual pools,
+  // not monthly-reset subscriptions.
   const multiplier = isYearlyPrice(priceId) ? 12 : 1
 
-  await getSupabase()
+  const { error } = await getSupabase()
     .from('profiles')
     .update({
       subscription_status: tier.toLowerCase(),
@@ -209,6 +214,10 @@ export async function syncUserPlan(
       images_remaining: quota.images * multiplier,
     })
     .eq('id', userId)
+
+  if (error) {
+    throw new Error(`Failed to sync Paddle entitlement for user ${userId}`)
+  }
 
   return tier
 }

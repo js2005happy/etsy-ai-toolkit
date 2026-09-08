@@ -15,6 +15,7 @@ const LINKS = [
   { key: 'examples', href: '/examples' },
   { key: 'pricing', href: '/pricing' },
   { key: 'openApp', href: '/dashboard' },
+  { key: 'shop', href: '/dashboard/shop' },
 ]
 
 export default function Navbar() {
@@ -60,7 +61,7 @@ export default function Navbar() {
               className={isActive(l.href) ? 'active' : ''}
               onClick={() => setMenuOpen(false)}
             >
-              {t(`nav.${l.key}`)}
+              {l.key === 'shop' ? 'My Shop' : t(`nav.${l.key}`)}
             </Link>
           ))}
         </div>
@@ -68,12 +69,12 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
           {user ? (
-            <Link href="/dashboard" className="k-btn k-btn-primary">
+            <Link href="/dashboard" className="k-btn k-btn-primary whitespace-nowrap">
               <span>{t('nav.dashboard')}</span>
               <i className="k-shine" />
             </Link>
           ) : (
-            <Link href="/signup" className="k-btn k-btn-primary">
+            <Link href="/signup" className="k-btn k-btn-primary whitespace-nowrap">
               <span>{t('nav.startFree')}</span>
               <i className="k-shine" />
             </Link>
@@ -82,6 +83,7 @@ export default function Navbar() {
             type="button"
             className="k-nav-toggle"
             aria-label="Menu"
+            aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
           >
             <i />

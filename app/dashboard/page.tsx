@@ -5,6 +5,7 @@ import TiltCard from '@/components/ui/tilt-card'
 import { Button } from '@/components/ui/button'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import { useI18n } from '@/lib/i18n/client'
+import { AI_TOOL_COUNT } from '@/lib/tools'
 import {
   FileText,
   MessageCircle,
@@ -31,6 +32,8 @@ export default function DashboardPage() {
   const [credits, setCredits] = useState<number | null>(null)
   const [plan, setPlan] = useState<string | null>(null)
   const [quota, setQuota] = useState<number | null>(null)
+  const [imageCredits, setImageCredits] = useState<number | null>(null)
+  const [imageQuota, setImageQuota] = useState<number | null>(null)
   const [isUpgrading, setIsUpgrading] = useState(false)
   const [isManaging, setIsManaging] = useState(false)
 
@@ -168,6 +171,8 @@ export default function DashboardPage() {
           setCredits(data.credits)
           setPlan(data.plan ?? null)
           setQuota(data.quota ?? null)
+          setImageCredits(data.imageCredits ?? null)
+          setImageQuota(data.imageQuota ?? null)
         }
       } catch (e) {
         console.error('Failed to fetch credits', e)
@@ -211,6 +216,7 @@ export default function DashboardPage() {
   }
 
   const progressPercentage = credits !== null && quota ? Math.min((credits / quota) * 100, 100) : 0
+  const imageProgressPercentage = imageCredits !== null && imageQuota ? Math.min((imageCredits / imageQuota) * 100, 100) : 0
 
   return (
     <div className="min-h-screen">
@@ -238,15 +244,26 @@ export default function DashboardPage() {
               </div>
               <div className="mt-3 flex items-baseline gap-3">
                 <span className="font-display text-6xl leading-none tracking-tight md:text-7xl">
-                  {isPaid ? '∞' : credits !== null ? credits : '…'}
+                  {credits !== null ? credits : '…'}
                 </span>
-                {!isPaid && quota !== null && (
+                {quota !== null && (
                   <span className="text-xl text-primary-foreground/60">/ {quota}</span>
                 )}
               </div>
               <p className="mt-3 text-sm text-primary-foreground/70">
-                {isPaid ? t('dashboard.unlimitedGenerations') : t('dashboard.creditsRemaining')}
+                {t('dashboard.creditsRemaining')}
               </p>
+              <div className="mt-4 h-2 w-64 overflow-hidden rounded-full bg-white/20">
+                <div className="h-full rounded-full bg-white transition-all" style={{ width: `${progressPercentage}%` }} />
+              </div>
+              <div className="mt-6 flex items-center gap-3 text-primary-foreground">
+                <ImageIcon className="h-4 w-4" />
+                <span className="font-medium">Images</span>
+                <span className="text-primary-foreground/70">{imageCredits ?? '…'} / {imageQuota ?? '…'}</span>
+              </div>
+              <div className="mt-2 h-2 w-64 overflow-hidden rounded-full bg-white/20">
+                <div className="h-full rounded-full bg-white transition-all" style={{ width: `${imageProgressPercentage}%` }} />
+              </div>
             </div>
 
             <div className="flex w-full flex-col items-center gap-6 md:w-auto md:items-end">
@@ -314,7 +331,7 @@ export default function DashboardPage() {
           <h2 className="font-display text-2xl tracking-tight text-foreground">
             {t('dashboard.yourTools')}
           </h2>
-          <span className="text-sm text-muted-foreground">{t('dashboard.nineToolsZero')}</span>
+          <span className="text-sm text-muted-foreground">{AI_TOOL_COUNT} AI tools</span>
         </div>
 
         <div className="space-y-14">
