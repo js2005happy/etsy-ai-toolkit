@@ -7,6 +7,15 @@ import {
   handleTransactionCompleted,
 } from '@/lib/billing/webhook-handlers'
 
+function normalizeOccurredAt(value: unknown): string | undefined {
+  if (value instanceof Date) return value.toISOString()
+  if (typeof value !== 'string') return undefined
+
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.valueOf())) return undefined
+  return parsed.toISOString()
+}
+
 export async function POST(request: Request) {
   const paddle = getPaddle()
 
@@ -31,6 +40,8 @@ export async function POST(request: Request) {
     )
   }
 
+  const occurredAt = normalizeOccurredAt(event.occurredAt)
+
   try {
     switch (event.eventType) {
       case EventName.CustomerCreated:
@@ -46,11 +57,11 @@ export async function POST(request: Request) {
       case EventName.SubscriptionPaused:
       case EventName.SubscriptionResumed:
       case EventName.SubscriptionTrialing:
-        await handleSubscription(event.data, event.eventType)
+        await handleSubscription(event.data, event.eventType, occurredAt)
         break
 
       case EventName.TransactionCompleted:
-        await handleTransactionCompleted(event.data)
+        await handleTransactionCompleted(event.data, occurredAt)
         break
 
       default:
