@@ -1,0 +1,80 @@
+name: Final copy and quota audit
+
+on:
+  push:
+    branches:
+      - craftly-reliability-conversion
+
+permissions:
+  contents: write
+
+jobs:
+  audit-fix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          ref: craftly-reliability-conversion
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Audit quota calls
+        shell: bash
+        run: |
+          echo 'DIRECT_CONSUME_CALLS_BEGIN'
+          grep -RInE "rpc\(['\"]consume_(credits|image_credits)['\"]" app lib mcp-server --exclude='quota.ts' || true
+          echo 'DIRECT_CONSUME_CALLS_END'
+      - name: Clean stale i18n claims
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('lib/i18n/messages.ts')
+          s = p.read_text()
+          replacements = {
+            "trust: 'Trusted by 4,200 makers · Etsy, Shopify, Amazon, Instagram',": "trust: 'Built for sellers working across Etsy, Shopify, Amazon, and Instagram',",
+            "trust: '4,200 位手作人信赖 · Etsy、Shopify、Amazon、Instagram',": "trust: '为使用 Etsy、Shopify、Amazon 和 Instagram 的卖家而打造',",
+            "trust: '4,200名の作家が利用 · Etsy, Shopify, Amazon, Instagram',": "trust: 'Etsy・Shopify・Amazon・Instagram で販売する人のためのツール',",
+            "trust: '4,200명의 메이커가 신뢰 · Etsy, Shopify, Amazon, Instagram',": "trust: 'Etsy, Shopify, Amazon, Instagram 판매자를 위한 도구',",
+            "unlimitedGenerations: 'unlimited generations · Pro plan active',": "unlimitedGenerations: 'Pro plan active · higher finite allowances',",
+            "unlimitedGenerations: 'unbegrenzte Generierungen · Pro-Tarif aktiv',": "unlimitedGenerations: 'Pro-Tarif aktiv · höhere feste Kontingente',",
+            "unlimitedGenerations: 'générations illimitées · offre Pro active',": "unlimitedGenerations: 'offre Pro active · quotas fixes plus élevés',",
+            "unlimitedGenerations: 'generaciones ilimitadas · plan Pro activo',": "unlimitedGenerations: 'plan Pro activo · límites fijos más altos',",
+            "unlimitedGenerations: '无限生成 · Pro 套餐已激活',": "unlimitedGenerations: 'Pro 套餐已激活 · 更高的有限额度',",
+            "unlimitedGenerations: '無制限の生成 · Pro プラン有効',": "unlimitedGenerations: 'Pro プラン有効 · より多い固定上限',",
+            "unlimitedGenerations: 'generazioni illimitate · piano Pro attivo',": "unlimitedGenerations: 'piano Pro attivo · limiti fissi più alti',",
+            "unlimitedGenerations: '무제한 생성 · Pro 플랜 활성',": "unlimitedGenerations: 'Pro 플랜 활성 · 더 높은 고정 한도',",
+            "unlimitedGenerations: 'gerações ilimitadas · plano Pro ativo',": "unlimitedGenerations: 'plano Pro ativo · limites fixos maiores',",
+          }
+          missing = []
+          for old, new in replacements.items():
+              if old not in s:
+                  missing.append(old)
+              s = s.replace(old, new)
+          if missing:
+              raise SystemExit('Missing expected strings: ' + repr(missing))
+          p.write_text(s)
+      - name: Verify stale claims removed
+        shell: bash
+        run: |
+          ! grep -n "4,200" lib/i18n/messages.ts
+          ! grep -nE "unlimited generations|unbegrenzte Generierungen|générations illimitées|generaciones ilimitadas|无限生成|無制限の生成|generazioni illimitate|무제한 생성|gerações ilimitadas" lib/i18n/messages.ts
+      - name: Install, lint and build
+        run: |
+          npm ci
+          npm run lint
+          npm run build
+      - name: Commit cleanup
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add lib/i18n/messages.ts
+          if git diff --cached --quiet; then
+            echo 'No changes needed'
+          else
+            git commit -m "fix: align translated quota and trust copy"
+            git push origin HEAD:craftly-reliability-conversion
+          fi
