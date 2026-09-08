@@ -1,210 +1,178 @@
-// Etsy Open API v3 client — OAuth 2.0 PKCE + draft-first listing workflow.
-
-import crypto from 'crypto'
-import { lookup } from 'node:dns/promises'
+import { resolve4, resolve6 } from 'node:dns/promises'
 import { isIP } from 'node:net'
 
-const ETSY_AUTHORIZE_URL = 'https://www.etsy.com/oauth/connect'
-const ETSY_TOKEN_URL = 'https://api.etsy.com/v3/public/oauth/token'
 const ETSY_API_BASE = 'https://openapi.etsy.com/v3/application'
-const ETSY_SCOPES = 'listings_w listings_r shops_r'
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024
-const MAX_REDIRECTS = 4
+const MAX_REDIRECTS = 2
+const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
-function getEtsyClient() {
-  const apiKey = process.env.ETSY_API_KEY
-  const redirectUri = process.env.ETSY_REDIRECT_URI
-  const sharedSecret = process.env.ETSY_SHARED_SECRET
-  if (!apiKey || !redirectUri) {
-    throw new Error('Etsy env vars not configured (ETSY_API_KEY / ETSY_REDIRECT_URI)')
-  }
-  return { apiKey, redirectUri, sharedSecret }
-}
-
-function apiHeaders(accessToken: string): Record<string, string> {
-  const { apiKey, sharedSecret } = getEtsyClient()
-  return {
+function apiHeaders(accessToken: string, contentType?: string) {
+  const headers: Record<string, string> = {
     Authorization: `Bearer ${accessToken}`,
-    'x-api-key': sharedSecret ? `${apiKey}:${sharedSecret}` : apiKey,
+    'x-api-key': process.env.ETSY_API_KEY!,
   }
+  if (contentType) headers['Content-Type'] = contentType
+  return headers
 }
 
-function base64UrlEncode(buf: Buffer): string {
-  return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
+export function getEtsyRedirectUri(): string {
+  return process.env.ETSY_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/etsy/callback`
 }
 
-export function generateCodeVerifier(): string {
-  return base64UrlEncode(crypto.randomBytes(32))
-}
-
-export function generateCodeChallenge(verifier: string): string {
-  return base64UrlEncode(crypto.createHash('sha256').update(verifier).digest())
-}
-
-export function buildAuthorizeUrl(state: string, codeChallenge: string): string {
-  const { apiKey, redirectUri } = getEtsyClient()
+export function buildEtsyAuthorizeUrl(state: string, codeChallenge: string): string {
   const params = new URLSearchParams({
     response_type: 'code',
-    redirect_uri: redirectUri,
-    scope: ETSY_SCOPES,
-    client_id: apiKey,
+    redirect_uri: getEtsyRedirectUri(),
+    scope: 'listings_r listings_w shops_r',
+    client_id: process.env.ETSY_API_KEY!,
     state,
     code_challenge: codeChallenge,
     code_challenge_method: 'S256',
   })
-  return `${ETSY_AUTHORIZE_URL}?${params.toString()}`
+  return `https://www.etsy.com/oauth/connect?${params}`
 }
 
-export interface EtsyToken {
-  accessToken: string
-  refreshToken: string
-  expiresAt: number
-}
-
-async function requestToken(params: Record<string, string>): Promise<EtsyToken> {
-  const res = await fetch(ETSY_TOKEN_URL, {
+export async function exchangeCodeForTokens(code: string, codeVerifier: string) {
+  const response = await fetch('https://api.etsy.com/v3/public/oauth/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams(params).toString(),
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      client_id: process.env.ETSY_API_KEY!,
+      redirect_uri: getEtsyRedirectUri(),
+      code,
+      code_verifier: codeVerifier,
+    }),
   })
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    console.error('Etsy token exchange failed', { status: res.status, body: text.slice(0, 500) })
-    throw new Error(`Etsy token exchange failed (${res.status})`)
+  if (!response.ok) {
+    const body = await response.text().catch(() => '')
+    console.error('Etsy token exchange failed', { status: response.status, body: body.slice(0, 500) })
+    throw new Error('Etsy authorization failed.')
   }
-  const data = await res.json()
-  const expiresIn = typeof data.expires_in === 'number' ? data.expires_in : 3600
+  const data = await response.json()
   return {
     accessToken: data.access_token as string,
     refreshToken: data.refresh_token as string,
-    expiresAt: Date.now() + expiresIn * 1000,
+    expiresAt: Date.now() + Number(data.expires_in ?? 3600) * 1000,
   }
 }
 
-export async function exchangeCode(code: string, codeVerifier: string): Promise<EtsyToken> {
-  const { apiKey, redirectUri } = getEtsyClient()
-  return requestToken({
-    grant_type: 'authorization_code',
-    client_id: apiKey,
-    redirect_uri: redirectUri,
-    code,
-    code_verifier: codeVerifier,
+export async function refreshAccessToken(refreshToken: string) {
+  const response = await fetch('https://api.etsy.com/v3/public/oauth/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'refresh_token',
+      client_id: process.env.ETSY_API_KEY!,
+      refresh_token: refreshToken,
+    }),
   })
+  if (!response.ok) {
+    const body = await response.text().catch(() => '')
+    console.error('Etsy token refresh failed', { status: response.status, body: body.slice(0, 500) })
+    throw new Error('Etsy session refresh failed.')
+  }
+  const data = await response.json()
+  return {
+    accessToken: data.access_token as string,
+    refreshToken: (data.refresh_token ?? refreshToken) as string,
+    expiresAt: Date.now() + Number(data.expires_in ?? 3600) * 1000,
+  }
 }
 
-export async function refreshAccessToken(refreshToken: string): Promise<EtsyToken> {
-  const { apiKey } = getEtsyClient()
-  return requestToken({ grant_type: 'refresh_token', client_id: apiKey, refresh_token: refreshToken })
+export async function getMyShop(accessToken: string) {
+  const me = await fetch(`${ETSY_API_BASE}/users/me`, { headers: apiHeaders(accessToken) })
+  if (!me.ok) throw new Error('Unable to identify Etsy user.')
+  const user = await me.json()
+  const shops = await fetch(`${ETSY_API_BASE}/users/${user.user_id}/shops`, { headers: apiHeaders(accessToken) })
+  if (!shops.ok) throw new Error('Unable to load Etsy shop.')
+  const data = await shops.json()
+  const shop = data.results?.[0]
+  if (!shop?.shop_id) throw new Error('No Etsy shop found for this account.')
+  return shop
 }
 
-export interface EtsyShop {
-  shop_id: number
-  shop_name: string
+export async function getSellerTaxonomyNodes(accessToken: string) {
+  const response = await fetch(`${ETSY_API_BASE}/seller-taxonomy/nodes`, { headers: apiHeaders(accessToken) })
+  if (!response.ok) throw new Error('Unable to load Etsy categories.')
+  return response.json()
 }
 
-export async function getUserShops(accessToken: string): Promise<EtsyShop[]> {
-  const userId = accessToken.split('.')[0]
-  const res = await fetch(`${ETSY_API_BASE}/users/${userId}/shops`, { headers: apiHeaders(accessToken) })
-  if (!res.ok) throw new Error(`Etsy getShops failed (${res.status})`)
-  const data = await res.json()
-  const shops = (data?.results ?? []) as Array<{ shop_id: number; shop_name: string }>
-  return shops.map((s) => ({ shop_id: s.shop_id, shop_name: s.shop_name }))
+export async function getShopListings(shopId: number, accessToken: string, limit = 100, offset = 0) {
+  const params = new URLSearchParams({ limit: String(Math.min(limit, 100)), offset: String(Math.max(offset, 0)) })
+  const response = await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings?${params}`, { headers: apiHeaders(accessToken) })
+  if (!response.ok) throw new Error('Unable to load Etsy listings.')
+  return response.json()
 }
 
-export type EtsyRemoteListing = Record<string, unknown> & {
-  listing_id: number
-  title?: string
-  description?: string
-  state?: string
+export async function getListingImages(listingId: number, accessToken: string) {
+  const response = await fetch(`${ETSY_API_BASE}/listings/${listingId}/images`, { headers: apiHeaders(accessToken) })
+  if (!response.ok) throw new Error('Unable to load Etsy listing images.')
+  return response.json()
 }
 
-export async function getShopListings(
-  shopId: number,
-  accessToken: string,
-  offset = 0
-): Promise<{ listings: EtsyRemoteListing[]; count: number }> {
-  const params = new URLSearchParams({ limit: '100', offset: String(offset), includes: 'Images' })
-  const res = await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings?${params}`, { headers: apiHeaders(accessToken) })
-  if (!res.ok) throw new Error(`Etsy listings request failed (${res.status})`)
-  const data = await res.json()
-  return { listings: (data?.results ?? []) as EtsyRemoteListing[], count: Number(data?.count ?? 0) }
-}
-
-async function getShippingProfileId(shopId: number, accessToken: string): Promise<number | null> {
-  const res = await fetch(`${ETSY_API_BASE}/shops/${shopId}/shipping-profiles`, { headers: apiHeaders(accessToken) })
-  if (!res.ok) return null
-  const data = await res.json()
-  const profiles = (data?.results ?? []) as Array<{ shipping_profile_id: number }>
-  return profiles[0]?.shipping_profile_id ?? null
-}
-
-export interface EtsyTaxonomyNode {
-  id: number
-  name: string
-  children?: EtsyTaxonomyNode[]
-}
-
-export async function getSellerTaxonomy(accessToken: string): Promise<EtsyTaxonomyNode[]> {
-  const res = await fetch(`${ETSY_API_BASE}/seller-taxonomy/nodes?limit=100`, { headers: apiHeaders(accessToken) })
-  if (!res.ok) throw new Error(`Etsy taxonomy request failed (${res.status})`)
-  const data = await res.json()
-  return (data?.results ?? []) as EtsyTaxonomyNode[]
-}
-
-export interface EtsyListingInput {
-  title: string
-  description: string
-  price: number
-  quantity?: number
-  who_made?: string
-  when_made?: string
-  type?: string
-  taxonomyId?: number
-  images?: string[]
-  tags?: string[]
-}
-
-/** Create an Etsy draft only. Image upload is a separate reviewed step. */
 export async function createListing(
   shopId: number,
   accessToken: string,
-  input: EtsyListingInput
-): Promise<Record<string, any>> {
-  const shippingProfileId = await getShippingProfileId(shopId, accessToken)
-  if (!shippingProfileId) throw new Error('No shipping profile found for this shop. Create one in Etsy first.')
-  if (!input.taxonomyId) throw new Error('A confirmed Etsy taxonomy category is required before creating a draft.')
-
-  const body: Record<string, any> = {
-    quantity: input.quantity ?? 1,
-    title: input.title,
-    description: input.description,
-    price: input.price,
-    who_made: input.who_made ?? 'i_did',
-    when_made: input.when_made ?? 'made_to_order',
-    taxonomy_id: input.taxonomyId,
-    shipping_profile_id: shippingProfileId,
-    type: input.type ?? 'physical',
-    ...(input.tags?.length ? { tags: input.tags.slice(0, 13) } : {}),
+  input: {
+    title: string
+    description: string
+    price: number
+    quantity: number
+    taxonomyId: number
+    tags?: string[]
+    whoMade?: string
+    whenMade?: string
+    isSupply?: boolean
   }
-
-  const res = await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings`, {
+): Promise<Record<string, unknown>> {
+  const response = await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...apiHeaders(accessToken) },
-    body: JSON.stringify(body),
+    headers: apiHeaders(accessToken, 'application/json'),
+    body: JSON.stringify({
+      quantity: input.quantity,
+      title: input.title,
+      description: input.description,
+      price: input.price,
+      who_made: input.whoMade ?? 'i_did',
+      when_made: input.whenMade ?? 'made_to_order',
+      taxonomy_id: input.taxonomyId,
+      is_supply: input.isSupply ?? false,
+      should_auto_renew: false,
+      tags: input.tags?.slice(0, 13),
+      state: 'draft',
+    }),
   })
-  const data = await res.json().catch(() => ({}))
-  if (!res.ok) {
-    console.error('Etsy draft creation failed', { status: res.status, response: data })
-    throw new Error(`Etsy listing create failed (${res.status})`)
+  if (!response.ok) {
+    const body = await response.text().catch(() => '')
+    console.error('Etsy draft creation failed', { status: response.status, body: body.slice(0, 500) })
+    throw new Error(`Etsy draft creation failed (${response.status})`)
   }
-  return data
+  return response.json()
 }
 
-const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
+export async function updateListingState(
+  shopId: number,
+  listingId: number,
+  accessToken: string,
+  state: 'active' | 'inactive'
+): Promise<Record<string, unknown>> {
+  const response = await fetch(`${ETSY_API_BASE}/shops/${shopId}/listings/${listingId}`, {
+    method: 'PATCH',
+    headers: apiHeaders(accessToken, 'application/json'),
+    body: JSON.stringify({ state }),
+  })
+  if (!response.ok) {
+    const body = await response.text().catch(() => '')
+    console.error('Etsy listing state update failed', { listingId, state, status: response.status, body: body.slice(0, 500) })
+    throw new Error(`Etsy listing update failed (${response.status})`)
+  }
+  return response.json()
+}
 
-function isPrivateIpv4(address: string): boolean {
-  const parts = address.split('.').map(Number)
-  if (parts.length !== 4 || parts.some((n) => !Number.isInteger(n) || n < 0 || n > 255)) return true
+function isPrivateIpv4(ip: string): boolean {
+  const parts = ip.split('.').map(Number)
+  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part))) return true
   const [a, b] = parts
   return (
     a === 0 ||
@@ -213,36 +181,59 @@ function isPrivateIpv4(address: string): boolean {
     (a === 169 && b === 254) ||
     (a === 172 && b >= 16 && b <= 31) ||
     (a === 192 && b === 168) ||
-    (a === 100 && b >= 64 && b <= 127) ||
     a >= 224
   )
 }
 
-function isPrivateAddress(address: string): boolean {
-  if (isIP(address) === 4) return isPrivateIpv4(address)
-  const normalized = address.toLowerCase()
-  if (normalized === '::1' || normalized === '::') return true
-  if (normalized.startsWith('fc') || normalized.startsWith('fd') || normalized.startsWith('fe8') || normalized.startsWith('fe9') || normalized.startsWith('fea') || normalized.startsWith('feb')) return true
-  if (normalized.startsWith('::ffff:')) return isPrivateIpv4(normalized.slice(7))
-  return false
+function isPrivateIpv6(ip: string): boolean {
+  const normalized = ip.toLowerCase()
+  return (
+    normalized === '::' ||
+    normalized === '::1' ||
+    normalized.startsWith('fc') ||
+    normalized.startsWith('fd') ||
+    normalized.startsWith('fe8') ||
+    normalized.startsWith('fe9') ||
+    normalized.startsWith('fea') ||
+    normalized.startsWith('feb')
+  )
 }
 
-async function assertSafeRemoteUrl(url: URL): Promise<void> {
-  if (url.protocol !== 'https:') throw new Error('Listing image URLs must use HTTPS.')
+function assertPublicIp(ip: string) {
+  const version = isIP(ip)
+  if (!version || (version === 4 ? isPrivateIpv4(ip) : isPrivateIpv6(ip))) {
+    throw new Error('Remote image host is not allowed.')
+  }
+}
+
+async function assertSafeRemoteUrl(url: URL) {
+  if (url.protocol !== 'https:') throw new Error('Remote listing images must use HTTPS.')
+  if (url.username || url.password) throw new Error('Remote image URLs cannot contain credentials.')
   const host = url.hostname.toLowerCase()
-  if (host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local')) {
-    throw new Error('Private image hosts are not allowed.')
+  if (!host || host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local')) {
+    throw new Error('Remote image host is not allowed.')
   }
-  const addresses = await lookup(host, { all: true, verbatim: true })
-  if (!addresses.length || addresses.some(({ address }) => isPrivateAddress(address))) {
-    throw new Error('Private image hosts are not allowed.')
+  if (isIP(host)) {
+    assertPublicIp(host)
+    return
   }
+  const addresses = new Set<string>()
+  const [v4, v6] = await Promise.allSettled([resolve4(host), resolve6(host)])
+  if (v4.status === 'fulfilled') v4.value.forEach((ip) => addresses.add(ip))
+  if (v6.status === 'fulfilled') v6.value.forEach((ip) => addresses.add(ip))
+  if (addresses.size === 0) throw new Error('Remote image host could not be resolved.')
+  addresses.forEach(assertPublicIp)
 }
 
 async function readResponseWithLimit(response: Response, maxBytes: number): Promise<Uint8Array> {
-  const declared = Number(response.headers.get('content-length') ?? '0')
-  if (Number.isFinite(declared) && declared > maxBytes) throw new Error('Listing image exceeds 20 MB.')
-  if (!response.body) return new Uint8Array(await response.arrayBuffer())
+  const declaredLength = Number(response.headers.get('content-length') ?? 0)
+  if (declaredLength > maxBytes) throw new Error('Listing image exceeds the 20 MB limit.')
+
+  if (!response.body) {
+    const buffer = await response.arrayBuffer()
+    if (buffer.byteLength > maxBytes) throw new Error('Listing image exceeds the 20 MB limit.')
+    return new Uint8Array(buffer)
+  }
 
   const reader = response.body.getReader()
   const chunks: Uint8Array[] = []
@@ -252,8 +243,8 @@ async function readResponseWithLimit(response: Response, maxBytes: number): Prom
     if (done) break
     total += value.byteLength
     if (total > maxBytes) {
-      await reader.cancel()
-      throw new Error('Listing image exceeds 20 MB.')
+      await reader.cancel().catch(() => undefined)
+      throw new Error('Listing image exceeds the 20 MB limit.')
     }
     chunks.push(value)
   }
@@ -324,8 +315,10 @@ export async function uploadListingImage(
   }
 
   const extension = type === 'image/jpeg' ? 'jpg' : type.split('/')[1]
+  const imageBuffer = new ArrayBuffer(bytes.byteLength)
+  new Uint8Array(imageBuffer).set(bytes)
   const form = new FormData()
-  form.append('image', new Blob([bytes], { type }), `listing-image-${rank}.${extension}`)
+  form.append('image', new Blob([imageBuffer], { type }), `listing-image-${rank}.${extension}`)
   form.append('rank', String(rank))
   if (altText) form.append('alt_text', altText.slice(0, 250))
 
