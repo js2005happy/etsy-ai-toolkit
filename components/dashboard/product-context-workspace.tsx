@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { ArrowLeft, Languages, Mail, Megaphone, MessageCircle, Share2, Sparkles, Wand2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -16,8 +16,11 @@ type Listing = {
   health: { score: number; issues: string[] }
 }
 
-function buildHref(path: string, params: Record<string, string>): string {
-  const search = new URLSearchParams({ source: 'product-context', ...params })
+function buildHref(path: string, listingId: number): string {
+  const search = new URLSearchParams({
+    source: 'product-context',
+    listing_id: String(listingId),
+  })
   return `${path}?${search.toString()}`
 }
 
@@ -44,13 +47,6 @@ export default function ProductContextWorkspace({ listingId }: { listingId: stri
     }
   }, [listingId])
 
-  const context = useMemo(() => {
-    if (!listing) return ''
-    return [listing.description, listing.tags?.length ? `Tags: ${listing.tags.join(', ')}` : '']
-      .filter(Boolean)
-      .join('\n\n')
-  }, [listing])
-
   if (error) return <div className="mx-auto max-w-4xl p-8 text-destructive">{error}</div>
   if (!listing) return <div className="mx-auto max-w-4xl p-8 text-muted-foreground">Loading product context…</div>
 
@@ -65,31 +61,31 @@ export default function ProductContextWorkspace({ listingId }: { listingId: stri
       icon: MessageCircle,
       title: 'Buyer reply',
       description: 'Preload this product as reply context so the response can stay specific to the item.',
-      href: buildHref('/dashboard/messages', { product_info: `${listing.title} — ${listing.description}` }),
+      href: buildHref('/dashboard/messages', listing.id),
     },
     {
       icon: Share2,
       title: 'Social post',
       description: 'Carry the product description into Instagram, Pinterest or TikTok copy.',
-      href: buildHref('/dashboard/social', { product_description: context }),
+      href: buildHref('/dashboard/social', listing.id),
     },
     {
       icon: Megaphone,
       title: 'Ad copy',
       description: 'Use the same product facts as the starting brief for a paid campaign.',
-      href: buildHref('/dashboard/ad-copy', { product_name: listing.title, product_description: context }),
+      href: buildHref('/dashboard/ad-copy', listing.id),
     },
     {
       icon: Mail,
       title: 'Email campaign',
       description: 'Reuse this product context in a promotional, cart, welcome or win-back email.',
-      href: buildHref('/dashboard/email', { product_name: listing.title, product_description: context }),
+      href: buildHref('/dashboard/email', listing.id),
     },
     {
       icon: Languages,
       title: 'Translate listing copy',
       description: 'Start translation from the current title, description and tags instead of pasting them again.',
-      href: buildHref('/dashboard/translate', { text: `${listing.title}\n\n${context}` }),
+      href: buildHref('/dashboard/translate', listing.id),
     },
   ]
 
@@ -129,7 +125,7 @@ export default function ProductContextWorkspace({ listingId }: { listingId: stri
             <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <div>
               <p className="font-medium">Product facts follow the workflow</p>
-              <p className="mt-1 text-sm text-muted-foreground">Craftly passes the current listing context into the next tool. You can still edit every field before generating anything.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Craftly passes only the listing context ID in navigation, then reloads the current listing through your authenticated session. Draft content is not embedded in the URL. You can still edit every field before generating anything.</p>
             </div>
           </CardContent>
         </Card>

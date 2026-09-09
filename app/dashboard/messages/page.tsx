@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -11,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Copy, Check, Coins, Boxes } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import PlatformSelect from '@/components/dashboard/platform-select'
+import { loadProductContextFromLocation, productContextText } from '@/lib/product-context-client'
 import { useI18n } from '@/lib/i18n/client'
 
 interface MessageReplyOutput { replies: string[] }
@@ -42,11 +42,17 @@ export default function MessagesPage() {
   }, [])
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const productInfo = params.get('product_info')
-    if (params.get('source') === 'product-context' && productInfo) {
-      setFormData((current) => ({ ...current, product_info: productInfo }))
-      setContextLoaded(true)
+    let cancelled = false
+    loadProductContextFromLocation()
+      .then((listing) => {
+        if (cancelled || !listing) return
+        const productInfo = [listing.title, productContextText(listing)].filter(Boolean).join('\n\n')
+        setFormData((current) => ({ ...current, product_info: productInfo }))
+        setContextLoaded(true)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
     }
   }, [])
 
@@ -91,7 +97,7 @@ export default function MessagesPage() {
         {credits !== null && <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20"><Coins className="h-4 w-4" /><span>{credits} {t('dashboardTools.common.creditsLeft')}</span></div>}
       </div>
 
-      {contextLoaded && <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground"><Boxes className="h-4 w-4 shrink-0 text-primary" /> Product Context loaded from your Etsy listing. Add the buyer message and edit the product context if needed.</div>}
+      {contextLoaded && <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground"><Boxes className="h-4 w-4 shrink-0 text-primary" /> Product Context loaded securely from your Etsy listing. Add the buyer message and edit the product context if needed.</div>}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
@@ -104,7 +110,7 @@ export default function MessagesPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="product_info">{t('dashboardTools.messages.productInfo')}</Label>
-                <Input id="product_info" placeholder={t('dashboardTools.messages.productInfoPh')} value={formData.product_info} onChange={(e) => setFormData({ ...formData, product_info: e.target.value })} />
+                <Textarea id="product_info" placeholder={t('dashboardTools.messages.productInfoPh')} value={formData.product_info} onChange={(e) => setFormData({ ...formData, product_info: e.target.value })} rows={6} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tone">{t('dashboardTools.messages.tone')}</Label>

@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Loader2, Copy, Check, Coins, Boxes } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
+import { loadProductContextFromLocation, productContextText } from '@/lib/product-context-client'
 import { useI18n } from '@/lib/i18n/client'
 
 interface EmailResult { subject: string; preview_text: string; body: string }
@@ -40,13 +41,18 @@ export default function EmailPage() {
   }, [])
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('source') !== 'product-context') return
-    const name = params.get('product_name')
-    const description = params.get('product_description')
-    if (name) setProductName(name)
-    if (description) setProductDescription(description)
-    if (name || description) setContextLoaded(true)
+    let cancelled = false
+    loadProductContextFromLocation()
+      .then((listing) => {
+        if (cancelled || !listing) return
+        setProductName(listing.title)
+        setProductDescription(productContextText(listing))
+        setContextLoaded(true)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   const handleCopy = async (text: string, field: string) => {
@@ -88,7 +94,7 @@ export default function EmailPage() {
         {credits !== null && <div className="flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium border border-primary/20"><Coins className="h-4 w-4" /><span>{credits} {t('dashboardTools.common.creditsLeft')}</span></div>}
       </div>
 
-      {contextLoaded && <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground"><Boxes className="h-4 w-4 shrink-0 text-primary" /> Product Context loaded from your Etsy listing. Choose the email type and edit the brief before generating.</div>}
+      {contextLoaded && <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground"><Boxes className="h-4 w-4 shrink-0 text-primary" /> Product Context loaded securely from your Etsy listing. Choose the email type and edit the brief before generating.</div>}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
@@ -97,7 +103,7 @@ export default function EmailPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2"><Label>{t('dashboardTools.email.emailType')}</Label><Select value={emailType} onValueChange={setEmailType}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{EMAIL_TYPES.map((et) => <SelectItem key={et.id} value={et.id}>{t(`dashboardTools.email.${et.labelKey}`)}</SelectItem>)}</SelectContent></Select></div>
               <div className="space-y-2"><Label htmlFor="product_name">{t('dashboardTools.common.productName')}</Label><Input id="product_name" placeholder={t('dashboardTools.email.productNamePh')} value={productName} onChange={(e) => setProductName(e.target.value)} required /></div>
-              <div className="space-y-2"><Label htmlFor="product_description">{t('dashboardTools.common.productDescription')}</Label><Textarea id="product_description" placeholder={t('dashboardTools.email.productDescPh')} value={productDescription} onChange={(e) => setProductDescription(e.target.value)} required rows={5} /></div>
+              <div className="space-y-2"><Label htmlFor="product_description">{t('dashboardTools.common.productDescription')}</Label><Textarea id="product_description" placeholder={t('dashboardTools.email.productDescPh')} value={productDescription} onChange={(e) => setProductDescription(e.target.value)} required rows={7} /></div>
               <div className="space-y-2"><Label htmlFor="audience">{t('dashboardTools.email.audience')}</Label><Input id="audience" placeholder={t('dashboardTools.email.audiencePh')} value={audience} onChange={(e) => setAudience(e.target.value)} /></div>
               <Button type="submit" className="w-full" disabled={loading}>{loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('dashboardTools.email.writing')}</> : t('dashboardTools.email.generate')}</Button>
             </form>

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Boxes } from 'lucide-react';
 import CinematicBackground from '@/components/cinematic/cinematic-background';
 import PlatformSelect from '@/components/dashboard/platform-select';
+import { loadProductContextFromLocation, productContextText } from '@/lib/product-context-client';
 import { useI18n } from '@/lib/i18n/client';
 
 const LANGUAGES = ['German', 'French', 'Spanish', 'Italian', 'Japanese', 'Dutch', 'Portuguese'];
@@ -73,13 +74,18 @@ export default function TranslatePage() {
   }, []);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const contextText = params.get('text');
-    if (params.get('source') === 'product-context' && contextText) {
-      setMode('text');
-      setText(contextText);
-      setContextLoaded(true);
-    }
+    let cancelled = false;
+    loadProductContextFromLocation()
+      .then((listing) => {
+        if (cancelled || !listing) return;
+        setMode('text');
+        setText([listing.title, productContextText(listing)].filter(Boolean).join('\n\n'));
+        setContextLoaded(true);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,7 +148,7 @@ export default function TranslatePage() {
           {credits !== null && <p className="mt-2 text-sm text-muted-foreground">{credits} {t('dashboardTools.common.creditsLeft')}</p>}
         </div>
 
-        {contextLoaded && <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground"><Boxes className="h-4 w-4 shrink-0 text-primary" /> Product Context loaded from your Etsy listing. Choose a target language or edit the source text before translating.</div>}
+        {contextLoaded && <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground"><Boxes className="h-4 w-4 shrink-0 text-primary" /> Product Context loaded securely from your Etsy listing. Choose a target language or edit the source text before translating.</div>}
 
         <Card className="mb-8 rounded-xl border-border bg-card p-6">
           <CardHeader className="p-0"><CardTitle>{t('dashboardTools.translate.details')}</CardTitle><CardDescription>{t('dashboardTools.translate.detailsDesc')}</CardDescription></CardHeader>

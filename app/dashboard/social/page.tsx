@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Copy, Check, Coins, Boxes } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import { PLATFORMS } from '@/lib/platforms'
+import { loadProductContextFromLocation, productContextText } from '@/lib/product-context-client'
 import { useI18n } from '@/lib/i18n/client'
 
 const SOCIAL_PLATFORMS = PLATFORMS.filter((p) =>
@@ -52,11 +53,17 @@ export default function SocialPage() {
   }, [])
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const productDescription = params.get('product_description')
-    if (params.get('source') === 'product-context' && productDescription) {
-      setFormData((current) => ({ ...current, product_description: productDescription }))
-      setContextLoaded(true)
+    let cancelled = false
+    loadProductContextFromLocation()
+      .then((listing) => {
+        if (cancelled || !listing) return
+        const context = [listing.title, productContextText(listing)].filter(Boolean).join('\n\n')
+        setFormData((current) => ({ ...current, product_description: context }))
+        setContextLoaded(true)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
     }
   }, [])
 
@@ -127,7 +134,7 @@ export default function SocialPage() {
 
       {contextLoaded && (
         <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground">
-          <Boxes className="h-4 w-4 shrink-0 text-primary" /> Product Context loaded from your Etsy listing. Edit it below before generating if needed.
+          <Boxes className="h-4 w-4 shrink-0 text-primary" /> Product Context loaded securely from your Etsy listing. Edit it below before generating if needed.
         </div>
       )}
 
@@ -147,7 +154,7 @@ export default function SocialPage() {
                   value={formData.product_description}
                   onChange={(e) => setFormData({ ...formData, product_description: e.target.value })}
                   required
-                  className="min-h-[150px]"
+                  className="min-h-[180px]"
                 />
               </div>
               <div className="space-y-2">
