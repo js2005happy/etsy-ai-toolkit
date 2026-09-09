@@ -30,7 +30,6 @@ type Version = {
 type Suggestion = { title: string; description: string; tags: string[]; suggestions?: string }
 type ReviewField = 'title' | 'description' | 'tags'
 type ReviewFields = Record<ReviewField, boolean>
-
 type SnapshotView = { title: string; description: string; tags: string[] }
 
 const emptyAccepted: ReviewFields = { title: false, description: false, tags: false }
@@ -292,7 +291,7 @@ export default function ListingWorkspace({ listingId }: { listingId: string }) {
           {!suggestion ? (
             <div className="mt-6 rounded-2xl border border-dashed p-8 text-center">
               <p className="font-medium text-foreground">No pending AI change set.</p>
-              <p className="mt-2 text-sm text-muted-foreground">Generate suggestions to compare the current Etsy draft with Craftly's proposed title, description and tags.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Generate suggestions to compare the current Etsy draft with Craftly&apos;s proposed title, description and tags.</p>
             </div>
           ) : (
             <div className="mt-6 space-y-5">
@@ -378,7 +377,7 @@ export default function ListingWorkspace({ listingId }: { listingId: string }) {
             </div>
             <VersionPreview current={listing} snapshot={preview} />
             <div className="mt-5 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="max-w-2xl text-xs leading-relaxed text-muted-foreground">Restoring changes Craftly's local working copy first. For Etsy drafts, Craftly will block Publish until you explicitly sync the restored fields back to the Etsy draft.</p>
+              <p className="max-w-2xl text-xs leading-relaxed text-muted-foreground">Restoring changes Craftly&apos;s local working copy first. For Etsy drafts, Craftly will block Publish until you explicitly sync the restored fields back to the Etsy draft.</p>
               <Button variant="outline" onClick={() => restore(previewVersion.id)} disabled={loading}>
                 <RotateCcw className="mr-2 h-4 w-4" /> Restore this version
               </Button>
