@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import {
   BookOpen,
   Coins,
@@ -17,6 +18,7 @@ import {
   MessageCircle,
   Search,
   Share2,
+  Sparkles,
   Star,
   Target,
   Wand2,
@@ -145,6 +147,18 @@ export default function DashboardPage() {
         </header>
 
         <SellerActionQueue />
+
+        <section className="mb-8 flex flex-col gap-5 rounded-3xl border border-primary/20 bg-primary/5 p-6 md:flex-row md:items-center md:justify-between md:p-7">
+          <div className="flex items-start gap-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Sparkles className="h-5 w-5" /></div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Shop Voice</p>
+              <h2 className="mt-1 font-display text-2xl">Make every Craftly tool sound like the same shop.</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground">Save your tone, audience, preferred vocabulary, words to avoid, product conventions and brand story once. Supported writing tools reuse it automatically.</p>
+            </div>
+          </div>
+          <Button asChild variant="outline" className="shrink-0"><Link href="/dashboard/shop-voice">Tune Shop Voice</Link></Button>
+        </section>
 
         <section className="relative mb-14 overflow-hidden rounded-3xl bg-primary p-8 text-primary-foreground md:p-10">
           <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />

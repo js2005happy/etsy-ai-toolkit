@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Boxes } from 'lucide-react';
 import CinematicBackground from '@/components/cinematic/cinematic-background';
 import PlatformSelect from '@/components/dashboard/platform-select';
 import { useI18n } from '@/lib/i18n/client';
@@ -55,19 +56,30 @@ export default function TranslatePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [credits, setCredits] = useState<number | null>(null);
+  const [contextLoaded, setContextLoaded] = useState(false);
 
   const fetchCredits = async () => {
     try {
       const res = await fetch('/api/user/credits');
       if (res.ok) {
         const data = await res.json();
-        setCredits(data.credits_remaining);
+        setCredits(data.credits_remaining ?? data.credits);
       }
-    } catch (e) {}
+    } catch {}
   };
 
   useEffect(() => {
     fetchCredits();
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const contextText = params.get('text');
+    if (params.get('source') === 'product-context' && contextText) {
+      setMode('text');
+      setText(contextText);
+      setContextLoaded(true);
+    }
   }, []);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -118,9 +130,7 @@ export default function TranslatePage() {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
+  const copyToClipboard = (value: string) => navigator.clipboard.writeText(value);
 
   return (
     <div className="min-h-screen py-10">
@@ -129,105 +139,39 @@ export default function TranslatePage() {
         <div className="mb-8">
           <h1 className="font-display text-3xl font-bold text-foreground">{t('dashboardTools.translate.h1')}</h1>
           <p className="mt-2 text-muted-foreground">{t('dashboardTools.translate.sub')}</p>
-          {credits !== null && (
-            <p className="mt-2 text-sm text-muted-foreground">{credits} {t('dashboardTools.common.creditsLeft')}</p>
-          )}
+          {credits !== null && <p className="mt-2 text-sm text-muted-foreground">{credits} {t('dashboardTools.common.creditsLeft')}</p>}
         </div>
 
+        {contextLoaded && <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground"><Boxes className="h-4 w-4 shrink-0 text-primary" /> Product Context loaded from your Etsy listing. Choose a target language or edit the source text before translating.</div>}
+
         <Card className="mb-8 rounded-xl border-border bg-card p-6">
-          <CardHeader className="p-0">
-            <CardTitle>{t('dashboardTools.translate.details')}</CardTitle>
-            <CardDescription>{t('dashboardTools.translate.detailsDesc')}</CardDescription>
-          </CardHeader>
+          <CardHeader className="p-0"><CardTitle>{t('dashboardTools.translate.details')}</CardTitle><CardDescription>{t('dashboardTools.translate.detailsDesc')}</CardDescription></CardHeader>
           <CardContent className="p-0 mt-4">
             <div className="mb-5 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setMode('text')}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${mode === 'text' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
-              >
-                {t('dashboardTools.translate.text')}
-              </button>
-              <button
-                type="button"
-                onClick={() => setMode('image')}
-                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${mode === 'image' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}
-              >
-                {t('dashboardTools.translate.imagePoster')}
-              </button>
+              <button type="button" onClick={() => setMode('text')} className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${mode === 'text' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>{t('dashboardTools.translate.text')}</button>
+              <button type="button" onClick={() => setMode('image')} className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${mode === 'image' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground'}`}>{t('dashboardTools.translate.imagePoster')}</button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {mode === 'text' ? (
-                <div>
-                  <Label htmlFor="text">{t('dashboardTools.translate.textToTranslate')}</Label>
-                  <Textarea
-                    id="text"
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder={t('dashboardTools.translate.textToTranslatePh')}
-                    required
-                  />
-                </div>
+                <div><Label htmlFor="text">{t('dashboardTools.translate.textToTranslate')}</Label><Textarea id="text" value={text} onChange={(e) => setText(e.target.value)} placeholder={t('dashboardTools.translate.textToTranslatePh')} required rows={10} /></div>
               ) : (
                 <div>
                   <Label>{t('dashboardTools.translate.posterImage')}</Label>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    className="mt-2 block w-full text-sm text-muted-foreground file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-foreground hover:file:opacity-90"
-                  />
-                  {imagePreview && (
-                    <div className="mt-3 overflow-hidden rounded-lg border border-border">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={imagePreview} alt={t('dashboardTools.translate.posterPreview')} className="max-h-64 w-full bg-secondary/50 object-contain" />
-                    </div>
-                  )}
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="mt-2 block w-full text-sm text-muted-foreground file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary-foreground hover:file:opacity-90" />
+                  {imagePreview && <div className="mt-3 overflow-hidden rounded-lg border border-border"><img src={imagePreview} alt={t('dashboardTools.translate.posterPreview')} className="max-h-64 w-full bg-secondary/50 object-contain" /></div>}
                 </div>
               )}
-
               {mode === 'text' && <PlatformSelect value={platform} onChange={setPlatform} />}
-              <div>
-                <Label htmlFor="target_language">{t('dashboardTools.translate.targetLanguage')}</Label>
-                <Select value={targetLanguage} onValueChange={setTargetLanguage}>
-                  <SelectTrigger><SelectValue placeholder={t('dashboardTools.translate.selectLanguage')} /></SelectTrigger>
-                  <SelectContent>
-                    {LANGUAGES.map((l) => (
-                      <SelectItem key={l} value={l}>{l}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Button
-                type="submit"
-                disabled={loading || (mode === 'image' && !image)}
-                className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                {loading ? t('dashboardTools.translate.translating') : t('dashboardTools.translate.translate')}
-              </Button>
+              <div><Label htmlFor="target_language">{t('dashboardTools.translate.targetLanguage')}</Label><Select value={targetLanguage} onValueChange={setTargetLanguage}><SelectTrigger><SelectValue placeholder={t('dashboardTools.translate.selectLanguage')} /></SelectTrigger><SelectContent>{LANGUAGES.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent></Select></div>
+              <Button type="submit" disabled={loading || (mode === 'image' && !image)} className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90">{loading ? t('dashboardTools.translate.translating') : t('dashboardTools.translate.translate')}</Button>
             </form>
             {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
           </CardContent>
         </Card>
 
-        {extractedText && (
-          <Card className="mb-4 rounded-xl border-border bg-card p-6">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('dashboardTools.translate.extractedText')}</p>
-            <p className="text-sm text-foreground whitespace-pre-wrap">{extractedText}</p>
-          </Card>
-        )}
-
-        {translatedText && (
-          <Card className="rounded-xl border-border bg-card p-6">
-            <div className="flex justify-between items-start">
-              <p className="text-sm text-foreground whitespace-pre-wrap">{translatedText}</p>
-              <Button variant="ghost" size="sm" onClick={() => copyToClipboard(translatedText)} className="ml-2">{t('dashboardTools.common.copy')}</Button>
-            </div>
-          </Card>
-        )}
+        {extractedText && <Card className="mb-4 rounded-xl border-border bg-card p-6"><p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t('dashboardTools.translate.extractedText')}</p><p className="text-sm text-foreground whitespace-pre-wrap">{extractedText}</p></Card>}
+        {translatedText && <Card className="rounded-xl border-border bg-card p-6"><div className="flex justify-between items-start"><p className="text-sm text-foreground whitespace-pre-wrap">{translatedText}</p><Button variant="ghost" size="sm" onClick={() => copyToClipboard(translatedText)} className="ml-2">{t('dashboardTools.common.copy')}</Button></div></Card>}
       </div>
     </div>
   );

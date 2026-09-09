@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Loader2, Copy, Check, Coins } from 'lucide-react'
+import { Loader2, Copy, Check, Coins, Boxes } from 'lucide-react'
 import CinematicBackground from '@/components/cinematic/cinematic-background'
 import { PLATFORMS } from '@/lib/platforms'
 import { useI18n } from '@/lib/i18n/client'
@@ -30,6 +29,7 @@ export default function SocialPage() {
   const [error, setError] = useState<string | null>(null)
   const [creditError, setCreditError] = useState(false)
   const [copiedField, setCopiedField] = useState<'caption' | 'hashtags' | null>(null)
+  const [contextLoaded, setContextLoaded] = useState(false)
 
   const [formData, setFormData] = useState({
     product_description: '',
@@ -49,6 +49,15 @@ export default function SocialPage() {
       }
     }
     fetchCredits()
+  }, [])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const productDescription = params.get('product_description')
+    if (params.get('source') === 'product-context' && productDescription) {
+      setFormData((current) => ({ ...current, product_description: productDescription }))
+      setContextLoaded(true)
+    }
   }, [])
 
   const handleCopy = async (text: string, field: 'caption' | 'hashtags') => {
@@ -116,6 +125,12 @@ export default function SocialPage() {
         )}
       </div>
 
+      {contextLoaded && (
+        <div className="mb-6 flex items-center gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-sm text-muted-foreground">
+          <Boxes className="h-4 w-4 shrink-0 text-primary" /> Product Context loaded from your Etsy listing. Edit it below before generating if needed.
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
@@ -137,31 +152,15 @@ export default function SocialPage() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="platform">{t('dashboardTools.social.platform')}</Label>
-                <Select
-                  value={formData.platform}
-                  onValueChange={(value) => setFormData({ ...formData, platform: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('dashboardTools.social.selectPlatform')} />
-                  </SelectTrigger>
+                <Select value={formData.platform} onValueChange={(value) => setFormData({ ...formData, platform: value })}>
+                  <SelectTrigger><SelectValue placeholder={t('dashboardTools.social.selectPlatform')} /></SelectTrigger>
                   <SelectContent>
-                    {SOCIAL_PLATFORMS.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.label}
-                      </SelectItem>
-                    ))}
+                    {SOCIAL_PLATFORMS.map((p) => <SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('dashboardTools.social.generating')}
-                  </>
-                ) : (
-                  t('dashboardTools.social.generate')
-                )}
+                {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />{t('dashboardTools.social.generating')}</> : t('dashboardTools.social.generate')}
               </Button>
             </form>
           </CardContent>
@@ -172,68 +171,27 @@ export default function SocialPage() {
             <Card className="border-destructive bg-destructive/10">
               <CardContent className="pt-6">
                 <p className="text-destructive font-medium">{error}</p>
-                {creditError && (
-                  <Button variant="link" className="p-0 h-auto text-destructive mt-2" asChild>
-                    <Link href="/pricing">
-                      {t('dashboardTools.common.upgradePlan')} &rarr;
-                    </Link>
-                  </Button>
-                )}
+                {creditError && <Button variant="link" className="p-0 h-auto text-destructive mt-2" asChild><Link href="/pricing">{t('dashboardTools.common.upgradePlan')} &rarr;</Link></Button>}
               </CardContent>
             </Card>
           )}
-
-          {!result && !loading && !error && (
-            <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground">
-              <p>{t('dashboardTools.social.empty')}</p>
-            </div>
-          )}
-
-          {loading && (
-            <div className="h-full flex flex-col items-center justify-center p-12 text-center">
-              <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-lg font-medium">{t('dashboardTools.social.loading')}</p>
-            </div>
-          )}
-
+          {!result && !loading && !error && <div className="h-full flex flex-col items-center justify-center text-center p-12 border-2 border-dashed border-border rounded-xl text-muted-foreground"><p>{t('dashboardTools.social.empty')}</p></div>}
+          {loading && <div className="h-full flex flex-col items-center justify-center p-12 text-center"><Loader2 className="h-12 w-12 animate-spin text-primary mb-4" /><p className="text-lg font-medium">{t('dashboardTools.social.loading')}</p></div>}
           {result && (
             <div className="space-y-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.social.caption')}</CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleCopy(result.caption, 'caption')}
-                  >
-                    {copiedField === 'caption' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleCopy(result.caption, 'caption')}>{copiedField === 'caption' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}</Button>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-lg whitespace-pre-wrap">{result.caption}</p>
-                </CardContent>
+                <CardContent><p className="text-lg whitespace-pre-wrap">{result.caption}</p></CardContent>
               </Card>
-
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium font-display">{t('dashboardTools.social.hashtags')}</CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleCopy(result.hashtags.join(' '), 'hashtags')}
-                  >
-                    {copiedField === 'hashtags' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleCopy(result.hashtags.join(' '), 'hashtags')}>{copiedField === 'hashtags' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}</Button>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {result.hashtags.map((tag, i) => (
-                      <span key={i} className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs font-medium">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </CardContent>
+                <CardContent><div className="flex flex-wrap gap-2">{result.hashtags.map((tag, i) => <span key={i} className="px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-xs font-medium">{tag}</span>)}</div></CardContent>
               </Card>
             </div>
           )}
