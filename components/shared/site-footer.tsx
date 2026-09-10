@@ -43,75 +43,46 @@ export default function SiteFooter() {
           <div>Etsy · Shopify · Amazon · Instagram · Pinterest · TikTok · eBay</div>
         </div>
         <div className="k-badges">
+          <a href="https://dang.ai" target="_blank" rel="dofollow noopener" aria-label="Verified on DANG!">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="https://assets.dang.ai/badges/dang-verified-dark.png" alt="Verified on DANG!" width={180} height={65} />
+          </a>
+          <a href="https://www.toolpilot.ai" target="_blank" rel="dofollow noopener" aria-label="ToolPilot AI">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="https://www.toolpilot.ai/cdn/shop/files/f-w_690x151_crop_center.png" alt="ToolPilot AI" width={180} height={39} />
+          </a>
+          <a href="https://www.producthunt.com/products/etsy-ai-toolkit?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-etsy-ai-toolkit" target="_blank" rel="noopener noreferrer" aria-label="Craftly on Product Hunt">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1236192&theme=dark" alt="Craftly - Made by you. Written by AI. | Product Hunt" width={250} height={54} />
+          </a>
+          <a href="https://techbasedirectory.com/product/craftly?utm_source=featured_embed" target="_blank" rel="dofollow noopener" aria-label="Craftly on TechBase Directory">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="https://techbasedirectory.com/api/featured-embed" alt="Craftly | Techbasedirectory.com" width={200} height={60} />
+          </a>
+          <a href="https://launchnest.io/p/craftly" target="_blank" rel="noopener" aria-label="Craftly on LaunchNest">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="https://launchnest.io/badge/craftly.svg?variant=listed" alt="Craftly on LaunchNest" width={220} height={56} />
+          </a>
           <a
-            href="https://dang.ai"
+            href="https://launchfree.io/listings/craftly.html"
             target="_blank"
             rel="dofollow noopener"
-            aria-label="Verified on DANG!"
+            aria-label="Craftly listed on The Runway by LaunchFree.io"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "8px",
+              minHeight: "44px",
+              padding: "10px 14px",
+              border: "1px solid rgba(255,255,255,0.18)",
+              borderRadius: "12px",
+              textDecoration: "none",
+              fontSize: "13px",
+              fontWeight: 600,
+            }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://assets.dang.ai/badges/dang-verified-dark.png"
-              alt="Verified on DANG!"
-              width={180}
-              height={65}
-            />
-          </a>
-          <a
-            href="https://www.toolpilot.ai"
-            target="_blank"
-            rel="dofollow noopener"
-            aria-label="ToolPilot AI"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://www.toolpilot.ai/cdn/shop/files/f-w_690x151_crop_center.png"
-              alt="ToolPilot AI"
-              width={180}
-              height={39}
-            />
-          </a>
-          <a
-            href="https://www.producthunt.com/products/etsy-ai-toolkit?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-etsy-ai-toolkit"
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Craftly on Product Hunt"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1236192&theme=dark"
-              alt="Craftly - Made by you. Written by AI. | Product Hunt"
-              width={250}
-              height={54}
-            />
-          </a>
-          <a
-            href="https://techbasedirectory.com/product/craftly?utm_source=featured_embed"
-            target="_blank"
-            rel="dofollow noopener"
-            aria-label="Craftly on TechBase Directory"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://techbasedirectory.com/api/featured-embed"
-              alt="Craftly | Techbasedirectory.com"
-              width={200}
-              height={60}
-            />
-          </a>
-          <a
-            href="https://launchnest.io/p/craftly"
-            target="_blank"
-            rel="noopener"
-            aria-label="Craftly on LaunchNest"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="https://launchnest.io/badge/craftly.svg?variant=listed"
-              alt="Craftly on LaunchNest"
-              width={220}
-              height={56}
-            />
+            <span aria-hidden="true">✈</span>
+            <span>Listed on The Runway · LaunchFree.io</span>
           </a>
         </div>
       </div>
