@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { authenticateRequest, getBrandPrefs } from '@/lib/auth'
 import { withCreditCharge } from '@/lib/quota'
 import { optimizeListing } from '@/lib/openai'
+import {
+  prepareCategoryAwareOptimizerInput,
+  readinessMetadata,
+} from '@/lib/category-aware-listing'
 
 export async function POST(request: Request) {
   try {
@@ -16,16 +20,22 @@ export async function POST(request: Request) {
     }
 
     const { brandTone, brandKeywords } = await getBrandPrefs(db, userId)
-    const charged = await withCreditCharge(db, userId, 1, () => optimizeListing({
+    const prepared = prepareCategoryAwareOptimizerInput({
       current_title,
       current_description,
       current_tags,
       platform,
       brand_tone: brandTone ?? undefined,
       brand_keywords: brandKeywords ?? undefined,
-    }))
+    })
+
+    const charged = await withCreditCharge(db, userId, 1, () => optimizeListing(prepared.input))
     if (!charged.ok) return NextResponse.json({ error: 'Insufficient credits' }, { status: 403 })
-    const result = charged.value
+
+    const output = {
+      ...charged.value,
+      ...readinessMetadata(prepared.readiness),
+    }
 
     // A workspace optimization never overwrites the imported listing. Preserve
     // the current user-owned snapshot before a later reviewed apply action.
@@ -50,10 +60,10 @@ export async function POST(request: Request) {
       user_id: userId,
       tool_type: 'optimize_listing',
       input_data: body,
-      output_data: result,
+      output_data: output,
     })
 
-    return NextResponse.json(result)
+    return NextResponse.json(output)
   } catch (error) {
     console.error('Error in optimize-listing:', error)
     return NextResponse.json({ error: "We couldn't optimize this listing. Please try again." }, { status: 500 })
