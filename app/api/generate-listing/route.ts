@@ -2,6 +2,10 @@ import { NextResponse } from 'next/server'
 import { authenticateRequest, getBrandPrefs } from '@/lib/auth'
 import { withCreditCharge } from '@/lib/quota'
 import { generateListing, type ListingInput } from '@/lib/openai'
+import {
+  prepareCategoryAwareListingInput,
+  readinessMetadata,
+} from '@/lib/category-aware-listing'
 
 // Free users get their first 3 listings without spending credits, so they can
 // run the full "notes → publishable listing" loop before the monthly quota
@@ -27,11 +31,13 @@ export async function POST(request: Request) {
 
     const withinTrial = tier === 'Free' && (count ?? 0) < FREE_LISTING_TRIAL
     const { brandTone, brandKeywords } = await getBrandPrefs(db, userId)
-    const generate = () => generateListing({
+    const prepared = prepareCategoryAwareListingInput({
       ...body,
       brand_tone: brandTone ?? undefined,
       brand_keywords: brandKeywords ?? undefined,
     })
+
+    const generate = () => generateListing(prepared.input)
 
     let result
     if (withinTrial) {
@@ -44,14 +50,19 @@ export async function POST(request: Request) {
       result = charged.value
     }
 
+    const output = {
+      ...result,
+      ...readinessMetadata(prepared.readiness),
+    }
+
     await db.from('generations').insert({
       user_id: userId,
       tool_type: 'listing',
       input_data: body,
-      output_data: result,
+      output_data: output,
     })
 
-    return NextResponse.json(result)
+    return NextResponse.json(output)
   } catch (error) {
     console.error('Error in generate-listing:', error)
     return NextResponse.json({ error: "We couldn't generate this listing. Please try again." }, { status: 500 })
