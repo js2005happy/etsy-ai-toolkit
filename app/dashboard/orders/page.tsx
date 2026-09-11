@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Download, ExternalLink, Loader2, PackageCheck, RefreshCw, ShoppingBag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -18,7 +18,7 @@ export default function OrdersPage() {
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true); setError('')
     try {
       const params = new URLSearchParams()
@@ -30,9 +30,9 @@ export default function OrdersPage() {
       setSummary(data.summary || {})
     } catch (err: any) { setError(err.message || 'Unable to load orders') }
     finally { setLoading(false) }
-  }
+  }, [platform])
 
-  useEffect(() => { load() }, [platform])
+  useEffect(() => { void load() }, [load])
 
   const importOrders = async (source: 'woocommerce' | 'shopify') => {
     setImporting(source); setError(''); setNotice('')
@@ -57,7 +57,7 @@ export default function OrdersPage() {
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => importOrders('shopify')} disabled={Boolean(importing) || loading}>{importing === 'shopify' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Import Shopify</Button>
           <Button variant="outline" onClick={() => importOrders('woocommerce')} disabled={Boolean(importing) || loading}>{importing === 'woocommerce' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Import WooCommerce</Button>
-          <Button variant="outline" onClick={load} disabled={loading}>{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<RefreshCw className="mr-2 h-4 w-4" />Refresh</Button>
+          <Button variant="outline" onClick={() => void load()} disabled={loading}>{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<RefreshCw className="mr-2 h-4 w-4" />Refresh</Button>
         </div>
       </div>
 
