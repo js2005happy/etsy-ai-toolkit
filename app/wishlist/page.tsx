@@ -1,11 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Heart, Scale } from 'lucide-react'
+import { Heart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { firstMarketplaceImage, loadMarketplaceCatalog } from '@/lib/marketplace/public-catalog'
 import WishlistRemoveButton from '@/components/marketplace/wishlist-remove-button'
+import CompareSelector from '@/components/marketplace/compare-selector'
+import MobileMarketplaceNav from '@/components/marketplace/mobile-marketplace-nav'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,20 +36,10 @@ export default async function WishlistPage() {
     .filter(({ product }) => order.has(product.id))
     .sort((a, b) => Number(order.get(a.product.id) ?? 9999) - Number(order.get(b.product.id) ?? 9999))
   const staleCount = Math.max(0, saved.length - items.length)
-  const compareIds = items.slice(0, 4).map(({ product }) => product.id).join(',')
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b bg-card/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
-          <Link href="/discover" className="font-display text-xl font-bold">Craftly Marketplace</Link>
-          <div className="flex items-center gap-4 text-sm">
-            <Link href="/discover" className="text-muted-foreground hover:text-foreground">Discover</Link>
-            <Link href="/discover/sellers" className="text-muted-foreground hover:text-foreground">Sellers</Link>
-            <span className="font-medium">Saved</span>
-          </div>
-        </div>
-      </header>
+      <MobileMarketplaceNav brand="Craftly Marketplace" brandHref="/discover" />
 
       <section className="mx-auto max-w-7xl px-5 py-12">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
@@ -57,11 +49,14 @@ export default async function WishlistPage() {
             <p className="mt-3 max-w-2xl text-muted-foreground">A private shortlist of marketplace products you may want to revisit. Saving does not reserve stock or create an order.</p>
             {staleCount > 0 && <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">{staleCount} saved {staleCount === 1 ? 'item is' : 'items are'} currently unavailable or no longer public and therefore hidden.</p>}
           </div>
-          <div className="flex items-center gap-3">
-            {items.length >= 2 && <Link href={`/compare?ids=${encodeURIComponent(compareIds)}`} className="inline-flex h-10 items-center rounded-lg border px-4 text-sm font-medium hover:bg-muted"><Scale className="mr-2 h-4 w-4" />Compare first {Math.min(items.length, 4)}</Link>}
-            <p className="text-sm text-muted-foreground">{items.length} {items.length === 1 ? 'item' : 'items'}</p>
-          </div>
+          <p className="text-sm text-muted-foreground">{items.length} {items.length === 1 ? 'item' : 'items'}</p>
         </div>
+
+        {items.length >= 2 && (
+          <div className="mt-8">
+            <CompareSelector items={items.map(({ storefront, product }) => ({ id: product.id, title: product.title, seller: storefront.name }))} />
+          </div>
+        )}
 
         {items.length === 0 ? (
           <div className="mt-10 rounded-3xl border border-dashed p-12 text-center">
