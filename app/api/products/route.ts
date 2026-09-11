@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     price,
     currency: text(body.currency, 8) || 'USD',
     inventory_quantity: inventory,
-    tags: Array.isArray(body.tags) ? body.tags.map(String).map((v) => v.trim()).filter(Boolean).slice(0, 50) : [],
+    tags: Array.isArray(body.tags) ? body.tags.map(String).map((v: string) => v.trim()).filter(Boolean).slice(0, 50) : [],
     images: Array.isArray(body.images) ? body.images.slice(0, 30) : [],
     facts: body.facts && typeof body.facts === 'object' && !Array.isArray(body.facts) ? body.facts : {},
     shipping: body.shipping && typeof body.shipping === 'object' && !Array.isArray(body.shipping) ? body.shipping : {},
