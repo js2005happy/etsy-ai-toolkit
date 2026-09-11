@@ -13,20 +13,36 @@ export default function GoogleAuthButton({ label = 'Continue with Google' }: { l
     setLoading(true)
     setError(null)
     try {
+      const diagnosticResponse = await fetch('/api/auth/google/diagnostics', { cache: 'no-store' })
+      const diagnostic = await diagnosticResponse.json().catch(() => null)
+      if (!diagnosticResponse.ok || !diagnostic?.ok) {
+        console.error('Google OAuth configuration preflight failed:', diagnostic)
+        setError('Google 登录配置暂时不可用。我们已经检测到 OAuth 配置异常，请稍后重试或先使用邮箱登录。')
+        setLoading(false)
+        return
+      }
+
       const supabase = createClient()
       const redirectTo = `${window.location.origin}/auth/callback?next=/dashboard`
-      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo },
+        options: {
+          redirectTo,
+          skipBrowserRedirect: true,
+        },
       })
-      if (oauthError) {
+
+      if (oauthError || !data?.url) {
         console.error('Google OAuth start failed:', oauthError)
-        setError('Google sign-in is unavailable right now. You can continue with email instead.')
+        setError('Google 登录暂时不可用，请稍后重试或先使用邮箱登录。')
         setLoading(false)
+        return
       }
+
+      window.location.assign(data.url)
     } catch (oauthError) {
       console.error('Google OAuth start failed:', oauthError)
-      setError('Google sign-in is unavailable right now. You can continue with email instead.')
+      setError('Google 登录暂时不可用，请稍后重试或先使用邮箱登录。')
       setLoading(false)
     }
   }
