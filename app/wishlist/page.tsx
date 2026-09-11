@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { Heart } from 'lucide-react'
+import { Heart, Scale } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { firstMarketplaceImage, loadMarketplaceCatalog } from '@/lib/marketplace/public-catalog'
+import WishlistRemoveButton from '@/components/marketplace/wishlist-remove-button'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,11 +27,14 @@ export default async function WishlistPage() {
     .order('created_at', { ascending: false })
     .limit(200)
 
-  const order = new Map((savedRows ?? []).map((row: any, index: number) => [row.product_id, index]))
+  const saved = savedRows ?? []
+  const order = new Map(saved.map((row: any, index: number) => [row.product_id, index]))
   const catalog = await loadMarketplaceCatalog(500)
   const items = catalog
     .filter(({ product }) => order.has(product.id))
     .sort((a, b) => Number(order.get(a.product.id) ?? 9999) - Number(order.get(b.product.id) ?? 9999))
+  const staleCount = Math.max(0, saved.length - items.length)
+  const compareIds = items.slice(0, 4).map(({ product }) => product.id).join(',')
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -46,13 +50,17 @@ export default async function WishlistPage() {
       </header>
 
       <section className="mx-auto max-w-7xl px-5 py-12">
-        <div className="flex items-end justify-between gap-4">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Your wishlist</p>
             <h1 className="mt-2 font-display text-4xl font-bold">Saved products</h1>
             <p className="mt-3 max-w-2xl text-muted-foreground">A private shortlist of marketplace products you may want to revisit. Saving does not reserve stock or create an order.</p>
+            {staleCount > 0 && <p className="mt-2 text-sm text-amber-700 dark:text-amber-300">{staleCount} saved {staleCount === 1 ? 'item is' : 'items are'} currently unavailable or no longer public and therefore hidden.</p>}
           </div>
-          <p className="text-sm text-muted-foreground">{items.length} {items.length === 1 ? 'item' : 'items'}</p>
+          <div className="flex items-center gap-3">
+            {items.length >= 2 && <Link href={`/compare?ids=${encodeURIComponent(compareIds)}`} className="inline-flex h-10 items-center rounded-lg border px-4 text-sm font-medium hover:bg-muted"><Scale className="mr-2 h-4 w-4" />Compare first {Math.min(items.length, 4)}</Link>}
+            <p className="text-sm text-muted-foreground">{items.length} {items.length === 1 ? 'item' : 'items'}</p>
+          </div>
         </div>
 
         {items.length === 0 ? (
@@ -73,7 +81,7 @@ export default async function WishlistPage() {
                     <div className="aspect-square bg-muted bg-cover bg-center" style={image ? { backgroundImage: `url(${JSON.stringify(image).slice(1, -1)})` } : undefined}>
                       {!image && <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Product image</div>}
                     </div>
-                    <div className="p-5">
+                    <div className="p-5 pb-3">
                       <p className="text-xs font-medium uppercase tracking-wide text-primary">{product.category || product.product_type || 'Independent product'}</p>
                       <h2 className="mt-1 line-clamp-2 font-display text-lg font-semibold">{product.title}</h2>
                       <p className="mt-2 text-sm text-muted-foreground">by {storefront.name}</p>
@@ -83,6 +91,7 @@ export default async function WishlistPage() {
                       </div>
                     </div>
                   </Link>
+                  <div className="flex items-center justify-end border-t px-5 py-3"><WishlistRemoveButton productId={product.id} /></div>
                 </article>
               )
             })}
