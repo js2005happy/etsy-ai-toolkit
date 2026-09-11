@@ -45,5 +45,5 @@ export function getCommerceAdapter(id: CommercePlatformId): CommercePlatformAdap
 }
 
 export function listRegisteredCommerceAdapters(): CommercePlatformAdapter[] {
-  return [...adapterRegistry.values()]
+  return Array.from(adapterRegistry.values())
 }
