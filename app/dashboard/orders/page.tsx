@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { ExternalLink, Loader2, PackageCheck, RefreshCw, ShoppingBag } from 'lucide-react'
+import { Download, ExternalLink, Loader2, PackageCheck, RefreshCw, ShoppingBag } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
@@ -14,6 +14,8 @@ export default function OrdersPage() {
   const [summary, setSummary] = useState<Record<string, number>>({})
   const [platform, setPlatform] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [importing, setImporting] = useState(false)
+  const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
 
   const load = async () => {
@@ -32,6 +34,18 @@ export default function OrdersPage() {
 
   useEffect(() => { load() }, [platform])
 
+  const importWoo = async () => {
+    setImporting(true); setError(''); setNotice('')
+    try {
+      const res = await fetch('/api/commerce/orders/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform: 'woocommerce', days: 30 }) })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Unable to import WooCommerce orders')
+      setNotice(`Imported ${data.imported} WooCommerce orders and ${data.items} line items from the last ${data.window_days} days.`)
+      await load()
+    } catch (err: any) { setError(err.message || 'Unable to import WooCommerce orders') }
+    finally { setImporting(false) }
+  }
+
   const gross = useMemo(() => orders.reduce((total, order) => total + (Number(order.total) || 0), 0), [orders])
   const currencies = useMemo(() => Array.from(new Set(orders.map((o) => o.currency).filter(Boolean))), [orders])
   const grossLabel = currencies.length === 1 ? `${currencies[0]} ${gross.toFixed(2)}` : gross ? `${gross.toFixed(2)} mixed` : '—'
@@ -39,9 +53,12 @@ export default function OrdersPage() {
   return (
     <div className="container mx-auto max-w-7xl px-4 py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div><p className="text-sm font-medium text-primary">Commerce operations</p><h1 className="mt-1 font-display text-3xl font-bold">Order Inbox</h1><p className="mt-2 max-w-3xl text-muted-foreground">One operational view for marketplace orders. This foundation is intentionally read-first: no refund, fulfillment or financial action happens automatically.</p></div>
-        <Button variant="outline" onClick={load} disabled={loading}>{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<RefreshCw className="mr-2 h-4 w-4" />Refresh</Button>
+        <div><p className="text-sm font-medium text-primary">Commerce operations</p><h1 className="mt-1 font-display text-3xl font-bold">Order Inbox</h1><p className="mt-2 max-w-3xl text-muted-foreground">One operational view for marketplace orders. This workspace is read-first: imports never refund, fulfill, message buyers or move money.</p></div>
+        <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={importWoo} disabled={importing || loading}>{importing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Import WooCommerce</Button><Button variant="outline" onClick={load} disabled={loading}>{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<RefreshCw className="mr-2 h-4 w-4" />Refresh</Button></div>
       </div>
+
+      {notice && <div className="mb-5 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground">{notice}</div>}
+      {error && <div className="mb-5 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</div>}
 
       <div className="mb-6 grid gap-4 sm:grid-cols-3">
         <Card><CardContent className="p-5"><div className="flex items-center gap-2 text-sm text-muted-foreground"><ShoppingBag className="h-4 w-4" />Orders loaded</div><p className="mt-2 text-3xl font-semibold">{summary.total ?? orders.length}</p></CardContent></Card>
@@ -51,16 +68,15 @@ export default function OrdersPage() {
 
       <Card>
         <CardHeader className="gap-4 md:flex-row md:items-end md:justify-between">
-          <div><CardTitle>Unified orders</CardTitle><CardDescription>Imported provider orders will appear here with normalized status, totals and line items.</CardDescription></div>
+          <div><CardTitle>Unified orders</CardTitle><CardDescription>Imported provider orders appear here with normalized status, totals and line items.</CardDescription></div>
           <select value={platform} onChange={(e) => setPlatform(e.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm">
             <option value="all">All channels</option>
             {Object.entries(PLATFORM_LABELS).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
           </select>
         </CardHeader>
         <CardContent>
-          {error && <p className="mb-4 text-sm text-destructive">{error}</p>}
           {loading ? <div className="flex min-h-52 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div> : orders.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-10 text-center"><ShoppingBag className="mx-auto h-8 w-8 text-muted-foreground" /><p className="mt-3 font-medium">No imported orders yet</p><p className="mt-1 text-sm text-muted-foreground">The normalized order model is ready. Provider-specific ingestion will populate this inbox without changing external orders.</p></div>
+            <div className="rounded-xl border border-dashed p-10 text-center"><ShoppingBag className="mx-auto h-8 w-8 text-muted-foreground" /><p className="mt-3 font-medium">No imported orders yet</p><p className="mt-1 text-sm text-muted-foreground">Connect WooCommerce and use the import button above. Other marketplace ingestion adapters will join this same normalized inbox.</p></div>
           ) : <div className="space-y-3">{orders.map((order) => (
             <div key={order.id} className="rounded-xl border p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
