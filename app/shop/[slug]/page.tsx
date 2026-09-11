@@ -11,7 +11,7 @@ async function loadStorefront(slug: string) {
   const service = createServiceClient()
   const { data: storefront } = await service
     .from('storefronts')
-    .select('id,user_id,slug,name,headline,description,logo_url,banner_url,contact_email,currency,is_published,seo_title,seo_description,created_at,updated_at')
+    .select('id,user_id,slug,name,headline,description,logo_url,banner_url,contact_email,currency,is_published,seo_title,seo_description,shipping_policy,returns_policy,custom_order_policy,processing_time_text,created_at,updated_at')
     .eq('slug', slug)
     .eq('is_published', true)
     .maybeSingle()
@@ -69,6 +69,7 @@ export default async function PublicStorefrontPage({ params }: { params: Promise
   if (!loaded) notFound()
   const { storefront, products } = loaded
   const categories = Array.from(new Set(products.map((product: any) => product.category).filter(Boolean))).slice(0, 8)
+  const hasPolicies = Boolean(storefront.processing_time_text || storefront.shipping_policy || storefront.returns_policy || storefront.custom_order_policy)
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -136,6 +137,18 @@ export default async function PublicStorefrontPage({ params }: { params: Promise
               )
             })}
           </div>
+        )}
+
+        {hasPolicies && (
+          <section className="mt-12 rounded-3xl border bg-card p-6 md:p-8">
+            <div className="max-w-3xl"><p className="text-sm font-medium uppercase tracking-[0.16em] text-primary">Seller policies</p><h2 className="mt-2 font-display text-2xl font-bold">Before you contact or purchase</h2><p className="mt-2 text-sm leading-6 text-muted-foreground">The statements below are written by the seller. Craftly displays them for context but does not independently verify, enforce, or guarantee them.</p></div>
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
+              {storefront.processing_time_text && <div className="rounded-2xl border p-5"><p className="text-sm font-medium">Processing time</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{storefront.processing_time_text}</p></div>}
+              {storefront.shipping_policy && <div className="rounded-2xl border p-5"><p className="text-sm font-medium">Shipping</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{storefront.shipping_policy}</p></div>}
+              {storefront.returns_policy && <div className="rounded-2xl border p-5"><p className="text-sm font-medium">Returns & exchanges</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{storefront.returns_policy}</p></div>}
+              {storefront.custom_order_policy && <div className="rounded-2xl border p-5"><p className="text-sm font-medium">Custom orders</p><p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{storefront.custom_order_policy}</p></div>}
+            </div>
+          </section>
         )}
 
         <div className="mt-12 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">

@@ -23,12 +23,14 @@ function httpsUrl(value: unknown): string | null {
   }
 }
 
+const STORE_SELECT = 'id,slug,name,headline,description,logo_url,banner_url,contact_email,currency,is_published,seo_title,seo_description,shipping_policy,returns_policy,custom_order_policy,processing_time_text,created_at,updated_at'
+
 export async function GET(request: Request) {
   const auth = await authenticateRequest(request)
   if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status })
   const { data, error } = await auth.db
     .from('storefronts')
-    .select('id,slug,name,headline,description,logo_url,banner_url,contact_email,currency,is_published,seo_title,seo_description,created_at,updated_at,storefront_products(product_id,sort_order,is_visible)')
+    .select(`${STORE_SELECT},storefront_products(product_id,sort_order,is_visible)`)
     .eq('user_id', auth.userId)
     .maybeSingle()
   if (error) return NextResponse.json({ error: 'Unable to load storefront' }, { status: 500 })
@@ -69,13 +71,17 @@ export async function PUT(request: Request) {
     is_published: Boolean(body.is_published),
     seo_title: cleanText(body.seo_title, 70),
     seo_description: cleanText(body.seo_description, 170),
+    shipping_policy: cleanText(body.shipping_policy, 2500),
+    returns_policy: cleanText(body.returns_policy, 2500),
+    custom_order_policy: cleanText(body.custom_order_policy, 2500),
+    processing_time_text: cleanText(body.processing_time_text, 500),
     updated_at: new Date().toISOString(),
   }
 
   const { data, error } = await auth.db
     .from('storefronts')
     .upsert(payload, { onConflict: 'user_id' })
-    .select('id,slug,name,headline,description,logo_url,banner_url,contact_email,currency,is_published,seo_title,seo_description,created_at,updated_at')
+    .select(STORE_SELECT)
     .single()
   if (error) {
     if (error.code === '23505') return NextResponse.json({ error: 'That storefront URL is already taken.' }, { status: 409 })

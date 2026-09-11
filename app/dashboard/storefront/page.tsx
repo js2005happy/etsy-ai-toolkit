@@ -9,8 +9,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
+const EMPTY_STORE = { slug: '', name: '', headline: '', description: '', logo_url: '', banner_url: '', contact_email: '', currency: 'USD', is_published: false, seo_title: '', seo_description: '', shipping_policy: '', returns_policy: '', custom_order_policy: '', processing_time_text: '' }
+
 export default function StorefrontBuilderPage() {
-  const [storefront, setStorefront] = useState<any>({ slug: '', name: '', headline: '', description: '', logo_url: '', banner_url: '', contact_email: '', currency: 'USD', is_published: false, seo_title: '', seo_description: '' })
+  const [storefront, setStorefront] = useState<any>(EMPTY_STORE)
   const [products, setProducts] = useState<any[]>([])
   const [selected, setSelected] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
@@ -28,7 +30,7 @@ export default function StorefrontBuilderPage() {
     ]).then(([storeRes, productRes, selectionRes]) => {
       if (!storeRes.ok) throw new Error(storeRes.data.error || 'Unable to load storefront')
       if (!productRes.ok) throw new Error(productRes.data.error || 'Unable to load products')
-      if (storeRes.data.storefront) setStorefront(storeRes.data.storefront)
+      if (storeRes.data.storefront) setStorefront({ ...EMPTY_STORE, ...storeRes.data.storefront })
       setProducts(productRes.data.products || [])
       if (selectionRes.ok) setSelected((selectionRes.data.selected || []).filter((row: any) => row.is_visible).map((row: any) => row.product_id))
     }).catch((err) => setError(err.message || 'Unable to load storefront')).finally(() => setLoading(false))
@@ -40,8 +42,7 @@ export default function StorefrontBuilderPage() {
       const settingsRes = await fetch('/api/storefront', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(storefront) })
       const settingsData = await settingsRes.json()
       if (!settingsRes.ok) throw new Error(settingsData.error || 'Unable to save storefront')
-      setStorefront(settingsData.storefront)
-
+      setStorefront({ ...EMPTY_STORE, ...settingsData.storefront })
       const productsRes = await fetch('/api/storefront/products', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ product_ids: selected }) })
       const productsData = await productsRes.json()
       if (!productsRes.ok) throw new Error(productsData.error || 'Unable to save storefront catalog')
@@ -51,9 +52,7 @@ export default function StorefrontBuilderPage() {
   }
 
   const toggle = (id: string) => setSelected((current) => current.includes(id) ? current.filter((value) => value !== id) : [...current, id])
-
   if (loading) return <div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-9 w-9 animate-spin text-primary" /></div>
-
   const publicUrl = storefront.slug ? `/shop/${storefront.slug}` : null
 
   return (
@@ -79,6 +78,13 @@ export default function StorefrontBuilderPage() {
             <div className="space-y-2"><Label>Display currency</Label><Input value={storefront.currency || 'USD'} maxLength={8} onChange={(e) => setStorefront({ ...storefront, currency: e.target.value.toUpperCase() })} /></div>
           </CardContent></Card>
 
+          <Card><CardHeader><CardTitle>Seller policies</CardTitle><CardDescription>These statements are written by you and shown to buyers as seller-authored information. Craftly does not verify or guarantee them.</CardDescription></CardHeader><CardContent className="space-y-5">
+            <div className="space-y-2"><Label>Processing time</Label><Input maxLength={500} value={storefront.processing_time_text || ''} onChange={(e) => setStorefront({ ...storefront, processing_time_text: e.target.value })} placeholder="Usually ships within 3–5 business days" /></div>
+            <div className="space-y-2"><Label>Shipping policy</Label><Textarea maxLength={2500} rows={5} value={storefront.shipping_policy || ''} onChange={(e) => setStorefront({ ...storefront, shipping_policy: e.target.value })} placeholder="Where you ship, estimated transit times, tracking, customs…" /></div>
+            <div className="space-y-2"><Label>Returns & exchanges</Label><Textarea maxLength={2500} rows={5} value={storefront.returns_policy || ''} onChange={(e) => setStorefront({ ...storefront, returns_policy: e.target.value })} placeholder="Return window, condition requirements, exclusions…" /></div>
+            <div className="space-y-2"><Label>Custom orders</Label><Textarea maxLength={2500} rows={5} value={storefront.custom_order_policy || ''} onChange={(e) => setStorefront({ ...storefront, custom_order_policy: e.target.value })} placeholder="Whether custom orders are accepted and what buyers should expect…" /></div>
+          </CardContent></Card>
+
           <Card><CardHeader><CardTitle>Catalog products</CardTitle><CardDescription>Only Product Hub items marked ready can appear publicly.</CardDescription></CardHeader><CardContent className="space-y-3">
             {readyProducts.length === 0 ? <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">No ready products yet. Open Product Hub and mark complete products ready before adding them here.</div> : readyProducts.map((product) => <button type="button" onClick={() => toggle(product.id)} key={product.id} className={`flex w-full items-center justify-between rounded-xl border p-4 text-left transition ${selected.includes(product.id) ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted/40'}`}><div><p className="font-medium">{product.title}</p><p className="text-xs text-muted-foreground">{product.sku || product.product_type || product.category || 'Product'}</p></div><span className={`rounded-full px-2 py-1 text-xs ${selected.includes(product.id) ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>{selected.includes(product.id) ? 'Included' : 'Hidden'}</span></button>)}
           </CardContent></Card>
@@ -88,7 +94,7 @@ export default function StorefrontBuilderPage() {
 
         <div className="space-y-5">
           <Card><CardHeader><CardTitle className="flex items-center gap-2"><Store className="h-4 w-4 text-primary" />Publication</CardTitle><CardDescription>Publishing exposes only the selected ready products in the public catalog.</CardDescription></CardHeader><CardContent className="space-y-4"><label className="flex items-start gap-3 rounded-xl border p-4"><input type="checkbox" className="mt-1" checked={Boolean(storefront.is_published)} onChange={(e) => setStorefront({ ...storefront, is_published: e.target.checked })} /><span><span className="block font-medium">Publish storefront</span><span className="mt-1 block text-xs text-muted-foreground">No checkout, payment collection, escrow, or automatic order creation is enabled.</span></span></label><Button onClick={save} disabled={saving} className="w-full">{saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}Save storefront</Button></CardContent></Card>
-          <Card><CardHeader><CardTitle className="text-base">Commerce foundation</CardTitle></CardHeader><CardContent className="space-y-2 text-sm text-muted-foreground"><p>{selected.length} products selected.</p><p>Catalog uses canonical Product Hub price and inventory.</p><p>Checkout will only be added after seller-payments, tax, refund and fraud responsibilities are designed separately from Craftly SaaS billing.</p></CardContent></Card>
+          <Card><CardHeader><CardTitle className="text-base">Commerce foundation</CardTitle></CardHeader><CardContent className="space-y-2 text-sm text-muted-foreground"><p>{selected.length} products selected.</p><p>Catalog uses canonical Product Hub price and inventory.</p><p>Policies are seller-authored and informational until a separate transaction system defines enforceable checkout terms.</p></CardContent></Card>
         </div>
       </div>
     </div>
