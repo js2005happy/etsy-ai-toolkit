@@ -6,6 +6,7 @@ export const EBAY_SCOPES = [
   'https://api.ebay.com/oauth/api_scope',
   'https://api.ebay.com/oauth/api_scope/sell.inventory',
   'https://api.ebay.com/oauth/api_scope/sell.account',
+  'https://api.ebay.com/oauth/api_scope/sell.fulfillment',
 ]
 
 function config() {
@@ -122,4 +123,37 @@ export async function publishEbayOffer(accessToken: string, offerId: string): Pr
   if (!res.ok) throw new Error(data?.errors?.[0]?.message || `eBay offer publish failed (${res.status})`)
   if (!data?.listingId) throw new Error('eBay publish returned no listing id')
   return { listingId: String(data.listingId) }
+}
+
+export async function updateEbayPriceQuantity(accessToken: string, input: { sku: string; offerId: string; quantity?: number; price?: number; currency?: string }): Promise<void> {
+  const sku = input.sku.trim()
+  const offerId = input.offerId.trim()
+  if (!sku || !offerId) throw new Error('eBay synchronization requires both SKU and offer id')
+  if (input.quantity != null && (!Number.isInteger(input.quantity) || input.quantity < 0)) throw new Error('eBay quantity must be a non-negative integer')
+  if (input.price != null && (!Number.isFinite(input.price) || input.price < 0 || !input.currency)) throw new Error('eBay price sync requires a non-negative price and currency')
+  if (input.quantity == null && input.price == null) throw new Error('No eBay inventory or price change supplied')
+
+  const offer: Record<string, unknown> = { offerId }
+  if (input.quantity != null) offer.availableQuantity = input.quantity
+  if (input.price != null) offer.price = { value: input.price.toFixed(2), currency: String(input.currency).toUpperCase() }
+  const request: Record<string, unknown> = { sku, offers: [offer] }
+  if (input.quantity != null) request.shipToLocationAvailability = { quantity: input.quantity }
+
+  const res = await ebayApi(accessToken, '/sell/inventory/v1/bulk_update_price_quantity', { method: 'POST', body: JSON.stringify({ requests: [request] }) })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data?.errors?.[0]?.message || `eBay inventory synchronization failed (${res.status})`)
+  const responses = Array.isArray(data?.responses) ? data.responses : []
+  const failed = responses.find((item: any) => Number(item?.statusCode || 200) >= 400 || (Array.isArray(item?.errors) && item.errors.length))
+  if (failed) throw new Error(failed?.errors?.[0]?.message || `eBay inventory synchronization failed (${failed.statusCode})`)
+}
+
+export async function listEbayOrders(accessToken: string, options: { createdAtMin?: string; limit?: number } = {}): Promise<any[]> {
+  const limit = Math.min(Math.max(options.limit ?? 50, 1), 200)
+  const params = new URLSearchParams({ limit: String(limit), offset: '0' })
+  if (options.createdAtMin) params.set('filter', `creationdate:[${options.createdAtMin}..]`)
+  const res = await ebayApi(accessToken, `/sell/fulfillment/v1/order?${params.toString()}`, { method: 'GET' })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data?.errors?.[0]?.message || `eBay orders request failed (${res.status})`)
+  if (!Array.isArray(data?.orders)) throw new Error('eBay orders response was invalid')
+  return data.orders
 }
