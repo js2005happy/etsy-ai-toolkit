@@ -68,7 +68,9 @@ export async function POST(request: Request) {
           buyer_email: order.billing?.email || null,
           ship_to_country: order.shipping?.country || order.billing?.country || null,
           ordered_at: isoOrNull(order.date_created_gmt || order.date_created),
-          raw_summary: { number: order.number, payment_method_title: order.payment_method_title, customer_note: order.customer_note },
+          // Deliberately retain only operational metadata. Customer notes, addresses,
+          // phone numbers and raw provider payloads are not copied into Craftly.
+          raw_summary: { number: order.number, payment_method_title: order.payment_method_title },
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id,platform,external_order_id' }).select('id').single()
         if (error || !saved) { console.error('Woo order upsert failed', { externalOrderId, error }); continue }
