@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase/service'
-import { resolveShopifyConnection, resolveWooCommerceConnection } from '@/lib/commerce/connections'
+import { resolveEbayConnection, resolveShopifyConnection, resolveWooCommerceConnection } from '@/lib/commerce/connections'
 import { updateWooProductPrice, updateWooProductStock } from '@/lib/woocommerce'
 import { updateShopifyProductPrice, updateShopifyProductStock } from '@/lib/shopify'
+import { updateEbayPriceQuantity } from '@/lib/ebay'
 
 type SyncType = 'inventory' | 'price'
 
@@ -27,7 +28,7 @@ export async function POST(request: Request) {
   const service = createServiceClient()
   const { data: listing, error } = await service
     .from('platform_listings')
-    .select('id,user_id,product_id,platform,external_id,title,price,currency,inventory_quantity,status,sync_status,last_synced_at')
+    .select('id,user_id,product_id,platform,external_id,title,price,currency,inventory_quantity,attributes,status,sync_status,last_synced_at')
     .eq('id', listingId)
     .eq('user_id', auth.userId)
     .maybeSingle()
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
     ? { inventory_quantity: inventoryQuantity as number }
     : { price: price as number, currency: currency as string }
 
-  const supportedNow = listing.platform === 'woocommerce' || listing.platform === 'shopify'
+  const supportedNow = ['woocommerce', 'shopify', 'ebay'].includes(String(listing.platform))
   const preview = {
     platform: listing.platform,
     listing_id: listing.id,
@@ -100,13 +101,22 @@ export async function POST(request: Request) {
       if (!Number.isInteger(externalId) || externalId <= 0) throw new Error('Invalid WooCommerce external product id.')
       if (syncType === 'inventory') await updateWooProductStock(connection.storeUrl, connection.credentials, externalId, nextInventory)
       else await updateWooProductPrice(connection.storeUrl, connection.credentials, externalId, nextPrice)
-    } else {
+    } else if (listing.platform === 'shopify') {
       const connection = await resolveShopifyConnection(auth.userId)
       if (!connection) throw new Error('Shopify is not connected.')
       const requiredScope = syncType === 'inventory' ? 'write_inventory' : 'write_products'
       if (!connection.scopes?.includes(requiredScope)) throw new Error(`Reconnect Shopify to grant ${requiredScope} before syncing.`)
       if (syncType === 'inventory') await updateShopifyProductStock(connection.shopDomain, connection.accessToken, String(listing.external_id), nextInventory)
       else await updateShopifyProductPrice(connection.shopDomain, connection.accessToken, String(listing.external_id), nextPrice)
+    } else {
+      const connection = await resolveEbayConnection(auth.userId)
+      if (!connection) throw new Error('eBay is not connected or its publishing settings are incomplete.')
+      const sku = String(listing.attributes?.sku || '').trim()
+      const offerId = String(listing.attributes?.offerId || '').trim()
+      if (!sku || !offerId) throw new Error('This eBay listing predates sync metadata. Reconnect/recreate it through the reviewed publishing flow before external synchronization.')
+      await updateEbayPriceQuantity(connection.accessToken, syncType === 'inventory'
+        ? { sku, offerId, quantity: nextInventory }
+        : { sku, offerId, price: nextPrice, currency: nextCurrency })
     }
 
     const now = new Date().toISOString()
