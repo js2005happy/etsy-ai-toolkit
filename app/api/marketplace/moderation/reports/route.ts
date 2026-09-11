@@ -29,7 +29,32 @@ export async function GET(request: Request) {
   if (status !== 'all') query = query.eq('status', status)
   const { data, error } = await query
   if (error) return NextResponse.json({ error: 'Unable to load moderation queue.' }, { status: 500 })
-  return NextResponse.json({ reports: data ?? [] })
+
+  const reports = data ?? []
+  if (!reports.length) return NextResponse.json({ reports: [] })
+
+  const storefrontIds = Array.from(new Set(reports.map((report: any) => report.storefront_id)))
+  const productIds = Array.from(new Set(reports.map((report: any) => report.product_id)))
+
+  const [{ data: storefrontRows }, { data: productRows }, { data: duplicateRows }] = await Promise.all([
+    service.from('storefronts').select('id,slug,name').in('id', storefrontIds),
+    service.from('products').select('id,title,status').in('id', productIds),
+    service.from('marketplace_reports').select('product_id,status').in('product_id', productIds),
+  ])
+
+  const storefrontById = new Map((storefrontRows ?? []).map((row: any) => [row.id, row]))
+  const productById = new Map((productRows ?? []).map((row: any) => [row.id, row]))
+  const duplicateCount = new Map<string, number>()
+  for (const row of duplicateRows ?? []) duplicateCount.set(row.product_id, (duplicateCount.get(row.product_id) ?? 0) + 1)
+
+  return NextResponse.json({
+    reports: reports.map((report: any) => ({
+      ...report,
+      storefront: storefrontById.get(report.storefront_id) ?? null,
+      product: productById.get(report.product_id) ?? null,
+      duplicate_count: duplicateCount.get(report.product_id) ?? 1,
+    })),
+  })
 }
 
 export async function PATCH(request: Request) {
