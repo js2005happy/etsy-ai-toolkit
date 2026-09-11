@@ -1,20 +1,16 @@
-<p align="center">
-  <img src="public/banner.webp" alt="Craftly" width="1280" />
-</p>
-
 <h1 align="center">Craftly</h1>
 
 <p align="center">
-  <strong>The AI workspace for your Etsy shop.</strong><br />
-  Connect a shop, find listing issues, review AI improvements, and publish approved changes from one dashboard.
+  <strong>AI-powered seller workspace for creating, managing, and growing products across marketplaces.</strong><br />
+  Create and improve listings, generate seller content, review changes safely, and manage connected commerce workflows from one workspace.
 </p>
 
 <p align="center">
   <a href="https://craftly.world"><img src="https://img.shields.io/badge/website-craftly.world-0ea5e9" alt="website" /></a>
-  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-14-000000?logo=nextdotjs&logoColor=white" alt="Next.js 14" /></a>
+  <a href="https://nextjs.org"><img src="https://img.shields.io/badge/Next.js-16-000000?logo=nextdotjs&logoColor=white" alt="Next.js 16" /></a>
   <img src="https://img.shields.io/badge/TypeScript-5-3178c6?logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38bdf8?logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
-  <a href="https://supabase.com"><img src="https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white" alt="Supabase" /></a>
+  <img src="https://img.shields.io/badge/React-19-149eca?logo=react&logoColor=white" alt="React 19" />
+  <a href="https://supabase.com"><img src="https://img.shields.io/badge/Supabase-Auth%20%2B%20Postgres-3FCF8E?logo=supabase&logoColor=white" alt="Supabase" /></a>
   <a href="https://paddle.com"><img src="https://img.shields.io/badge/Paddle-billing-6633ee" alt="Paddle" /></a>
   <a href="https://vercel.com"><img src="https://img.shields.io/badge/Vercel-deployed-000000?logo=vercel&logoColor=white" alt="Vercel" /></a>
   <img src="https://img.shields.io/badge/MCP-server-ED8106" alt="MCP server" />
@@ -23,218 +19,183 @@
 
 ---
 
-## What it is
+## What Craftly is
 
-Craftly is a production SaaS (live at **[craftly.world](https://craftly.world)**) that helps Etsy sellers work through a listing workflow: connect, inspect, improve, review, and publish. Its AI tools support listing creation, buyer communication, SEO, translation, and product photography. The Free plan includes **10 credits + 3 generated images** with no card.
+Craftly is a production SaaS available at **[craftly.world](https://craftly.world)**. It started as an Etsy AI writing toolkit and has grown into a broader seller workspace for marketplace and commerce workflows.
 
-- **OTP sign-in** — passwordless email login via Supabase Auth (6-digit code).
-- **Credit + image quotas** — every generation is metered; tiers unlock more.
-- **4-tier billing** — powered by Paddle (checkout, customer portal, webhooks).
-- **Multi-provider AI** — a primary chat relay with automatic fallback, a vision model for image translation, and a dedicated image-generation model for posters.
-- **MCP server** — a Model Context Protocol server exposes the toolkit to Claude and other MCP clients.
-- **Batch image generation** — poster variants, per-platform sizes, or a bulk product list, all generated in one run.
-- **One-click language switcher** — flip the entire UI between 9 languages (en / de / fr / es / zh / ja / it / ko / pt) instantly.
+The current product combines:
+
+- **Listing creation and optimization** — titles, descriptions, tags, keywords, bullets, translations, and listing-health review.
+- **Seller communication** — buyer replies, review replies, email drafts, announcements, and brand-aware responses.
+- **Marketing content** — social posts, ad copy, product visuals, brand story, and localized content.
+- **Pricing assistance** — product pricing and market-aware recommendations.
+- **Seller Workspace** — a central place to review AI suggestions before publishing.
+- **Connected commerce workflows** — Etsy, Shopify, WooCommerce, and eBay are the current live-connector scope.
+- **Marketplace discovery layer** — Marketplace V1 is discovery/non-payment only. Craftly does not operate buyer checkout, escrow, payouts, refunds, chargebacks, or tax handling.
+- **MCP access** — seller tools can be accessed from compatible MCP clients using a per-user key.
+- **9-language UI** — English, German, French, Spanish, Chinese, Japanese, Italian, Korean, and Portuguese.
+
+> Amazon, TikTok Shop, Walmart, and Google should not be treated as completed live connectors unless separately implemented and authorized.
+
+## Product workflow
+
+A typical Craftly flow is:
+
+1. Connect or import product/shop data.
+2. Review listing health and identify issues worth fixing.
+3. Generate clearer titles, descriptions, tags, images, replies, or marketing content.
+4. Review every suggested change before anything is published.
+5. Publish approved work to supported connected channels or copy it elsewhere.
+
+Craftly is designed around **human review before external publishing**. AI suggestions are editable, and nothing should be treated as a guaranteed ranking, traffic, or sales outcome.
+
+## Screenshots
+
+The repository screenshots are being refreshed to match the current Craftly production UI and the September 2026 listing-review experience. The previous website hero artwork has been removed from the README so the repository does not present an outdated interface while the new screenshots are being captured.
 
 <p align="center">
-  <img src="public/dashboard.webp" alt="Dashboard — sixteen tools and credits" width="1280" />
+  <img src="public/dashboard.webp" alt="Craftly seller workspace dashboard" width="1280" />
 </p>
 
 ## Included AI tools
 
 | Tool | What it does |
 | --- | --- |
-| **Listing Generator** | SEO-optimized title, description, and 13 Etsy tags from your product details |
-| **Message Reply** | Three professional replies to any buyer message, in your brand voice |
-| **Review Reply** | Rating-aware review responses that keep your 5-star reputation intact |
-| **Social Post** | Captions + hashtags tuned for Instagram, Pinterest, TikTok, Facebook, and X |
-| **Shop Announcement** | Sales, restocks, or holiday notices written in your tone |
-| **Keyword Generator** | 15 high-volume, long-tail keywords for search and ads |
-| **Listing Optimizer** | Rewrites an existing listing and explains exactly what it improved |
-| **Pricing Advisor** | Suggested price and profit margin from your costs and competitors |
-| **Translate** | Translates listing text **or images** (vision OCR) while preserving SEO keywords |
-| **Product Image Generator** | AI-generated product posters and banners (see below) |
-| **Ad Copy** | Etsy Ads and promoted-listing copy from your product details |
-| **Brand Story** | A shop "about" section and brand narrative written in your voice |
-| **Bullets** | Benefit-led bullet points (Amazon-style) for listings and pages |
-| **Competitor Analysis** | A side-by-side breakdown of competing listings and where you stand |
-| **Email** | Customer emails and newsletter drafts in your brand voice |
-| **Global Pricing** | Per-market price suggestions with currency and localization |
+| **Listing Generator** | Creates marketplace-ready titles, descriptions, and tags from product details |
+| **Listing Optimizer** | Reviews an existing listing and drafts clearer improvements |
+| **Keyword Generator** | Produces relevant search and listing keyword ideas |
+| **Buyer Reply** | Drafts helpful responses to buyer questions |
+| **Review Reply** | Creates rating-aware review responses |
+| **Social Post** | Generates social captions and hashtags for seller channels |
+| **Shop Announcement** | Writes sales, restock, holiday, and shop notices |
+| **Pricing Advisor** | Helps reason about product pricing and margins |
+| **Translate** | Localizes listing and seller content across supported languages |
+| **Product Images** | Generates promotional product visuals and posters |
+| **Ad Copy** | Drafts paid and organic promotional copy |
+| **Brand Story** | Creates seller and shop brand narratives |
+| **Bullets** | Produces concise benefit-led product bullets |
+| **Competitor Analysis** | Helps compare listing positioning and content patterns |
+| **Email** | Drafts customer and marketing emails |
+| **Global Pricing** | Helps structure market-aware pricing ideas |
 
-### Product image generator
+## Commerce integrations
 
-Three batch modes share one backend (`POST /api/generate-images`), so you never wait for one poster at a time:
+Current reviewed live-connector scope:
 
-- **Variants** — 2–4 different-styled posters of the same product (Etsy listings want multiple images).
-- **Multi-platform** — one poster per platform size (Etsy / Instagram / Pinterest / TikTok / YouTube / Facebook).
-- **Bulk** — paste a list of products, get one poster each.
+- **Etsy** — OAuth / seller publishing workflows
+- **Shopify**
+- **WooCommerce**
+- **eBay**
 
-Each poster consumes 1 image credit, deducted per generated image.
+Commerce credentials are handled separately from public product content, and external publishing is intended to remain an explicit reviewed action.
+
+## Product image generation
+
+The image workflow supports batch generation patterns such as variants, platform-sized creatives, and bulk product poster generation. Generated image usage is metered separately from normal text-generation usage.
 
 <p align="center">
-  <img src="public/images-page.webp" alt="Product image generator — variants, multi-platform, bulk" width="1280" />
+  <img src="public/images-page.webp" alt="Craftly product image generation workspace" width="1280" />
 </p>
 
-## Pricing
+## Authentication and account model
 
-`lib/pricing.ts` is the single source of truth for plans, Paddle price IDs, credits, image credits, and prices. The pricing page, dashboard, checkout validation, and webhook plan mapping all import from that module. Do not copy pricing values into this README.
+Craftly uses Supabase Auth with SSR session handling. Supported account flows include email authentication and Google OAuth. Protected seller pages validate the authenticated user server-side before allowing access.
+
+The application stores subscription/account entitlements and seller data in Supabase Postgres with Row Level Security where applicable.
+
+## Billing
+
+Billing is powered by Paddle. Pricing, plan entitlements, credits, and image quotas are centralized in the application pricing configuration rather than duplicated across UI surfaces.
 
 ## Affiliate program
 
-Earn **30% recurring commission** on eligible paid subscriptions you refer. The program is for creators, bloggers, and newsletter authors with an audience of Etsy sellers or handmade-shop owners.
-
-- **30% recurring commission** on successful initial subscription payments and normal renewals.
-- **Monthly and annual plans** both qualify; annual commissions recur on successful annual renewals.
-- **Free tier** makes it easy for your audience to try before they buy.
-- **Ready-made assets** — tracking links, banners, and copy.
+Craftly includes an affiliate workflow for eligible partners and creators who serve Etsy, handmade, and small-commerce audiences.
 
 Apply at **[craftly.world/affiliates](https://craftly.world/affiliates)**.
 
 ## MCP server
 
-A Model Context Protocol server (`mcp-server/`) exposes the toolkit to any MCP client (Claude Code, Codex, Cursor, etc.). It ships with **dual transport** — stdio and Streamable HTTP — and **per-user API keys** (`x-mcp-key` header). Every account gets its own key, so credits and image quota are tracked per user, not shared.
+A Model Context Protocol server in `mcp-server/` exposes selected Craftly seller tools to compatible MCP clients. It supports per-user API keys so usage and credits are tied to the individual Craftly account rather than a shared service account.
 
-| Tool | Purpose |
-| --- | --- |
-| `generate_listing` | Create a listing (title / description / tags) |
-| `generate_message_reply` | Draft buyer message replies |
-| `generate_review_reply` | Respond to reviews |
-| `generate_social_post` | Write social captions + hashtags |
-| `generate_announcement` | Write shop announcements |
-| `generate_keywords` | Generate keywords |
-| `translate_listing` | Translate listing text |
-| `optimize_listing` | Improve an existing listing |
-| `generate_pricing_advice` | Suggest pricing and margins |
-| `get_credits` | Check remaining credits |
+Example tool categories include listing generation, seller replies, review responses, social content, announcements, keywords, translation, optimization, pricing assistance, and credit checks.
 
-Published to npm as [`etsy-ai-toolkit-mcp`](https://www.npmjs.com/package/etsy-ai-toolkit-mcp):
+Published package:
 
 ```bash
 npm install -g etsy-ai-toolkit-mcp
-etsy-ai-toolkit-mcp          # stdio
-etsy-ai-toolkit-mcp-http     # Streamable HTTP
+etsy-ai-toolkit-mcp
+etsy-ai-toolkit-mcp-http
 ```
-
-Or run from source:
-
-```bash
-cd mcp-server
-npm install
-npm run build
-npm start          # stdio
-npm run start:http # Streamable HTTP
-```
-
-### Connecting your client
-
-Each account gets its own MCP key — no shared service account. Grab yours in **Account → MCP connection**, then point your client at the server with that key in the `MCP_API_KEY` env var:
-
-**Claude Code / Codex** (`.mcp.json` / `config.toml`):
-
-```json
-{
-  "mcpServers": {
-    "etsy": {
-      "command": "npx",
-      "args": ["-y", "etsy-ai-toolkit-mcp"],
-      "env": { "MCP_API_KEY": "mcp_your_personal_key" }
-    }
-  }
-}
-```
-
-The server sends the key as the `x-mcp-key` header; the site maps it back to your profile and deducts credits from **your** account. Resetting the key in Account invalidates the old one immediately.
 
 ## Tech stack
 
 | Layer | Choice |
 | --- | --- |
-| Framework | Next.js 14 (App Router), TypeScript |
-| Styling | Tailwind CSS, shadcn/ui + Radix UI, Framer Motion |
-| Auth | Supabase Auth (OTP, SSR) |
-| Database | Supabase (Postgres + RLS) |
-| Billing | Paddle (checkout, portal, webhooks) |
-| Email | Resend (welcome, subscription lifecycle) |
-| AI | Multi-provider — primary chat relay with automatic fallback · vision model · image-generation model |
-| i18n | Lightweight custom framework, 9 locales (en / de / fr / es / zh / ja / it / ko / pt) |
-| MCP | @modelcontextprotocol/sdk, 10 tools |
+| Framework | Next.js 16 App Router |
+| Runtime | Node.js 22+ |
+| Language | TypeScript 5 |
+| UI | React 19, Tailwind CSS, Radix UI, Framer Motion |
+| Auth | Supabase Auth + SSR |
+| Database | Supabase Postgres + RLS |
+| Billing | Paddle |
+| Email | Resend |
+| Analytics | PostHog / web analytics integrations |
+| AI | Multi-provider text, vision, and image-generation workflows |
+| i18n | Custom lightweight framework, 9 locales |
+| MCP | Model Context Protocol server with per-user keys |
+| Hosting | Vercel |
 
 ## Getting started
 
 ### Prerequisites
 
-- Node.js 18+
-- A [Supabase](https://supabase.com) project
-- An LLM provider API key (OpenAI-compatible)
-- (Optional) Paddle + Resend keys for billing and email
+- Node.js 22+
+- A Supabase project
+- An OpenAI-compatible LLM provider key
+- Optional Paddle and Resend credentials for billing and email flows
 
-### 1. Install
+### Install
 
 ```bash
 npm install
 ```
 
-### 2. Configure environment variables
+### Configure environment variables
 
-Create a `.env.local` in the project root:
+Create `.env.local` in the project root and configure the required server and public environment variables. Use `.env.example` as the reference and never commit real production secrets.
 
-```bash
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-OPENAI_API_KEY=your_llm_api_key
-# Optional: override the LLM base URL (custom gateway/proxy)
-OPENAI_BASE_URL=
-```
+At minimum, local development requires the Supabase public URL/key and the configured AI provider credentials.
 
-### 3. Set up the database
-
-Apply the migrations in `supabase/migrations/` (SQL Editor or `supabase db push`). They cover the schema, Row Level Security, the signup trigger, and the pricing/image-quota gradient.
-
-### 4. Run
+### Run locally
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+### Quality checks
 
-## Environment variables
-
-| Variable | Required | Description |
-| --- | --- | --- |
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
-| `OPENAI_API_KEY` | Yes | Primary LLM API key |
-| `OPENAI_BASE_URL` | No | Override the LLM base URL (custom gateway/proxy) |
-| `USE_MOCK_AI` | No | Set `true` to run without calling any LLM API |
-
-> API keys are used **server-side only** and never reach the browser. Never commit `.env.local`.
+```bash
+npm run lint
+npm run build
+```
 
 ## Database
 
-Schema lives in `supabase/migrations/`:
-
-- `profiles` — one row per user; tracks `credits_remaining`, `images_remaining`, subscription status, and brand prefs
-- `generations` — a log of every AI generation
-- `handle_new_user()` trigger — auto-creates a profile row on signup (with the Free quota)
-- Row Level Security policies on all tables
+Schema and product evolution are tracked in `supabase/migrations/`. The project includes account/profile data, generation history, quota/subscription fields, commerce data, marketplace discovery data, and associated security policies/functions.
 
 ## Project structure
 
+```text
+app/                  # Next.js routes, auth callbacks, APIs, dashboard and product surfaces
+components/           # UI, seller workspace, home, auth and feature components
+lib/                  # auth, Supabase, AI, pricing, i18n and product logic
+mcp-server/           # MCP server transports and seller tools
+supabase/migrations/  # database schema and migrations
+docs/                 # product/release/technical documentation
 ```
-app/
-  (auth)/             # OTP login / signup
-  api/                # AI generation, billing, image routes
-  dashboard/          # AI tools and shop workspace pages
-components/
-  dashboard/images/   # image generator (hook, panels, result grid)
-  ui/                 # shadcn/ui primitives
-lib/
-  auth.ts             # request auth + tier/image access
-  openai.ts           # multi-provider AI + image generation
-  pricing.ts          # canonical plan, quota, and Paddle price definitions
-  email.ts            # Resend email helpers
-  i18n/               # lightweight i18n framework
-mcp-server/           # MCP server (stdio + Streamable HTTP)
-supabase/
-  migrations/         # SQL schema migrations
-```
+
+## Release boundaries
+
+Craftly's current Marketplace V1 remains a discovery/non-payment layer. It does **not** provide Craftly-operated buyer payment, escrow, seller payout, refund/chargeback handling, or tax handling.
+
+For commerce connectors, stock/price changes and publishing actions should remain explicit reviewed operations rather than silent automated mutations.

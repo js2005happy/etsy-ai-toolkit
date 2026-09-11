@@ -2,6 +2,7 @@
   "name": "etsy-ai-toolkit",
   "version": "0.1.0",
   "private": true,
+  "description": "Craftly — AI-powered seller workspace for marketplace listings, seller content, commerce workflows, and reviewed publishing.",
   "engines": {
     "node": ">=22.0.0"
   },
