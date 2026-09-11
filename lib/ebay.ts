@@ -25,42 +25,23 @@ async function timedFetch(url: string, init: RequestInit) {
 
 export function buildEbayAuthorizeUrl(state: string): string {
   const { clientId, redirectUriName } = config()
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUriName,
-    response_type: 'code',
-    scope: EBAY_SCOPES.join(' '),
-    state,
-  })
+  const params = new URLSearchParams({ client_id: clientId, redirect_uri: redirectUriName, response_type: 'code', scope: EBAY_SCOPES.join(' '), state })
   return `${EBAY_AUTH_BASE}/oauth2/authorize?${params.toString()}`
 }
 
-export type EbayTokenSet = {
-  accessToken: string
-  refreshToken?: string
-  expiresIn: number
-  refreshTokenExpiresIn?: number
-}
+export type EbayTokenSet = { accessToken: string; refreshToken?: string; expiresIn: number; refreshTokenExpiresIn?: number }
 
 async function tokenRequest(params: URLSearchParams): Promise<EbayTokenSet> {
   const { clientId, clientSecret } = config()
   const res = await timedFetch(`${EBAY_API_BASE}/identity/v1/oauth2/token`, {
     method: 'POST',
-    headers: {
-      Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers: { Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     body: params.toString(),
   })
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(data?.error_description || data?.error || `eBay token request failed (${res.status})`)
   if (!data?.access_token) throw new Error('eBay token response did not include an access token')
-  return {
-    accessToken: String(data.access_token),
-    refreshToken: data.refresh_token ? String(data.refresh_token) : undefined,
-    expiresIn: Number(data.expires_in || 7200),
-    refreshTokenExpiresIn: data.refresh_token_expires_in ? Number(data.refresh_token_expires_in) : undefined,
-  }
+  return { accessToken: String(data.access_token), refreshToken: data.refresh_token ? String(data.refresh_token) : undefined, expiresIn: Number(data.expires_in || 7200), refreshTokenExpiresIn: data.refresh_token_expires_in ? Number(data.refresh_token_expires_in) : undefined }
 }
 
 export function exchangeEbayCode(code: string): Promise<EbayTokenSet> {
@@ -74,15 +55,11 @@ export function refreshEbayToken(refreshToken: string): Promise<EbayTokenSet> {
 
 async function ebayApi(accessToken: string, path: string, init: RequestInit = {}) {
   if (!accessToken) throw new Error('Missing eBay access token')
-  return timedFetch(`${EBAY_API_BASE}${path}`, {
-    ...init,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      'Content-Language': 'en-US',
-      ...(init.headers || {}),
-    },
-  })
+  const headers = new Headers(init.headers)
+  headers.set('Authorization', `Bearer ${accessToken}`)
+  headers.set('Content-Type', 'application/json')
+  if (!headers.has('Content-Language')) headers.set('Content-Language', 'en-US')
+  return timedFetch(`${EBAY_API_BASE}${path}`, { ...init, headers })
 }
 
 export async function getEbayUser(accessToken: string): Promise<any> {
@@ -92,15 +69,7 @@ export async function getEbayUser(accessToken: string): Promise<any> {
   return data
 }
 
-export type EbayInventoryInput = {
-  sku: string
-  title: string
-  description: string
-  quantity: number
-  condition?: string
-  imageUrls?: string[]
-  aspects?: Record<string, string[]>
-}
+export type EbayInventoryInput = { sku: string; title: string; description: string; quantity: number; condition?: string; imageUrls?: string[]; aspects?: Record<string, string[]> }
 
 export async function putEbayInventoryItem(accessToken: string, input: EbayInventoryInput): Promise<void> {
   if (!input.sku?.trim()) throw new Error('eBay publishing requires a stable SKU')
@@ -108,18 +77,10 @@ export async function putEbayInventoryItem(accessToken: string, input: EbayInven
   const payload = {
     availability: { shipToLocationAvailability: { quantity: input.quantity } },
     condition: input.condition || 'NEW',
-    product: {
-      title: input.title.slice(0, 80),
-      description: input.description,
-      imageUrls: (input.imageUrls || []).filter((url) => /^https:\/\//i.test(url)).slice(0, 12),
-      aspects: input.aspects || {},
-    },
+    product: { title: input.title.slice(0, 80), description: input.description, imageUrls: (input.imageUrls || []).filter((url) => /^https:\/\//i.test(url)).slice(0, 12), aspects: input.aspects || {} },
   }
   const res = await ebayApi(accessToken, `/sell/inventory/v1/inventory_item/${encodeURIComponent(input.sku)}`, { method: 'PUT', body: JSON.stringify(payload) })
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}))
-    throw new Error(data?.errors?.[0]?.message || `eBay inventory item update failed (${res.status})`)
-  }
+  if (!res.ok) { const data = await res.json().catch(() => ({})); throw new Error(data?.errors?.[0]?.message || `eBay inventory item update failed (${res.status})`) }
 }
 
 export type EbayOfferInput = {
@@ -127,6 +88,7 @@ export type EbayOfferInput = {
   marketplaceId: string
   categoryId: string
   merchantLocationKey: string
+  quantity: number
   price: { value: string; currency: string }
   fulfillmentPolicyId: string
   paymentPolicyId: string
@@ -141,16 +103,11 @@ export async function createEbayOffer(accessToken: string, input: EbayOfferInput
       sku: input.sku,
       marketplaceId: input.marketplaceId,
       format: 'FIXED_PRICE',
-      availableQuantity: 1,
+      availableQuantity: Math.max(0, Math.trunc(input.quantity)),
       categoryId: input.categoryId,
       merchantLocationKey: input.merchantLocationKey,
-      listingDescription: undefined,
       pricingSummary: { price: input.price },
-      listingPolicies: {
-        fulfillmentPolicyId: input.fulfillmentPolicyId,
-        paymentPolicyId: input.paymentPolicyId,
-        returnPolicyId: input.returnPolicyId,
-      },
+      listingPolicies: { fulfillmentPolicyId: input.fulfillmentPolicyId, paymentPolicyId: input.paymentPolicyId, returnPolicyId: input.returnPolicyId },
     }),
   })
   const data = await res.json().catch(() => ({}))
