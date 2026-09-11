@@ -40,7 +40,7 @@ export async function GET(request: Request) {
       account_label: label,
       account_key: accountKey,
       credentials_encrypted: encrypted,
-      scopes: ['sell.inventory','sell.account'],
+      scopes: ['sell.inventory','sell.account','sell.fulfillment'],
       token_expires_at: expiresAt,
       status: 'active',
       last_error: null,
