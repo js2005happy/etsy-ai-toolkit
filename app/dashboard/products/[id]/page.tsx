@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import ProductReadinessPanel from '@/components/dashboard/product-readiness-panel'
 import ChannelDrafts from '@/components/dashboard/channel-drafts'
+import ProductAssetsEditor from '@/components/dashboard/product-assets-editor'
 
 const CATEGORIES = [
   ['generic','General Product'],['apparel','Apparel'],['jewelry','Jewelry'],['home-decor','Home Decor'],['art-print','Art & Prints'],
@@ -55,6 +56,18 @@ export default function ProductDetailPage() {
     inventoryQuantity: product.inventory_quantity == null ? undefined : Number(product.inventory_quantity),
     tags: product.tags || [],
     images: product.images || [],
+    variants: (product.product_variants || []).map((variant: any) => ({
+      id: variant.id,
+      sku: variant.sku || undefined,
+      title: variant.title,
+      options: variant.options || {},
+      price: variant.price == null ? undefined : Number(variant.price),
+      currency: variant.currency || product.currency || 'USD',
+      inventoryQuantity: variant.inventory_quantity == null ? undefined : Number(variant.inventory_quantity),
+      barcode: variant.barcode || undefined,
+      weightGrams: variant.weight_grams == null ? undefined : Number(variant.weight_grams),
+      imageUrl: variant.image_url || undefined,
+    })),
     facts: parseFacts(factsText),
     shipping: product.shipping || {},
     compliance: product.compliance || {},
@@ -89,7 +102,7 @@ export default function ProductDetailPage() {
     if (!product) return
     setSaving(true); setError(''); setSaved(false)
     try {
-      const res = await fetch(`/api/products/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...product, facts: parseFacts(factsText) }) })
+      const res = await fetch(`/api/products/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...product, facts: parseFacts(factsText), product_variants: undefined, platform_listings: undefined }) })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Unable to save product')
       setProduct({ ...product, ...data.product })
@@ -139,6 +152,15 @@ export default function ProductDetailPage() {
             <div className="space-y-2 md:col-span-2"><Label>Source description / notes</Label><Textarea rows={7} value={product.description || ''} onChange={(e) => update('description', e.target.value)} /></div>
             <div className="space-y-2 md:col-span-2"><Label>Verified facts</Label><Textarea rows={9} value={factsText} onChange={(e) => setFactsText(e.target.value)} placeholder="dimensions: 18 x 12 cm" /><p className="text-xs text-muted-foreground">One key: value fact per line. Only enter facts you can verify.</p></div>
           </CardContent></Card>
+
+          <ProductAssetsEditor
+            productId={id}
+            images={Array.isArray(product.images) ? product.images : []}
+            variants={Array.isArray(product.product_variants) ? product.product_variants : []}
+            currency={product.currency || 'USD'}
+            onImagesChange={(images) => update('images', images)}
+            onVariantsChange={(variants) => update('product_variants', variants)}
+          />
 
           <Card><CardHeader><CardTitle>Channel drafts</CardTitle><CardDescription>Every external publish is a separate reviewed action. Nothing is pushed automatically.</CardDescription></CardHeader><CardContent><ChannelDrafts listings={channelListings} onPublished={load} /></CardContent></Card>
         </div>
