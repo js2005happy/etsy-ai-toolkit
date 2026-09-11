@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import WishlistButton from '@/components/marketplace/wishlist-button'
+import ReportListingButton from '@/components/marketplace/report-listing-button'
 import { createServiceClient } from '@/lib/supabase/service'
 import { firstMarketplaceImage, loadMarketplaceCatalog, type PublicProduct, type PublicStorefront } from '@/lib/marketplace/public-catalog'
 
@@ -129,6 +130,7 @@ export default async function PublicProductPage({ params }: { params: PageParams
 
           <div className="mt-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5 text-sm leading-6 text-muted-foreground">
             Craftly is showing this seller's published catalog. Checkout, escrow, payment collection and buyer protection are not enabled in this marketplace preview. Saving a product does not reserve inventory or create an order.
+            <div className="mt-3"><ReportListingButton storefrontId={storefront.id} productId={product.id} /></div>
           </div>
         </div>
       </section>
