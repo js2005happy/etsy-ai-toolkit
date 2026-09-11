@@ -1,7 +1,7 @@
 {
   "name": "etsy-ai-toolkit-mcp",
   "version": "1.0.1",
-  "description": "Model Context Protocol (MCP) server for Craftly — 10 AI tools for Etsy sellers (stdio + Streamable HTTP)",
+  "description": "Model Context Protocol (MCP) server for Craftly — AI seller tools for marketplace listings, replies, content, translation, and pricing (stdio + Streamable HTTP)",
   "license": "MIT",
   "type": "module",
   "bin": {
@@ -25,9 +25,12 @@
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "craftly",
     "etsy",
-    "ai",
+    "shopify",
     "ecommerce",
+    "marketplace",
+    "ai",
     "listing"
   ],
   "repository": {
