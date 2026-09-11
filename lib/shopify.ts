@@ -1,9 +1,9 @@
-// Shopify Admin API client — OAuth install + product push.
+// Shopify Admin API client — OAuth install + product push/order read.
 // Credentials stay server-side in env vars. All shop domains are normalized
 // before use so user-controlled input cannot become an arbitrary fetch target.
 
 const SHOPIFY_API_VERSION = '2026-07'
-const SHOPIFY_SCOPE = 'write_products,read_products'
+const SHOPIFY_SCOPE = 'write_products,read_products,read_orders'
 const REQUEST_TIMEOUT_MS = 15_000
 
 function getShopifyClient() {
@@ -99,22 +99,13 @@ export async function createProduct(
     title: input.title.trim().slice(0, 255),
     status: input.status ?? 'draft',
   }
-  if (input.description) {
-    body.body_html = `<p>${escapeHtml(input.description).replace(/\n/g, '<br/>')}</p>`
-  }
+  if (input.description) body.body_html = `<p>${escapeHtml(input.description).replace(/\n/g, '<br/>')}</p>`
   if (input.tags?.length) body.tags = input.tags.slice(0, 50).join(', ')
   if (input.vendor) body.vendor = input.vendor.slice(0, 255)
   if (input.productType) body.product_type = input.productType.slice(0, 255)
-  if (input.images?.length) {
-    body.images = input.images
-      .filter((src) => /^https:\/\//i.test(src))
-      .slice(0, 10)
-      .map((src) => ({ src }))
-  }
+  if (input.images?.length) body.images = input.images.filter((src) => /^https:\/\//i.test(src)).slice(0, 10).map((src) => ({ src }))
 
-  const variant: Record<string, any> = {
-    price: input.price ? String(input.price) : '0.00',
-  }
+  const variant: Record<string, any> = { price: input.price ? String(input.price) : '0.00' }
   if (input.sku) variant.sku = input.sku.slice(0, 255)
   if (Number.isInteger(input.inventoryQuantity) && Number(input.inventoryQuantity) >= 0) {
     variant.inventory_management = 'shopify'
@@ -124,13 +115,9 @@ export async function createProduct(
 
   const res = await shopifyFetch(`https://${shop}/admin/api/${SHOPIFY_API_VERSION}/products.json`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Shopify-Access-Token': accessToken,
-    },
+    headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': accessToken },
     body: JSON.stringify({ product: body }),
   })
-
   const data = await res.json().catch(() => ({}))
   if (!res.ok) {
     const msg = data?.errors ? JSON.stringify(data.errors) : `Shopify product create failed (${res.status})`
@@ -138,4 +125,25 @@ export async function createProduct(
   }
   if (!data?.product?.id) throw new Error('Shopify product create returned no product id')
   return data.product
+}
+
+export async function listShopifyOrders(
+  shopInput: string,
+  accessToken: string,
+  options: { createdAtMin?: string; limit?: number } = {}
+): Promise<any[]> {
+  const shop = normalizeShopDomain(shopInput)
+  const params = new URLSearchParams({
+    status: 'any',
+    limit: String(Math.min(Math.max(options.limit ?? 50, 1), 250)),
+  })
+  if (options.createdAtMin) params.set('created_at_min', options.createdAtMin)
+  const res = await shopifyFetch(`https://${shop}/admin/api/${SHOPIFY_API_VERSION}/orders.json?${params.toString()}`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': accessToken },
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data?.errors ? JSON.stringify(data.errors) : `Shopify orders request failed (${res.status})`)
+  if (!Array.isArray(data?.orders)) throw new Error('Shopify orders response was invalid')
+  return data.orders
 }
