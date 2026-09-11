@@ -19,6 +19,7 @@ Apply migrations in order and verify each succeeds exactly once:
 2. `0017_commerce_connections.sql`
 3. `0018_commerce_operations.sql`
 4. `0019_commerce_rls_hardening.sql`
+5. `0020_security_advisor_hardening.sql`
 
 Verify:
 
@@ -27,6 +28,10 @@ Verify:
 - [ ] `commerce_connections.credentials_encrypted` is not readable by authenticated clients.
 - [ ] No anonymous write policy exists for commerce/storefront operational tables.
 - [ ] Service-role key is server-only.
+- [ ] `consume_credits` and `consume_image_credits` are executable by `service_role`, not `anon`/`authenticated`.
+- [ ] `protect_profile_columns()` has a fixed `search_path`.
+- [ ] Re-run Supabase Security Advisor after migrations and review every remaining warning.
+- [ ] Enable Supabase Auth leaked-password protection if available for the production project.
 
 ## 3. Environment gate
 
