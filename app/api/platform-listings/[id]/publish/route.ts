@@ -61,9 +61,11 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const now = new Date().toISOString()
+  const nextAttributes = result.metadata ? { ...(row.attributes || {}), ...result.metadata } : (row.attributes || {})
   await service.from('platform_listings').update({
     external_id: result.externalId || row.external_id,
     external_url: result.externalUrl || row.external_url,
+    attributes: nextAttributes,
     status: 'active',
     sync_status: 'synced',
     last_error: null,
