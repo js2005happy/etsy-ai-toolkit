@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { ArrowLeft, Archive, Loader2, Save, Sparkles } from 'lucide-react'
@@ -73,7 +73,8 @@ export default function ProductDetailPage() {
     compliance: product.compliance || {},
   }) : null, [product, factsText])
 
-  const load = async () => {
+  const load = useCallback(async () => {
+    if (!id) return
     setLoading(true); setError('')
     try {
       const res = await fetch(`/api/products/${id}`, { cache: 'no-store' })
@@ -83,9 +84,9 @@ export default function ProductDetailPage() {
       setFactsText(factsToText(data.product.facts))
     } catch (err: any) { setError(err.message || 'Unable to load product') }
     finally { setLoading(false) }
-  }
+  }, [id])
 
-  useEffect(() => { if (id) load() }, [id])
+  useEffect(() => { void load() }, [load])
 
   useEffect(() => {
     if (!canonical?.title) return
