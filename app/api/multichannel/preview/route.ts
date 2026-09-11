@@ -35,8 +35,8 @@ export async function POST(request: Request) {
       : body.facts && typeof body.facts === 'object' && !Array.isArray(body.facts)
         ? body.facts as Record<string, ProductFactValue>
         : undefined
-    const requested = Array.isArray(body.platforms) ? body.platforms.map(String) : []
-    const platforms = [...new Set(requested)].filter((id): id is CommercePlatformId => SUPPORTED.includes(id as CommercePlatformId)).slice(0, MAX_PLATFORMS)
+    const requested: string[] = Array.isArray(body.platforms) ? body.platforms.map(String) : []
+    const platforms = Array.from(new Set<string>(requested)).filter((id): id is CommercePlatformId => SUPPORTED.includes(id as CommercePlatformId)).slice(0, MAX_PLATFORMS)
 
     if (!productName || !productType) return NextResponse.json({ error: 'Product name and product type are required.' }, { status: 400 })
     if (platforms.length < 2) return NextResponse.json({ error: 'Choose at least two supported sales channels.' }, { status: 400 })
