@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import ProductReadinessPanel from '@/components/dashboard/product-readiness-panel'
+import ChannelDrafts from '@/components/dashboard/channel-drafts'
 
 const CATEGORIES = [
   ['generic','General Product'],['apparel','Apparel'],['jewelry','Jewelry'],['home-decor','Home Decor'],['art-print','Art & Prints'],
@@ -88,10 +89,7 @@ export default function ProductDetailPage() {
     if (!product) return
     setSaving(true); setError(''); setSaved(false)
     try {
-      const res = await fetch(`/api/products/${id}`, {
-        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...product, facts: parseFacts(factsText) }),
-      })
+      const res = await fetch(`/api/products/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...product, facts: parseFacts(factsText) }) })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Unable to save product')
       setProduct({ ...product, ...data.product })
@@ -142,9 +140,7 @@ export default function ProductDetailPage() {
             <div className="space-y-2 md:col-span-2"><Label>Verified facts</Label><Textarea rows={9} value={factsText} onChange={(e) => setFactsText(e.target.value)} placeholder="dimensions: 18 x 12 cm" /><p className="text-xs text-muted-foreground">One key: value fact per line. Only enter facts you can verify.</p></div>
           </CardContent></Card>
 
-          <Card><CardHeader><CardTitle>Channel drafts</CardTitle><CardDescription>Local drafts created from this canonical product. Publishing remains a separate reviewed action.</CardDescription></CardHeader><CardContent>
-            {channelListings.length === 0 ? <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">No channel drafts yet.</div> : <div className="space-y-3">{channelListings.map((listing: any) => <div key={listing.id} className="flex items-center justify-between rounded-lg border p-3"><div><p className="font-medium capitalize">{listing.platform}</p><p className="text-xs text-muted-foreground">{listing.sync_status} · {listing.status}</p></div><span className="max-w-[55%] truncate text-sm text-muted-foreground">{listing.title}</span></div>)}</div>}
-          </CardContent></Card>
+          <Card><CardHeader><CardTitle>Channel drafts</CardTitle><CardDescription>Every external publish is a separate reviewed action. Nothing is pushed automatically.</CardDescription></CardHeader><CardContent><ChannelDrafts listings={channelListings} onPublished={load} /></CardContent></Card>
         </div>
 
         <div className="space-y-5">
