@@ -14,7 +14,7 @@ export default function OrdersPage() {
   const [summary, setSummary] = useState<Record<string, number>>({})
   const [platform, setPlatform] = useState('all')
   const [loading, setLoading] = useState(true)
-  const [importing, setImporting] = useState(false)
+  const [importing, setImporting] = useState<string | null>(null)
   const [notice, setNotice] = useState('')
   const [error, setError] = useState('')
 
@@ -34,16 +34,16 @@ export default function OrdersPage() {
 
   useEffect(() => { load() }, [platform])
 
-  const importWoo = async () => {
-    setImporting(true); setError(''); setNotice('')
+  const importOrders = async (source: 'woocommerce' | 'shopify') => {
+    setImporting(source); setError(''); setNotice('')
     try {
-      const res = await fetch('/api/commerce/orders/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform: 'woocommerce', days: 30 }) })
+      const res = await fetch('/api/commerce/orders/import', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ platform: source, days: 30 }) })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Unable to import WooCommerce orders')
-      setNotice(`Imported ${data.imported} WooCommerce orders and ${data.items} line items from the last ${data.window_days} days.`)
+      if (!res.ok) throw new Error(data.error || `Unable to import ${PLATFORM_LABELS[source]} orders`)
+      setNotice(`Imported ${data.imported} ${PLATFORM_LABELS[source]} orders and ${data.items} line items from the last ${data.window_days} days.`)
       await load()
-    } catch (err: any) { setError(err.message || 'Unable to import WooCommerce orders') }
-    finally { setImporting(false) }
+    } catch (err: any) { setError(err.message || `Unable to import ${PLATFORM_LABELS[source]} orders`) }
+    finally { setImporting(null) }
   }
 
   const gross = useMemo(() => orders.reduce((total, order) => total + (Number(order.total) || 0), 0), [orders])
@@ -54,7 +54,11 @@ export default function OrdersPage() {
     <div className="container mx-auto max-w-7xl px-4 py-10">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div><p className="text-sm font-medium text-primary">Commerce operations</p><h1 className="mt-1 font-display text-3xl font-bold">Order Inbox</h1><p className="mt-2 max-w-3xl text-muted-foreground">One operational view for marketplace orders. This workspace is read-first: imports never refund, fulfill, message buyers or move money.</p></div>
-        <div className="flex flex-wrap gap-2"><Button variant="outline" onClick={importWoo} disabled={importing || loading}>{importing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Import WooCommerce</Button><Button variant="outline" onClick={load} disabled={loading}>{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<RefreshCw className="mr-2 h-4 w-4" />Refresh</Button></div>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => importOrders('shopify')} disabled={Boolean(importing) || loading}>{importing === 'shopify' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Import Shopify</Button>
+          <Button variant="outline" onClick={() => importOrders('woocommerce')} disabled={Boolean(importing) || loading}>{importing === 'woocommerce' ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Import WooCommerce</Button>
+          <Button variant="outline" onClick={load} disabled={loading}>{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}<RefreshCw className="mr-2 h-4 w-4" />Refresh</Button>
+        </div>
       </div>
 
       {notice && <div className="mb-5 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground">{notice}</div>}
@@ -68,7 +72,7 @@ export default function OrdersPage() {
 
       <Card>
         <CardHeader className="gap-4 md:flex-row md:items-end md:justify-between">
-          <div><CardTitle>Unified orders</CardTitle><CardDescription>Imported provider orders appear here with normalized status, totals and line items.</CardDescription></div>
+          <div><CardTitle>Unified orders</CardTitle><CardDescription>Imported provider orders appear here with normalized status, totals and line items. Existing Shopify connections may need reconnecting once to grant read_orders.</CardDescription></div>
           <select value={platform} onChange={(e) => setPlatform(e.target.value)} className="h-10 rounded-md border border-input bg-background px-3 text-sm">
             <option value="all">All channels</option>
             {Object.entries(PLATFORM_LABELS).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
@@ -76,7 +80,7 @@ export default function OrdersPage() {
         </CardHeader>
         <CardContent>
           {loading ? <div className="flex min-h-52 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div> : orders.length === 0 ? (
-            <div className="rounded-xl border border-dashed p-10 text-center"><ShoppingBag className="mx-auto h-8 w-8 text-muted-foreground" /><p className="mt-3 font-medium">No imported orders yet</p><p className="mt-1 text-sm text-muted-foreground">Connect WooCommerce and use the import button above. Other marketplace ingestion adapters will join this same normalized inbox.</p></div>
+            <div className="rounded-xl border border-dashed p-10 text-center"><ShoppingBag className="mx-auto h-8 w-8 text-muted-foreground" /><p className="mt-3 font-medium">No imported orders yet</p><p className="mt-1 text-sm text-muted-foreground">Connect Shopify or WooCommerce and use an import button above. Imports are read-only against the source marketplace.</p></div>
           ) : <div className="space-y-3">{orders.map((order) => (
             <div key={order.id} className="rounded-xl border p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
