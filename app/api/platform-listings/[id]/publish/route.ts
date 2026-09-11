@@ -21,6 +21,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     .maybeSingle()
   if (error) return NextResponse.json({ error: 'Unable to load channel draft' }, { status: 500 })
   if (!row) return NextResponse.json({ error: 'Channel draft not found' }, { status: 404 })
+  if (row.external_id) {
+    return NextResponse.json({ error: 'This channel draft is already linked to an external listing. Use supported sync controls instead of creating a duplicate.' }, { status: 409 })
+  }
 
   const platform = row.platform as CommercePlatformId
   const adapter = platform === 'shopify'
@@ -37,7 +40,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const listing: PlatformListing = {
     platform,
-    externalId: row.external_id || undefined,
     title: row.title,
     description: row.description || '',
     bullets: Array.isArray(row.bullets) ? row.bullets : [],
@@ -63,8 +65,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const now = new Date().toISOString()
   const nextAttributes = result.metadata ? { ...(row.attributes || {}), ...result.metadata } : (row.attributes || {})
   await service.from('platform_listings').update({
-    external_id: result.externalId || row.external_id,
-    external_url: result.externalUrl || row.external_url,
+    external_id: result.externalId,
+    external_url: result.externalUrl || null,
     attributes: nextAttributes,
     status: 'active',
     sync_status: 'synced',
