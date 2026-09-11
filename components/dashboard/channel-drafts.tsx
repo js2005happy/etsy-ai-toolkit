@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 
 const DIRECT_PUBLISH = new Set(['shopify', 'woocommerce', 'ebay'])
-const DIRECT_SYNC = new Set(['shopify', 'woocommerce'])
+const DIRECT_SYNC = new Set(['shopify', 'woocommerce', 'ebay'])
 
 export default function ChannelDrafts({ listings, onPublished }: { listings: any[]; onPublished?: () => void | Promise<void> }) {
   const [publishingId, setPublishingId] = useState<string | null>(null)
@@ -83,7 +83,7 @@ export default function ChannelDrafts({ listings, onPublished }: { listings: any
           </div>
         )
       })}
-      <p className="text-xs text-muted-foreground">Publishing supports Shopify, WooCommerce and eBay. Reviewed stock/price synchronization supports Shopify and WooCommerce and always requires a second confirmation before any external mutation. Older Shopify connections may need reconnecting once to grant inventory/order scopes. Configure connections in <Link className="text-primary hover:underline" href="/account">Account</Link>.</p>
+      <p className="text-xs text-muted-foreground">Publishing and reviewed stock/price synchronization support Shopify, WooCommerce and eBay. Every external sync requires preview + second confirmation. Existing Shopify/eBay connections may need reconnecting once for the newer inventory/order scopes. Configure connections in <Link className="text-primary hover:underline" href="/account">Account</Link>.</p>
     </div>
   )
 }
