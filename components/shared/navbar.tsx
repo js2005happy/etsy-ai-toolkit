@@ -14,8 +14,8 @@ const LINKS = [
   { key: 'howItWorks', href: '/how-it-works' },
   { key: 'examples', href: '/examples' },
   { key: 'pricing', href: '/pricing' },
+  { key: 'channels', href: '/dashboard/channels' },
   { key: 'openApp', href: '/dashboard' },
-  { key: 'shop', href: '/dashboard/shop' },
 ]
 
 export default function Navbar() {
@@ -44,8 +44,8 @@ export default function Navbar() {
   }, [])
 
   const isActive = (href: string) => {
-    if (href === '/dashboard') return pathname.startsWith('/dashboard')
-    return pathname === href
+    if (href === '/dashboard') return pathname === '/dashboard'
+    return pathname === href || pathname.startsWith(`${href}/`)
   }
 
   return (
@@ -61,7 +61,7 @@ export default function Navbar() {
               className={isActive(l.href) ? 'active' : ''}
               onClick={() => setMenuOpen(false)}
             >
-              {l.key === 'shop' ? 'My Shop' : t(`nav.${l.key}`)}
+              {l.key === 'channels' ? 'Sales Channels' : t(`nav.${l.key}`)}
             </Link>
           ))}
         </div>
