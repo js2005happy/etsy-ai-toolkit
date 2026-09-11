@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase/service'
-import { resolveShopifyConnection, resolveWooCommerceConnection } from '@/lib/commerce/connections'
+import { resolveEbayConnection, resolveShopifyConnection, resolveWooCommerceConnection } from '@/lib/commerce/connections'
 import { listWooOrders } from '@/lib/woocommerce'
 import { listShopifyOrders } from '@/lib/shopify'
+import { listEbayOrders } from '@/lib/ebay'
 
 function money(value: unknown): number | null {
   if (value == null || value === '') return null
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
 
   const body = await request.json().catch(() => ({}))
   const platform = String(body.platform || 'woocommerce')
-  if (!['woocommerce', 'shopify'].includes(platform)) {
+  if (!['woocommerce', 'shopify', 'ebay'].includes(platform)) {
     return NextResponse.json({ error: `${platform} order ingestion is not enabled yet.` }, { status: 409 })
   }
 
@@ -68,8 +69,6 @@ export async function POST(request: Request) {
           buyer_email: order.billing?.email || null,
           ship_to_country: order.shipping?.country || order.billing?.country || null,
           ordered_at: isoOrNull(order.date_created_gmt || order.date_created),
-          // Deliberately retain only operational metadata. Customer notes, addresses,
-          // phone numbers and raw provider payloads are not copied into Craftly.
           raw_summary: { number: order.number, payment_method_title: order.payment_method_title },
           updated_at: new Date().toISOString(),
         }, { onConflict: 'user_id,platform,external_order_id' }).select('id').single()
@@ -80,7 +79,7 @@ export async function POST(request: Request) {
         })))
         imported += 1
       }
-    } else {
+    } else if (platform === 'shopify') {
       const connection = await resolveShopifyConnection(auth.userId)
       if (!connection) return NextResponse.json({ error: 'Shopify is not connected.' }, { status: 409 })
       if (!connection.scopes?.includes('read_orders')) {
@@ -117,11 +116,65 @@ export async function POST(request: Request) {
         })))
         imported += 1
       }
+    } else {
+      const connection = await resolveEbayConnection(auth.userId)
+      if (!connection) return NextResponse.json({ error: 'eBay is not connected or its publishing settings are incomplete.' }, { status: 409 })
+      const remoteOrders = await listEbayOrders(connection.accessToken, { createdAtMin: after, limit: 200 })
+
+      for (const order of remoteOrders) {
+        const externalOrderId = String(order.orderId || '').trim()
+        if (!externalOrderId) continue
+        const pricing = order.pricingSummary || {}
+        const cancelState = String(order.cancelStatus?.cancelState || '')
+        const cancelled = Boolean(cancelState && !['NONE_REQUESTED', 'NONE'].includes(cancelState))
+        const shipTo = Array.isArray(order.fulfillmentStartInstructions)
+          ? order.fulfillmentStartInstructions.find((entry: any) => entry?.shippingStep?.shipTo)?.shippingStep?.shipTo
+          : null
+        const { data: saved, error } = await service.from('commerce_orders').upsert({
+          user_id: auth.userId,
+          platform: 'ebay',
+          external_order_id: externalOrderId,
+          external_url: null,
+          status: cancelled ? 'cancelled' : 'open',
+          financial_status: String(order.orderPaymentStatus || '').toLowerCase() || null,
+          fulfillment_status: String(order.orderFulfillmentStatus || '').toLowerCase() || null,
+          currency: pricing.total?.currency || pricing.priceSubtotal?.currency || null,
+          subtotal: money(pricing.priceSubtotal?.value),
+          shipping_total: money(pricing.deliveryCost?.value),
+          tax_total: money(pricing.tax?.value),
+          discount_total: money(pricing.adjustment?.value),
+          total: money(pricing.total?.value),
+          buyer_name: order.buyer?.username || null,
+          buyer_email: null,
+          ship_to_country: shipTo?.countryCode || null,
+          ordered_at: isoOrNull(order.creationDate),
+          raw_summary: { sales_record_reference: order.salesRecordReference || null, marketplace_id: order.marketplaceId || null },
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,platform,external_order_id' }).select('id').single()
+        if (error || !saved) { console.error('eBay order upsert failed', { externalOrderId, error }); continue }
+        const lines = Array.isArray(order.lineItems) ? order.lineItems : []
+        itemCount += await replaceItems(service, auth.userId, saved.id, lines.map((line: any) => {
+          const quantity = Math.max(Number(line.quantity) || 1, 1)
+          const unitPrice = money(line.lineItemCost?.value)
+          return {
+            external_line_id: line.lineItemId == null ? null : String(line.lineItemId),
+            sku: line.sku || null,
+            title: String(line.title || 'Product').slice(0, 500),
+            quantity,
+            unit_price: unitPrice,
+            total: unitPrice == null ? null : unitPrice * quantity,
+            metadata: { legacy_item_id: line.legacyItemId || null, fulfillment_status: line.lineItemFulfillmentStatus || null },
+          }
+        }))
+        imported += 1
+      }
     }
 
     return NextResponse.json({ ok: true, platform, imported, items: itemCount, window_days: days })
   } catch (error: any) {
     console.error(`${platform} order import failed`, error)
-    return NextResponse.json({ error: error.message || `${platform} order import failed.` }, { status: 400 })
+    const message = String(error?.message || `${platform} order import failed.`)
+    const needsReconnect = platform === 'ebay' && /scope|authorization|permission|403/i.test(message)
+    return NextResponse.json({ error: needsReconnect ? 'Reconnect eBay to grant the sell.fulfillment scope before importing orders.' : message }, { status: 400 })
   }
 }
