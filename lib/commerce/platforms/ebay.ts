@@ -44,7 +44,7 @@ export function createEbayCommerceAdapter(resolveConnection: EbayConnectionResol
     label: 'eBay',
     async getConnectionStatus(userId): Promise<PlatformConnectionStatus> {
       const connection = await resolveConnection(userId)
-      return connection ? { connected: true, accountLabel: connection.accountLabel, scopes: ['sell.inventory', 'sell.account'] } : { connected: false }
+      return connection ? { connected: true, accountLabel: connection.accountLabel, scopes: ['sell.inventory', 'sell.account', 'sell.fulfillment'] } : { connected: false }
     },
     validateProduct: validation,
     transformProduct: transform,
@@ -60,7 +60,7 @@ export function createEbayCommerceAdapter(resolveConnection: EbayConnectionResol
       try {
         const aspects: Record<string, string[]> = {}
         for (const [key, value] of Object.entries(listing.attributes || {})) {
-          if (['sku','categoryId','condition'].includes(key) || value == null) continue
+          if (['sku','categoryId','condition','offerId'].includes(key) || value == null) continue
           aspects[key] = Array.isArray(value) ? value.map(String) : [String(value)]
         }
         await putEbayInventoryItem(connection.accessToken, {
@@ -84,7 +84,7 @@ export function createEbayCommerceAdapter(resolveConnection: EbayConnectionResol
           returnPolicyId: connection.returnPolicyId,
         })
         const published = await publishEbayOffer(connection.accessToken, offerId)
-        return { ok: true, platform: 'ebay', externalId: published.listingId }
+        return { ok: true, platform: 'ebay', externalId: published.listingId, metadata: { offerId, sku } }
       } catch (error: any) {
         return { ok: false, platform: 'ebay', error: error.message || 'eBay publish failed' }
       }
