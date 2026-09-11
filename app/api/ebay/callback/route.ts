@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { authenticateRequest } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase/service'
 import { encryptCommerceSecret } from '@/lib/commerce/secret-box'
+import { getEbayPublishingSettings } from '@/lib/commerce/connections'
 import { exchangeEbayCode, getEbayUser } from '@/lib/ebay'
 
 export async function GET(request: Request) {
@@ -27,12 +28,30 @@ export async function GET(request: Request) {
     const identity = await getEbayUser(tokens.accessToken)
     const accountKey = String(identity?.username || identity?.userId || identity?.email || crypto.randomUUID()).slice(0, 240)
     const label = String(identity?.username || identity?.email || 'eBay seller').slice(0, 120)
+    const service = createServiceClient()
+
+    const { data: existing } = await service
+      .from('commerce_connections')
+      .select('id')
+      .eq('user_id', auth.userId)
+      .eq('platform', 'ebay')
+      .eq('account_key', accountKey)
+      .maybeSingle()
+
+    const previousSettings = existing?.id
+      ? await getEbayPublishingSettings(auth.userId, existing.id).catch(() => null)
+      : null
+
     const encrypted = encryptCommerceSecret({
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
-      marketplaceId: 'EBAY_US',
+      marketplaceId: previousSettings?.marketplaceId || 'EBAY_US',
+      merchantLocationKey: previousSettings?.merchantLocationKey || undefined,
+      fulfillmentPolicyId: previousSettings?.fulfillmentPolicyId || undefined,
+      paymentPolicyId: previousSettings?.paymentPolicyId || undefined,
+      returnPolicyId: previousSettings?.returnPolicyId || undefined,
+      categoryId: previousSettings?.categoryId || undefined,
     })
-    const service = createServiceClient()
     const expiresAt = new Date(Date.now() + Math.max(tokens.expiresIn, 60) * 1000).toISOString()
     const { error } = await service.from('commerce_connections').upsert({
       user_id: auth.userId,
