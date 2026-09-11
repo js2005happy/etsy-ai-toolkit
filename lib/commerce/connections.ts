@@ -48,6 +48,27 @@ type StoredEbaySecret = {
   categoryId?: string
 }
 
+export async function getEbayPublishingSettings(userId: string, connectionId: string) {
+  const service = createServiceClient()
+  const { data } = await service
+    .from('commerce_connections')
+    .select('credentials_encrypted')
+    .eq('id', connectionId)
+    .eq('user_id', userId)
+    .eq('platform', 'ebay')
+    .maybeSingle()
+  if (!data) return null
+  const secret = decryptCommerceSecret<StoredEbaySecret>(data.credentials_encrypted)
+  return {
+    marketplaceId: secret.marketplaceId || 'EBAY_US',
+    merchantLocationKey: secret.merchantLocationKey || '',
+    fulfillmentPolicyId: secret.fulfillmentPolicyId || '',
+    paymentPolicyId: secret.paymentPolicyId || '',
+    returnPolicyId: secret.returnPolicyId || '',
+    categoryId: secret.categoryId || '',
+  }
+}
+
 export async function resolveEbayConnection(userId: string) {
   const service = createServiceClient()
   const { data } = await service
