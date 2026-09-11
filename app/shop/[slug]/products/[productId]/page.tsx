@@ -1,8 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { BadgeCheck, Info, Mail, PackageCheck } from 'lucide-react'
 import WishlistButton from '@/components/marketplace/wishlist-button'
 import ReportListingButton from '@/components/marketplace/report-listing-button'
+import MobileMarketplaceNav from '@/components/marketplace/mobile-marketplace-nav'
 import { createServiceClient } from '@/lib/supabase/service'
 import { firstMarketplaceImage, loadMarketplaceCatalog, type PublicProduct, type PublicStorefront } from '@/lib/marketplace/public-catalog'
 
@@ -14,12 +16,12 @@ async function loadPublicProduct(slug: string, productId: string) {
   const service = createServiceClient()
   const { data: storefrontRow } = await service
     .from('storefronts')
-    .select('id,user_id,slug,name,headline,description,logo_url,currency,contact_email')
+    .select('id,user_id,slug,name,headline,description,logo_url,currency,contact_email,created_at')
     .eq('slug', slug)
     .eq('is_published', true)
     .maybeSingle()
 
-  const storefront = storefrontRow as (PublicStorefront & { contact_email?: string | null }) | null
+  const storefront = storefrontRow as (PublicStorefront & { contact_email?: string | null; created_at?: string | null }) | null
   if (!storefront) return null
 
   const { data: membership } = await service
@@ -69,22 +71,21 @@ export default async function PublicProductPage({ params }: { params: PageParams
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b bg-card/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
-          <Link href={`/shop/${storefront.slug}`} className="font-display text-xl font-bold">{storefront.name}</Link>
-          <div className="flex items-center gap-4 text-sm">
-            <Link href="/discover" className="text-muted-foreground hover:text-foreground">Discover</Link>
-            <Link href="/discover/sellers" className="text-muted-foreground hover:text-foreground">Sellers</Link>
-            <Link href="/wishlist" className="text-muted-foreground hover:text-foreground">Saved</Link>
-            <Link href="/" className="text-muted-foreground hover:text-foreground">Craftly</Link>
-          </div>
-        </div>
-      </header>
+      <MobileMarketplaceNav brand={storefront.name} brandHref={`/shop/${storefront.slug}`} />
 
       <section className="mx-auto grid max-w-7xl gap-10 px-5 py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:py-16">
         <div>
           <div className="aspect-square overflow-hidden rounded-3xl border bg-muted bg-cover bg-center" style={image ? { backgroundImage: `url(${JSON.stringify(image).slice(1, -1)})` } : undefined}>
             {!image && <div className="flex h-full items-center justify-center text-muted-foreground">Product image</div>}
+          </div>
+          <div className="mt-5 rounded-2xl border bg-card p-5">
+            <div className="flex items-center gap-2"><Info className="h-4 w-4 text-primary" /><p className="text-sm font-medium">Marketplace trust context</p></div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
+              <div><p className="text-xs text-muted-foreground">Public product details</p><p className="mt-1 font-medium">{facts.length} structured {facts.length === 1 ? 'fact' : 'facts'}</p></div>
+              <div><p className="text-xs text-muted-foreground">Inventory signal</p><p className="mt-1 font-medium">{available ? 'Currently available' : 'Seller marks sold out'}</p></div>
+              <div><p className="text-xs text-muted-foreground">Seller contact</p><p className="mt-1 font-medium">{storefront.contact_email ? 'Provided' : 'Not provided'}</p></div>
+            </div>
+            <p className="mt-4 text-xs leading-5 text-muted-foreground">These are evidence signals from the seller's current Craftly data. They are not an identity, authenticity, quality, delivery, or legal-compliance verification badge.</p>
           </div>
         </div>
 
@@ -112,9 +113,9 @@ export default async function PublicProductPage({ params }: { params: PageParams
 
           {facts.length > 0 && (
             <div className="mt-8 rounded-2xl border bg-card p-5">
-              <h2 className="font-display text-lg font-semibold">Verified product details</h2>
+              <div className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-primary" /><h2 className="font-display text-lg font-semibold">Seller-provided product details</h2></div>
               <dl className="mt-4 divide-y">
-                {facts.map(([key, value]) => <div key={key} className="grid grid-cols-[140px_1fr] gap-4 py-3 text-sm"><dt className="text-muted-foreground">{key}</dt><dd className="font-medium">{Array.isArray(value) ? value.join(', ') : String(value ?? '')}</dd></div>)}
+                {facts.map(([key, value]) => <div key={key} className="grid grid-cols-[120px_1fr] gap-4 py-3 text-sm sm:grid-cols-[140px_1fr]"><dt className="text-muted-foreground">{key}</dt><dd className="break-words font-medium">{Array.isArray(value) ? value.join(', ') : String(value ?? '')}</dd></div>)}
               </dl>
             </div>
           )}
@@ -123,14 +124,14 @@ export default async function PublicProductPage({ params }: { params: PageParams
             <p className="font-medium">Seller information</p>
             {storefront.description && <p className="mt-2 text-muted-foreground">{storefront.description}</p>}
             <div className="mt-3 flex flex-wrap gap-3">
-              <Link href={`/shop/${storefront.slug}`} className="font-medium text-primary hover:underline">Visit {storefront.name}</Link>
-              {storefront.contact_email && <a href={`mailto:${storefront.contact_email}`} className="font-medium text-primary hover:underline">Contact seller</a>}
+              <Link href={`/shop/${storefront.slug}`} className="font-medium text-primary hover:underline"><PackageCheck className="mr-1 inline h-4 w-4" />Visit storefront</Link>
+              {storefront.contact_email && <a href={`mailto:${storefront.contact_email}`} className="font-medium text-primary hover:underline"><Mail className="mr-1 inline h-4 w-4" />Contact seller</a>}
             </div>
+            <div className="mt-4 border-t pt-4"><ReportListingButton storefrontId={storefront.id} productId={product.id} /></div>
           </div>
 
           <div className="mt-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5 text-sm leading-6 text-muted-foreground">
             Craftly is showing this seller's published catalog. Checkout, escrow, payment collection and buyer protection are not enabled in this marketplace preview. Saving a product does not reserve inventory or create an order.
-            <div className="mt-3"><ReportListingButton storefrontId={storefront.id} productId={product.id} /></div>
           </div>
         </div>
       </section>

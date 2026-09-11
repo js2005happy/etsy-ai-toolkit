@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { CalendarDays, Mail, PackageCheck, ShieldCheck } from 'lucide-react'
+import MobileMarketplaceNav from '@/components/marketplace/mobile-marketplace-nav'
 import { createServiceClient } from '@/lib/supabase/service'
 
 export const dynamic = 'force-dynamic'
@@ -9,7 +11,7 @@ async function loadStorefront(slug: string) {
   const service = createServiceClient()
   const { data: storefront } = await service
     .from('storefronts')
-    .select('id,user_id,slug,name,headline,description,logo_url,banner_url,contact_email,currency,is_published,seo_title,seo_description')
+    .select('id,user_id,slug,name,headline,description,logo_url,banner_url,contact_email,currency,is_published,seo_title,seo_description,created_at,updated_at')
     .eq('slug', slug)
     .eq('is_published', true)
     .maybeSingle()
@@ -44,6 +46,12 @@ function firstImage(product: any): string | null {
   return null
 }
 
+function formatMonth(value: string | null | undefined) {
+  if (!value) return 'Not available'
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? 'Not available' : new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric' }).format(date)
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
   const loaded = await loadStorefront(slug)
@@ -64,17 +72,7 @@ export default async function PublicStorefrontPage({ params }: { params: Promise
 
   return (
     <main className="min-h-screen bg-background text-foreground">
-      <header className="border-b bg-card/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
-          <Link href={`/shop/${storefront.slug}`} className="font-display text-xl font-bold">{storefront.name}</Link>
-          <div className="flex items-center gap-4 text-sm">
-            <Link href="/discover" className="text-muted-foreground hover:text-foreground">Discover</Link>
-            <Link href="/discover/sellers" className="text-muted-foreground hover:text-foreground">Sellers</Link>
-            <Link href="/wishlist" className="text-muted-foreground hover:text-foreground">Saved</Link>
-            <Link href="/" className="text-xs font-medium text-muted-foreground hover:text-foreground">Powered by Craftly</Link>
-          </div>
-        </div>
-      </header>
+      <MobileMarketplaceNav brand={storefront.name} brandHref={`/shop/${storefront.slug}`} />
 
       <section className="relative overflow-hidden border-b bg-muted/30">
         {storefront.banner_url && /^https:\/\//i.test(storefront.banner_url) && (
@@ -95,7 +93,17 @@ export default async function PublicStorefrontPage({ params }: { params: Promise
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-5 py-12">
+      <section className="mx-auto max-w-7xl px-5 py-8">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-2xl border bg-card p-4"><CalendarDays className="h-5 w-5 text-primary" /><p className="mt-3 text-xs uppercase tracking-wide text-muted-foreground">Storefront since</p><p className="mt-1 font-medium">{formatMonth(storefront.created_at)}</p></div>
+          <div className="rounded-2xl border bg-card p-4"><PackageCheck className="h-5 w-5 text-primary" /><p className="mt-3 text-xs uppercase tracking-wide text-muted-foreground">Public catalog</p><p className="mt-1 font-medium">{products.length} ready {products.length === 1 ? 'product' : 'products'}</p></div>
+          <div className="rounded-2xl border bg-card p-4"><Mail className="h-5 w-5 text-primary" /><p className="mt-3 text-xs uppercase tracking-wide text-muted-foreground">Seller contact</p><p className="mt-1 font-medium">{storefront.contact_email ? 'Contact method provided' : 'Not provided'}</p></div>
+          <div className="rounded-2xl border bg-card p-4"><ShieldCheck className="h-5 w-5 text-primary" /><p className="mt-3 text-xs uppercase tracking-wide text-muted-foreground">Trust note</p><p className="mt-1 font-medium">Evidence shown, not a verification badge</p></div>
+        </div>
+        <p className="mt-3 text-xs leading-5 text-muted-foreground">These signals describe data currently present in Craftly. They do not mean Craftly has independently verified identity, product quality, delivery performance, or legal compliance.</p>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-5 py-12 pt-4">
         <div className="mb-7 flex items-end justify-between gap-4">
           <div><p className="text-sm font-medium text-primary">Catalog</p><h2 className="mt-1 font-display text-2xl font-bold">Products</h2></div>
           <p className="text-sm text-muted-foreground">{products.length} {products.length === 1 ? 'item' : 'items'}</p>
