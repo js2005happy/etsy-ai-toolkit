@@ -54,7 +54,7 @@ function requiredCandidates(requiredFact: string): string[] {
   const normalized = normalize(requiredFact)
   const aliases = FACT_ALIASES[normalized] ?? []
   const slashParts = requiredFact.split('/').map(normalize).filter(Boolean)
-  return [...new Set([normalized, ...aliases.map(normalize), ...slashParts])]
+  return Array.from(new Set([normalized, ...aliases.map(normalize), ...slashParts]))
 }
 
 function factExists(product: CanonicalProduct, requiredFact: string): boolean {
