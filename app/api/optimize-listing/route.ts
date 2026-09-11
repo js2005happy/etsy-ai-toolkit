@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { authenticateRequest, getBrandPrefs } from '@/lib/auth'
 import { withCreditCharge } from '@/lib/quota'
-import { optimizeListing } from '@/lib/openai'
+import { optimizeCategoryAwareListing } from '@/lib/category-aware-generation'
 
 export async function POST(request: Request) {
   try {
@@ -10,16 +10,20 @@ export async function POST(request: Request) {
     const { db, userId } = auth
 
     const body = await request.json()
-    const { current_title, current_description, current_tags, platform, listing_id } = body
+    const { current_title, current_description, current_tags, platform, listing_id, product_type, material, style, facts } = body
     if (!current_title && !current_description && !current_tags) {
       return NextResponse.json({ error: 'At least one field is required' }, { status: 400 })
     }
 
     const { brandTone, brandKeywords } = await getBrandPrefs(db, userId)
-    const charged = await withCreditCharge(db, userId, 1, () => optimizeListing({
+    const charged = await withCreditCharge(db, userId, 1, () => optimizeCategoryAwareListing({
       current_title,
       current_description,
       current_tags,
+      product_type,
+      material,
+      style,
+      facts,
       platform,
       brand_tone: brandTone ?? undefined,
       brand_keywords: brandKeywords ?? undefined,
@@ -27,8 +31,6 @@ export async function POST(request: Request) {
     if (!charged.ok) return NextResponse.json({ error: 'Insufficient credits' }, { status: 403 })
     const result = charged.value
 
-    // A workspace optimization never overwrites the imported listing. Preserve
-    // the current user-owned snapshot before a later reviewed apply action.
     if (Number.isSafeInteger(Number(listing_id))) {
       const { data: listing } = await db
         .from('etsy_listings')

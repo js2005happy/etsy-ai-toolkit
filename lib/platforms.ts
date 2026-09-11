@@ -7,14 +7,12 @@ export interface Platform {
   id: string
   label: string
   short: string
-  // SEO / copywriting rules
   titleRule: string
   titleMax: number
   descriptionRule: string
   bulletsRule: string
   keywordRule: string
   tone: string
-  // standard product-image size for the marketplace
   imageSize: string
   imageW: number
   imageH: number
@@ -62,6 +60,20 @@ export const PLATFORMS: Platform[] = [
     imageSize: '2048x2048',
     imageW: 2048,
     imageH: 2048,
+  },
+  {
+    id: 'woocommerce',
+    label: 'WooCommerce',
+    short: 'Woo',
+    titleRule: 'Keep the product title readable and SEO-focused, usually 50-70 characters. Put the primary product phrase near the front without keyword stuffing.',
+    titleMax: 70,
+    descriptionRule: 'Use a strong short description for the purchase decision, then a structured long description with benefits, specs, care, compatibility, and shipping facts when verified.',
+    bulletsRule: 'Use 3-6 concise benefit/spec bullets that can map cleanly into a WooCommerce short description or product highlights section.',
+    keywordRule: 'Optimize for Google and the merchant site taxonomy: one primary keyword, supporting long-tail phrases, accurate categories, attributes, and product schema.',
+    tone: 'Brand-owned, clear, conversion-focused, and SEO-natural. Match the store voice rather than a marketplace voice.',
+    imageSize: '2000x2000',
+    imageW: 2000,
+    imageH: 2000,
   },
   {
     id: 'ebay',

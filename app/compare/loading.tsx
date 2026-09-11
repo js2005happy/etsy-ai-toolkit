@@ -1,0 +1,3 @@
+export default function CompareLoading() {
+  return <main className="min-h-screen bg-background text-foreground"><div className="border-b bg-card/80"><div className="mx-auto max-w-7xl px-5 py-4"><div className="h-7 w-52 animate-pulse rounded bg-muted" /></div></div><section className="mx-auto max-w-7xl px-5 py-12"><div className="h-4 w-24 animate-pulse rounded bg-muted" /><div className="mt-4 h-10 w-72 animate-pulse rounded bg-muted" /><div className="mt-10 overflow-hidden rounded-2xl border bg-card"><div className="grid min-w-[760px] grid-cols-4 gap-px bg-border">{Array.from({ length: 12 }).map((_, i) => <div key={i} className="h-24 animate-pulse bg-card p-4"><div className="h-4 rounded bg-muted" /></div>)}</div></div></section></main>
+}
