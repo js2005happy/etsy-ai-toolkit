@@ -50,12 +50,13 @@ export function createEbayCommerceAdapter(resolveConnection: EbayConnectionResol
     transformProduct: transform,
     async publish(userId, listing) {
       const connection = await resolveConnection(userId)
-      if (!connection) return { ok: false, platform: 'ebay', error: 'eBay is not connected.' }
+      if (!connection) return { ok: false, platform: 'ebay', error: 'eBay is not connected or its publishing policies are incomplete.' }
       const sku = String(listing.attributes?.sku || '').trim()
       const categoryId = String(listing.attributes?.categoryId || connection.categoryId || '').trim()
       if (!sku) return { ok: false, platform: 'ebay', error: 'eBay publish requires a SKU.' }
       if (!categoryId) return { ok: false, platform: 'ebay', error: 'Choose an eBay category before publishing.' }
       if (listing.price == null || !listing.currency) return { ok: false, platform: 'ebay', error: 'eBay publish requires price and currency.' }
+      const quantity = listing.inventoryQuantity ?? 0
       try {
         const aspects: Record<string, string[]> = {}
         for (const [key, value] of Object.entries(listing.attributes || {})) {
@@ -66,7 +67,7 @@ export function createEbayCommerceAdapter(resolveConnection: EbayConnectionResol
           sku,
           title: listing.title,
           description: listing.description,
-          quantity: listing.inventoryQuantity ?? 0,
+          quantity,
           condition: String(listing.attributes?.condition || 'NEW'),
           imageUrls: listing.images?.map((image) => image.url),
           aspects,
@@ -76,6 +77,7 @@ export function createEbayCommerceAdapter(resolveConnection: EbayConnectionResol
           marketplaceId: connection.marketplaceId,
           categoryId,
           merchantLocationKey: connection.merchantLocationKey,
+          quantity,
           price: { value: String(listing.price), currency: listing.currency },
           fulfillmentPolicyId: connection.fulfillmentPolicyId,
           paymentPolicyId: connection.paymentPolicyId,
