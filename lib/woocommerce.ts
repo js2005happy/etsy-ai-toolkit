@@ -87,3 +87,21 @@ export async function updateWooProductPrice(storeUrl: string, credentials: WooCo
   if (!res.ok) throw new Error(data?.message || `WooCommerce price update failed (${res.status})`)
   return data
 }
+
+export async function listWooOrders(
+  storeUrl: string,
+  credentials: WooCommerceCredentials,
+  options: { after?: string; perPage?: number } = {}
+): Promise<any[]> {
+  const params = new URLSearchParams({
+    per_page: String(Math.min(Math.max(options.perPage ?? 50, 1), 100)),
+    orderby: 'date',
+    order: 'desc',
+  })
+  if (options.after) params.set('after', options.after)
+  const res = await wooFetch(storeUrl, credentials, `/orders?${params.toString()}`, { method: 'GET' })
+  const data = await res.json().catch(() => [])
+  if (!res.ok) throw new Error(data?.message || `WooCommerce orders request failed (${res.status})`)
+  if (!Array.isArray(data)) throw new Error('WooCommerce orders response was invalid')
+  return data
+}
