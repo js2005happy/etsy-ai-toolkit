@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   BookOpen, Boxes, Coins, Crosshair, DollarSign, FileText, Globe, ImageIcon, Languages, Layers3, ListChecks, Loader2, Mail,
-  Megaphone, MessageCircle, Search, Share2, Sparkles, Star, Target, Wand2,
+  Megaphone, MessageCircle, Search, Share2, ShoppingBag, Sparkles, Star, Store, Target, Wand2,
 } from 'lucide-react'
 import TiltCard from '@/components/ui/tilt-card'
 import { Button } from '@/components/ui/button'
@@ -76,6 +76,13 @@ export default function DashboardPage() {
   const progressPercentage = credits !== null && quota ? Math.min((credits / quota) * 100, 100) : 0
   const imageProgressPercentage = imageCredits !== null && imageQuota ? Math.min((imageCredits / imageQuota) * 100, 100) : 0
 
+  const commerceCards = [
+    { href: '/dashboard/products', icon: Boxes, eyebrow: 'Commerce Core', title: 'Product Hub', description: 'Keep one verified source of truth for product facts, variants, images, SKU, price and inventory.', cta: 'Manage canonical products →' },
+    { href: '/dashboard/multichannel', icon: Layers3, eyebrow: 'Multichannel', title: 'One product, every marketplace', description: 'Generate category-aware drafts for Etsy, Shopify, WooCommerce, Amazon, eBay, TikTok Shop, Walmart and Google Shopping.', cta: 'Adapt channel listings →' },
+    { href: '/dashboard/orders', icon: ShoppingBag, eyebrow: 'Operations', title: 'Order Inbox', description: 'Review normalized marketplace orders and line items in one read-first operational workspace.', cta: 'Open unified orders →' },
+    { href: '/dashboard/storefront', icon: Store, eyebrow: 'Direct channel', title: 'Craftly Storefront', description: 'Publish a seller-owned catalog from Product Hub without mixing SaaS billing with marketplace escrow.', cta: 'Build storefront →' },
+  ]
+
   return (
     <div className="min-h-screen">
       <CinematicBackground theme="default" />
@@ -90,20 +97,7 @@ export default function DashboardPage() {
         <SellerActionQueue />
 
         <section className="mb-8 grid gap-4 md:grid-cols-2">
-          <Link href="/dashboard/products" className="group rounded-3xl border border-primary/20 bg-card p-6 transition hover:border-primary/50 hover:shadow-sm">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Boxes className="h-5 w-5" /></div>
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-primary">Commerce Core</p>
-            <h2 className="mt-1 font-display text-2xl">Product Hub</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Keep one verified source of truth for product facts, SKU, price and inventory before adapting it to different sales channels.</p>
-            <p className="mt-4 text-sm font-medium text-primary">Manage canonical products →</p>
-          </Link>
-          <Link href="/dashboard/multichannel" className="group rounded-3xl border border-primary/20 bg-card p-6 transition hover:border-primary/50 hover:shadow-sm">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"><Layers3 className="h-5 w-5" /></div>
-            <p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-primary">Multichannel</p>
-            <h2 className="mt-1 font-display text-2xl">One product, every marketplace</h2>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">Generate category-aware drafts for Etsy, Shopify, WooCommerce, Amazon, eBay, TikTok Shop, Walmart and Google Shopping.</p>
-            <p className="mt-4 text-sm font-medium text-primary">Adapt channel listings →</p>
-          </Link>
+          {commerceCards.map((card) => <Link key={card.href} href={card.href} className="group rounded-3xl border border-primary/20 bg-card p-6 transition hover:border-primary/50 hover:shadow-sm"><div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary"><card.icon className="h-5 w-5" /></div><p className="mt-5 text-xs font-semibold uppercase tracking-[0.14em] text-primary">{card.eyebrow}</p><h2 className="mt-1 font-display text-2xl">{card.title}</h2><p className="mt-2 text-sm leading-relaxed text-muted-foreground">{card.description}</p><p className="mt-4 text-sm font-medium text-primary">{card.cta}</p></Link>)}
         </section>
 
         <section className="mb-8 flex flex-col gap-5 rounded-3xl border border-primary/20 bg-primary/5 p-6 md:flex-row md:items-center md:justify-between md:p-7">
