@@ -1,15 +1,18 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Reveal from '@/components/shared/reveal'
 import Faq from '@/components/shared/faq'
 import { useI18n } from '@/lib/i18n/client'
+import { HOME_REVIEW_COPY } from '@/components/home/home-review-copy'
 
-function MarqueeItems() {
+type HomeCopy = (typeof HOME_REVIEW_COPY)['en']
+
+function MarqueeItems({ copy }: { copy: HomeCopy }) {
   return (
     <>
-      Publishing: Etsy <i className="k-dot" /> Shopify <i className="k-dot" /> Content for: Amazon Handmade <i className="k-dot" /> Instagram <i className="k-dot" /> Pinterest <i className="k-dot" /> TikTok Shop <i className="k-dot" /> eBay <i className="k-dot" />
+      {copy.publishing} Etsy <i className="k-dot" /> Shopify <i className="k-dot" /> {copy.contentFor} Amazon Handmade <i className="k-dot" /> Instagram <i className="k-dot" /> Pinterest <i className="k-dot" /> TikTok Shop <i className="k-dot" /> eBay <i className="k-dot" />
     </>
   )
 }
@@ -24,66 +27,54 @@ const HOME_MARKETS = [
   { flag: '🇧🇷', rank: '07', country: 'Brasil', lang: 'Português', line: 'Alta procura artesanal — anúncios que soam locais.' },
 ]
 
-function demoOutput(note: string) {
+function demoOutput(note: string, copy: HomeCopy) {
   const normalized = note.trim().toLowerCase()
-  if (normalized.includes('moon') || normalized.includes('silver')) {
-    return {
-      icon: '🌙',
-      product: 'Sterling silver moon necklace',
-      title: 'Handmade Sterling Silver Moon Pendant Necklace — Minimal Celestial Jewelry Gift',
-      tags: ['moon necklace', 'sterling silver', 'celestial gift'],
-      issues: ['Title is too generic', 'Important material missing', 'Tags can be more specific'],
-    }
+  if (normalized.includes('moon') || normalized.includes('silver') || normalized.includes('月') || normalized.includes('银')) {
+    return { icon: '🌙', ...copy.moon }
   }
-  if (normalized.includes('mug') || normalized.includes('ceramic')) {
-    return {
-      icon: '☕',
-      product: 'Sage green ceramic mug',
-      title: 'Handmade Sage Green Ceramic Mug — Speckled 12 oz Pottery Cup',
-      tags: ['ceramic mug', 'sage green mug', 'handmade pottery'],
-      issues: ['Size is missing from title', 'Material can be clearer', 'Tags repeat broad terms'],
-    }
+  if (normalized.includes('mug') || normalized.includes('ceramic') || normalized.includes('杯') || normalized.includes('陶瓷')) {
+    return { icon: '☕', ...copy.mug }
   }
-  return {
-    icon: '✨',
-    product: 'Handmade product',
-    title: 'Handmade Product Listing — Clear Materials, Style and Gift Details',
-    tags: ['handmade gift', 'small business', 'artisan made'],
-    issues: ['Title needs more detail', 'Key attributes are missing', 'Tags can be more specific'],
-  }
+  return { icon: '✨', ...copy.generic }
 }
 
 export default function HomeClient() {
-  const { t } = useI18n()
-  const [demoNote, setDemoNote] = useState('handmade ceramic mug, sage green, 12 oz, speckled glaze')
-  const demo = useMemo(() => demoOutput(demoNote), [demoNote])
+  const { t, locale } = useI18n()
+  const copy = HOME_REVIEW_COPY[locale]
+  const [demoNote, setDemoNote] = useState(copy.demoNote)
+
+  useEffect(() => {
+    setDemoNote(copy.demoNote)
+  }, [copy.demoNote])
+
+  const demo = useMemo(() => demoOutput(demoNote, copy), [demoNote, copy])
 
   return (
     <>
       <header className="k-wrap k-hero">
         <div className="k-hero-grid">
           <div>
-            <div className="k-pill"><b>Craftly for Etsy sellers</b></div>
+            <div className="k-pill"><b>{copy.pill}</b></div>
             <h1 className="k-h1-hero">
-              Connect your Etsy shop.<br />
-              <span className="grad">Find what needs fixing.</span>{' '}
-              <em className="serif-accent">Improve listings.</em>
+              {copy.heroA}<br />
+              <span className="grad">{copy.heroB}</span>{' '}
+              <em className="serif-accent">{copy.heroC}</em>
             </h1>
-            <p className="k-sub">Craftly analyzes your Etsy listings, suggests improvements to titles, descriptions, tags and images, then lets you review every change before publishing.</p>
+            <p className="k-sub">{copy.heroSub}</p>
             <div className="k-cta-row">
-              <Link href="/signup" className="k-btn k-btn-primary whitespace-nowrap"><span>Start free — no card</span><i className="k-shine" /></Link>
-              <Link href="/tools/free-etsy-title-generator" className="k-btn">Try a free Etsy tool</Link>
+              <Link href="/signup" className="k-btn k-btn-primary whitespace-nowrap"><span>{copy.startFree}</span><i className="k-shine" /></Link>
+              <Link href="/tools/free-etsy-title-generator" className="k-btn">{copy.tryTool}</Link>
             </div>
-            <p className="k-trust">Review first. Publish only when you are ready.</p>
+            <p className="k-trust">{copy.trust}</p>
           </div>
 
           <div className="rounded-3xl border border-border bg-card/80 p-5 shadow-2xl backdrop-blur md:p-6">
             <div className="flex items-center justify-between gap-3 border-b border-border pb-4">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Listing workspace preview</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{copy.workspacePreview}</p>
                 <p className="mt-1 text-sm font-semibold text-foreground">{demo.product}</p>
               </div>
-              <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-400">Review mode</span>
+              <span className="rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-400">{copy.reviewMode}</span>
             </div>
 
             <div className="mt-5 grid grid-cols-[72px_1fr] gap-4">
@@ -91,30 +82,22 @@ export default function HomeClient() {
               <div>
                 <div className="flex items-end justify-between gap-3">
                   <div>
-                    <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Listing health</p>
+                    <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{copy.listingHealth}</p>
                     <p className="mt-1 text-2xl font-bold text-foreground"><span className="text-muted-foreground line-through decoration-muted-foreground/50">62</span> <span className="mx-1 text-muted-foreground">→</span> <span className="text-emerald-400">91</span></p>
                   </div>
-                  <span className="text-xs text-muted-foreground">Example score</span>
+                  <span className="text-xs text-muted-foreground">{copy.exampleScore}</span>
                 </div>
-                <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full w-[91%] rounded-full bg-primary" />
-                </div>
+                <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted"><div className="h-full w-[91%] rounded-full bg-primary" /></div>
               </div>
             </div>
 
-            <label htmlFor="home-demo-note" className="mt-5 block text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Your rough note</label>
-            <textarea
-              id="home-demo-note"
-              value={demoNote}
-              onChange={(event) => setDemoNote(event.target.value.slice(0, 180))}
-              rows={3}
-              className="mt-2 w-full resize-none rounded-xl border border-border bg-background/70 px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
+            <label htmlFor="home-demo-note" className="mt-5 block text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{copy.roughNote}</label>
+            <textarea id="home-demo-note" value={demoNote} onChange={(event) => setDemoNote(event.target.value.slice(0, 180))} rows={3} className="mt-2 w-full resize-none rounded-xl border border-border bg-background/70 px-4 py-3 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30" />
 
             <div className="mt-5 rounded-2xl border border-primary/30 bg-primary/5 p-4">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">Suggested title</p>
-                <span className="text-xs text-muted-foreground">AI draft</span>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{copy.suggestedTitle}</p>
+                <span className="text-xs text-muted-foreground">{copy.aiDraft}</span>
               </div>
               <p className="mt-2 text-sm font-semibold leading-relaxed text-foreground">{demo.title}</p>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -127,58 +110,52 @@ export default function HomeClient() {
             </div>
 
             <div className="mt-5 flex flex-wrap items-center gap-3">
-              <button type="button" className="k-btn k-btn-primary pointer-events-none"><span>Review changes</span></button>
-              <button type="button" className="k-btn pointer-events-none">Publish to Etsy</button>
-              <span className="text-xs text-muted-foreground">Example data · nothing publishes automatically</span>
+              <button type="button" className="k-btn k-btn-primary pointer-events-none"><span>{copy.reviewChanges}</span></button>
+              <button type="button" className="k-btn pointer-events-none">{copy.publishToEtsy}</button>
+              <span className="text-xs text-muted-foreground">{copy.exampleData}</span>
             </div>
           </div>
         </div>
       </header>
 
       <div className="k-marquee">
-        <div className="k-marquee-track"><span><MarqueeItems /></span><span><MarqueeItems /></span></div>
+        <div className="k-marquee-track"><span><MarqueeItems copy={copy} /></span><span><MarqueeItems copy={copy} /></span></div>
       </div>
 
       <section className="k-wrap k-section">
         <Reveal>
-          <div className="eyebrow">See the difference</div>
-          <h2 className="k-h2">From rough listing to review-ready.</h2>
-          <p className="k-lead">Craftly gives sellers a clear before-and-after view so AI suggestions stay useful, editable and under your control.</p>
+          <div className="eyebrow">{copy.seeDifference}</div>
+          <h2 className="k-h2">{copy.differenceHeading}</h2>
+          <p className="k-lead">{copy.differenceLead}</p>
         </Reveal>
         <div className="mt-12 grid gap-5 lg:grid-cols-2">
           <Reveal className="rounded-3xl border border-border bg-card/60 p-6 md:p-8">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Before</span>
-              <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">Needs work</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">{copy.before}</span>
+              <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">{copy.needsWork}</span>
             </div>
-            <p className="mt-6 text-sm text-muted-foreground">Title</p>
-            <p className="mt-2 text-lg font-semibold text-foreground">Handmade green mug gift ceramic cup</p>
+            <p className="mt-6 text-sm text-muted-foreground">{copy.title}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{copy.beforeTitle}</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-border bg-background/60 p-4"><p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Listing health</p><p className="mt-2 text-3xl font-bold text-foreground">62</p></div>
-              <div className="rounded-2xl border border-border bg-background/60 p-4"><p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Issues found</p><p className="mt-2 text-3xl font-bold text-foreground">3</p></div>
+              <div className="rounded-2xl border border-border bg-background/60 p-4"><p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{copy.listingHealth}</p><p className="mt-2 text-3xl font-bold text-foreground">62</p></div>
+              <div className="rounded-2xl border border-border bg-background/60 p-4"><p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{copy.issuesFound}</p><p className="mt-2 text-3xl font-bold text-foreground">3</p></div>
             </div>
-            <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
-              <li>• Product size is missing</li>
-              <li>• Title reads like a keyword list</li>
-              <li>• Tags are broad and repetitive</li>
-            </ul>
+            <ul className="mt-6 space-y-3 text-sm text-muted-foreground">{copy.beforeIssues.map((issue) => <li key={issue}>• {issue}</li>)}</ul>
           </Reveal>
 
           <Reveal className="rounded-3xl border border-primary/40 bg-primary/5 p-6 md:p-8" delay={80}>
             <div className="flex items-center justify-between gap-3">
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">After Craftly review</span>
-              <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-400">Ready to review</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{copy.afterReview}</span>
+              <span className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-400">{copy.readyToReview}</span>
             </div>
-            <p className="mt-6 text-sm text-muted-foreground">Suggested title</p>
-            <p className="mt-2 text-lg font-semibold text-foreground">Handmade Sage Green Ceramic Mug — Speckled 12 oz Pottery Cup</p>
+            <p className="mt-6 text-sm text-muted-foreground">{copy.suggestedTitle}</p>
+            <p className="mt-2 text-lg font-semibold text-foreground">{copy.mug.title}</p>
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-primary/20 bg-background/60 p-4"><p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Example health</p><p className="mt-2 text-3xl font-bold text-emerald-400">91</p></div>
-              <div className="rounded-2xl border border-primary/20 bg-background/60 p-4"><p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Publishing</p><p className="mt-2 text-base font-bold text-foreground">Your approval only</p></div>
+              <div className="rounded-2xl border border-primary/20 bg-background/60 p-4"><p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{copy.exampleHealth}</p><p className="mt-2 text-3xl font-bold text-emerald-400">91</p></div>
+              <div className="rounded-2xl border border-primary/20 bg-background/60 p-4"><p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">{copy.publishingLabel}</p><p className="mt-2 text-base font-bold text-foreground">{copy.approvalOnly}</p></div>
             </div>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {['ceramic mug', 'sage green mug', 'handmade pottery', '12 oz mug'].map((tag) => <span key={tag} className="rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground">{tag}</span>)}
-            </div>
-            <p className="mt-6 text-xs leading-relaxed text-muted-foreground">Illustrative example only. Craftly does not guarantee Etsy ranking, traffic or sales.</p>
+            <div className="mt-6 flex flex-wrap gap-2">{copy.mug.tags.map((tag) => <span key={tag} className="rounded-full border border-border bg-background px-3 py-1.5 text-xs text-muted-foreground">{tag}</span>)}</div>
+            <p className="mt-6 text-xs leading-relaxed text-muted-foreground">{copy.disclaimer}</p>
           </Reveal>
         </div>
       </section>
@@ -203,12 +180,7 @@ export default function HomeClient() {
         </div>
         <Reveal className="mt-10 rounded-3xl border border-border bg-card/60 p-6 md:p-8">
           <div className="grid gap-6 md:grid-cols-4">
-            {[
-              ['Find problems', 'Listing health surfaces the places worth reviewing.'],
-              ['Fix with AI', 'Draft clearer titles, descriptions, tags and seller content.'],
-              ['Review safely', 'Nothing changes remotely until you approve it.'],
-              ['Publish', 'Push approved work to Etsy from the same workspace.'],
-            ].map(([title, body], index) => (
+            {copy.process.map(([title, body], index) => (
               <div key={title}>
                 <span className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">0{index + 1}</span>
                 <h3 className="mt-2 text-base font-bold text-foreground">{title}</h3>
@@ -244,7 +216,7 @@ export default function HomeClient() {
         ]} />
         <Reveal className="k-cta-band" style={{ marginTop: 80 }}>
           <h2 className="k-h2">{t('home.cta.h1')}</h2><p className="k-lead">{t('home.cta.lead')}</p>
-          <div className="k-cta-row"><Link href="/signup" className="k-btn k-btn-primary whitespace-nowrap"><span>Start free — no card</span><i className="k-shine" /></Link><Link href="/how-it-works" className="k-btn">{t('home.cta.btn2')}</Link></div>
+          <div className="k-cta-row"><Link href="/signup" className="k-btn k-btn-primary whitespace-nowrap"><span>{copy.startFree}</span><i className="k-shine" /></Link><Link href="/how-it-works" className="k-btn">{t('home.cta.btn2')}</Link></div>
         </Reveal>
       </section>
     </>
