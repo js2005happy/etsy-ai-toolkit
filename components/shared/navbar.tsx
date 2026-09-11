@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client'
 import Logo from '@/components/shared/logo'
 import LanguageSwitcher from '@/components/shared/language-switcher'
 import { useI18n } from '@/lib/i18n/client'
+import type { Locale } from '@/lib/i18n/locales'
 import type { User } from '@supabase/supabase-js'
 
 const LINKS = [
@@ -18,9 +19,21 @@ const LINKS = [
   { key: 'openApp', href: '/dashboard' },
 ]
 
+const channelLabel: Record<Locale, string> = {
+  en: 'Sales Channels',
+  de: 'Vertriebskanäle',
+  fr: 'Canaux de vente',
+  es: 'Canales de venta',
+  zh: '销售渠道',
+  ja: '販売チャネル',
+  it: 'Canali di vendita',
+  ko: '판매 채널',
+  pt: 'Canais de venda',
+}
+
 export default function Navbar() {
   const pathname = usePathname()
-  const { t } = useI18n()
+  const { t, locale } = useI18n()
   const [scrolled, setScrolled] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -61,7 +74,7 @@ export default function Navbar() {
               className={isActive(l.href) ? 'active' : ''}
               onClick={() => setMenuOpen(false)}
             >
-              {l.key === 'channels' ? 'Sales Channels' : t(`nav.${l.key}`)}
+              {l.key === 'channels' ? channelLabel[locale] : t(`nav.${l.key}`)}
             </Link>
           ))}
         </div>
