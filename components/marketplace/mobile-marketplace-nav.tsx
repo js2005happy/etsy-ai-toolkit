@@ -8,6 +8,7 @@ const links = [
   ['/discover', 'Discover'],
   ['/discover/sellers', 'Sellers'],
   ['/wishlist', 'Saved'],
+  ['/recently-viewed', 'Recent'],
   ['/compare', 'Compare'],
 ] as const
 

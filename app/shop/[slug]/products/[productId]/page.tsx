@@ -5,6 +5,7 @@ import { BadgeCheck, Info, Mail, PackageCheck } from 'lucide-react'
 import WishlistButton from '@/components/marketplace/wishlist-button'
 import ReportListingButton from '@/components/marketplace/report-listing-button'
 import MobileMarketplaceNav from '@/components/marketplace/mobile-marketplace-nav'
+import RecentlyViewedTracker from '@/components/marketplace/recently-viewed-tracker'
 import { createServiceClient } from '@/lib/supabase/service'
 import { firstMarketplaceImage, loadMarketplaceCatalog, type PublicProduct, type PublicStorefront } from '@/lib/marketplace/public-catalog'
 
@@ -71,6 +72,7 @@ export default async function PublicProductPage({ params }: { params: PageParams
 
   return (
     <main className="min-h-screen bg-background text-foreground">
+      <RecentlyViewedTracker item={{ productId: product.id, storefrontSlug: storefront.slug, storefrontName: storefront.name, title: product.title, image, price: product.price == null ? null : Number(product.price), currency: product.currency || storefront.currency || 'USD' }} />
       <MobileMarketplaceNav brand={storefront.name} brandHref={`/shop/${storefront.slug}`} />
 
       <section className="mx-auto grid max-w-7xl gap-10 px-5 py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:py-16">
