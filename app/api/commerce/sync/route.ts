@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
 import { createServiceClient } from '@/lib/supabase/service'
-import { resolveWooCommerceConnection } from '@/lib/commerce/connections'
+import { resolveShopifyConnection, resolveWooCommerceConnection } from '@/lib/commerce/connections'
 import { updateWooProductPrice, updateWooProductStock } from '@/lib/woocommerce'
+import { updateShopifyProductPrice, updateShopifyProductStock } from '@/lib/shopify'
 
 type SyncType = 'inventory' | 'price'
 
@@ -50,6 +51,7 @@ export async function POST(request: Request) {
     ? { inventory_quantity: inventoryQuantity as number }
     : { price: price as number, currency: currency as string }
 
+  const supportedNow = listing.platform === 'woocommerce' || listing.platform === 'shopify'
   const preview = {
     platform: listing.platform,
     listing_id: listing.id,
@@ -59,12 +61,10 @@ export async function POST(request: Request) {
       ? { inventory_quantity: listing.inventory_quantity }
       : { price: listing.price, currency: listing.currency },
     requested_value: requestedValue,
-    supported_now: listing.platform === 'woocommerce',
+    supported_now: supportedNow,
   }
 
-  if (!confirm) {
-    return NextResponse.json({ preview, requires_confirmation: true })
-  }
+  if (!confirm) return NextResponse.json({ preview, requires_confirmation: true })
 
   const { data: event, error: eventError } = await service.from('commerce_sync_events').insert({
     user_id: auth.userId,
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
 
   if (eventError || !event) return NextResponse.json({ error: 'Unable to create sync audit event.' }, { status: 500 })
 
-  if (listing.platform !== 'woocommerce') {
+  if (!supportedNow) {
     await service.from('commerce_sync_events').update({
       status: 'skipped',
       error: `${listing.platform} external ${syncType} sync is not enabled yet. No external change was made.`,
@@ -89,25 +89,33 @@ export async function POST(request: Request) {
   }
 
   try {
-    const connection = await resolveWooCommerceConnection(auth.userId)
-    if (!connection) throw new Error('WooCommerce is not connected.')
-    const externalId = Number(listing.external_id)
-    if (!Number.isInteger(externalId) || externalId <= 0) throw new Error('Invalid WooCommerce external product id.')
+    const nextInventory = inventoryQuantity as number
+    const nextPrice = price as number
+    const nextCurrency = currency as string
 
-    if (syncType === 'inventory') {
-      const nextInventory = inventoryQuantity as number
-      await updateWooProductStock(connection.storeUrl, connection.credentials, externalId, nextInventory)
-      await service.from('platform_listings').update({ inventory_quantity: nextInventory, sync_status: 'synced', last_error: null, last_synced_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', listing.id).eq('user_id', auth.userId)
+    if (listing.platform === 'woocommerce') {
+      const connection = await resolveWooCommerceConnection(auth.userId)
+      if (!connection) throw new Error('WooCommerce is not connected.')
+      const externalId = Number(listing.external_id)
+      if (!Number.isInteger(externalId) || externalId <= 0) throw new Error('Invalid WooCommerce external product id.')
+      if (syncType === 'inventory') await updateWooProductStock(connection.storeUrl, connection.credentials, externalId, nextInventory)
+      else await updateWooProductPrice(connection.storeUrl, connection.credentials, externalId, nextPrice)
     } else {
-      const nextPrice = price as number
-      const nextCurrency = currency as string
-      await updateWooProductPrice(connection.storeUrl, connection.credentials, externalId, nextPrice)
-      await service.from('platform_listings').update({ price: nextPrice, currency: nextCurrency, sync_status: 'synced', last_error: null, last_synced_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', listing.id).eq('user_id', auth.userId)
+      const connection = await resolveShopifyConnection(auth.userId)
+      if (!connection) throw new Error('Shopify is not connected.')
+      const requiredScope = syncType === 'inventory' ? 'write_inventory' : 'write_products'
+      if (!connection.scopes?.includes(requiredScope)) throw new Error(`Reconnect Shopify to grant ${requiredScope} before syncing.`)
+      if (syncType === 'inventory') await updateShopifyProductStock(connection.shopDomain, connection.accessToken, String(listing.external_id), nextInventory)
+      else await updateShopifyProductPrice(connection.shopDomain, connection.accessToken, String(listing.external_id), nextPrice)
     }
 
-    const completedAt = new Date().toISOString()
-    await service.from('commerce_sync_events').update({ status: 'success', external_reference: String(listing.external_id), completed_at: completedAt }).eq('id', event.id).eq('user_id', auth.userId)
-    return NextResponse.json({ ok: true, event_id: event.id, completed_at: completedAt })
+    const now = new Date().toISOString()
+    const listingUpdate = syncType === 'inventory'
+      ? { inventory_quantity: nextInventory, sync_status: 'synced', last_error: null, last_synced_at: now, updated_at: now }
+      : { price: nextPrice, currency: nextCurrency, sync_status: 'synced', last_error: null, last_synced_at: now, updated_at: now }
+    await service.from('platform_listings').update(listingUpdate).eq('id', listing.id).eq('user_id', auth.userId)
+    await service.from('commerce_sync_events').update({ status: 'success', external_reference: String(listing.external_id), completed_at: now }).eq('id', event.id).eq('user_id', auth.userId)
+    return NextResponse.json({ ok: true, event_id: event.id, completed_at: now })
   } catch (err: any) {
     const message = err?.message || 'External synchronization failed.'
     await service.from('commerce_sync_events').update({ status: 'error', error: message, completed_at: new Date().toISOString() }).eq('id', event.id).eq('user_id', auth.userId)
