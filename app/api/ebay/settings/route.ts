@@ -1,8 +1,24 @@
 import { NextResponse } from 'next/server'
 import { authenticateRequest } from '@/lib/auth'
-import { updateEbayPublishingSettings } from '@/lib/commerce/connections'
+import { getEbayPublishingSettings, updateEbayPublishingSettings } from '@/lib/commerce/connections'
 
 const MARKETPLACE_RE = /^EBAY_[A-Z]{2,3}$/
+
+export async function GET(request: Request) {
+  const auth = await authenticateRequest(request)
+  if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status })
+  const url = new URL(request.url)
+  const connectionId = String(url.searchParams.get('connection_id') || '').trim()
+  if (!connectionId) return NextResponse.json({ error: 'Connection id is required.' }, { status: 400 })
+  try {
+    const settings = await getEbayPublishingSettings(auth.userId, connectionId)
+    if (!settings) return NextResponse.json({ error: 'eBay connection not found.' }, { status: 404 })
+    return NextResponse.json({ settings })
+  } catch (error) {
+    console.error('Unable to load eBay publishing settings', error)
+    return NextResponse.json({ error: 'Unable to load eBay publishing settings.' }, { status: 500 })
+  }
+}
 
 export async function POST(request: Request) {
   const auth = await authenticateRequest(request)
