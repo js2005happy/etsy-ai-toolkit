@@ -76,3 +76,14 @@ export async function updateWooProductStock(storeUrl: string, credentials: WooCo
   if (!res.ok) throw new Error(data?.message || `WooCommerce inventory update failed (${res.status})`)
   return data
 }
+
+export async function updateWooProductPrice(storeUrl: string, credentials: WooCommerceCredentials, productId: number, price: number): Promise<any> {
+  if (!Number.isFinite(price) || price < 0) throw new Error('Price must be a non-negative number')
+  const res = await wooFetch(storeUrl, credentials, `/products/${encodeURIComponent(String(productId))}`, {
+    method: 'PUT',
+    body: JSON.stringify({ regular_price: price.toFixed(2) }),
+  })
+  const data = await res.json().catch(() => ({}))
+  if (!res.ok) throw new Error(data?.message || `WooCommerce price update failed (${res.status})`)
+  return data
+}
