@@ -90,6 +90,7 @@ export type PublishResult = {
   platform: CommercePlatformId
   externalId?: string
   externalUrl?: string
+  metadata?: Record<string, ProductFactValue>
   warnings?: string[]
   error?: string
 }
