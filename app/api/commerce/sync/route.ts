@@ -35,16 +35,20 @@ export async function POST(request: Request) {
   if (!listing) return NextResponse.json({ error: 'Channel listing not found.' }, { status: 404 })
   if (!listing.external_id) return NextResponse.json({ error: 'Publish this channel listing before syncing it.' }, { status: 409 })
 
-  const requestedValue = syncType === 'inventory'
-    ? { inventory_quantity: Number(body.inventory_quantity) }
-    : { price: Number(body.price), currency: String(body.currency || listing.currency || 'USD').toUpperCase() }
+  const inventoryQuantity = syncType === 'inventory' ? Number(body.inventory_quantity) : null
+  const price = syncType === 'price' ? Number(body.price) : null
+  const currency = syncType === 'price' ? String(body.currency || listing.currency || 'USD').toUpperCase() : null
 
-  if (syncType === 'inventory' && (!Number.isInteger(requestedValue.inventory_quantity) || requestedValue.inventory_quantity < 0)) {
+  if (syncType === 'inventory' && (!Number.isInteger(inventoryQuantity) || inventoryQuantity == null || inventoryQuantity < 0)) {
     return NextResponse.json({ error: 'Inventory must be a non-negative integer.' }, { status: 400 })
   }
-  if (syncType === 'price' && (!Number.isFinite(requestedValue.price) || requestedValue.price < 0)) {
+  if (syncType === 'price' && (price == null || !Number.isFinite(price) || price < 0)) {
     return NextResponse.json({ error: 'Price must be a non-negative number.' }, { status: 400 })
   }
+
+  const requestedValue = syncType === 'inventory'
+    ? { inventory_quantity: inventoryQuantity as number }
+    : { price: price as number, currency: currency as string }
 
   const preview = {
     platform: listing.platform,
@@ -91,11 +95,14 @@ export async function POST(request: Request) {
     if (!Number.isInteger(externalId) || externalId <= 0) throw new Error('Invalid WooCommerce external product id.')
 
     if (syncType === 'inventory') {
-      await updateWooProductStock(connection.storeUrl, connection.credentials, externalId, requestedValue.inventory_quantity)
-      await service.from('platform_listings').update({ inventory_quantity: requestedValue.inventory_quantity, sync_status: 'synced', last_error: null, last_synced_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', listing.id).eq('user_id', auth.userId)
+      const nextInventory = inventoryQuantity as number
+      await updateWooProductStock(connection.storeUrl, connection.credentials, externalId, nextInventory)
+      await service.from('platform_listings').update({ inventory_quantity: nextInventory, sync_status: 'synced', last_error: null, last_synced_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', listing.id).eq('user_id', auth.userId)
     } else {
-      await updateWooProductPrice(connection.storeUrl, connection.credentials, externalId, requestedValue.price)
-      await service.from('platform_listings').update({ price: requestedValue.price, currency: requestedValue.currency, sync_status: 'synced', last_error: null, last_synced_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', listing.id).eq('user_id', auth.userId)
+      const nextPrice = price as number
+      const nextCurrency = currency as string
+      await updateWooProductPrice(connection.storeUrl, connection.credentials, externalId, nextPrice)
+      await service.from('platform_listings').update({ price: nextPrice, currency: nextCurrency, sync_status: 'synced', last_error: null, last_synced_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', listing.id).eq('user_id', auth.userId)
     }
 
     const completedAt = new Date().toISOString()
