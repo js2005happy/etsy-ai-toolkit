@@ -1,15 +1,8 @@
 import { NextResponse } from 'next/server'
 import { authenticateRequest, getBrandPrefs } from '@/lib/auth'
 import { withCreditCharge } from '@/lib/quota'
-import { generateListing, type ListingInput } from '@/lib/openai'
-import {
-  prepareCategoryAwareListingInput,
-  readinessMetadata,
-} from '@/lib/category-aware-listing'
+import { generateCategoryAwareListing, type CategoryAwareListingInput } from '@/lib/category-aware-generation'
 
-// Free users get their first 3 listings without spending credits, so they can
-// run the full "notes → publishable listing" loop before the monthly quota
-// kicks in. Trial generations deliberately bypass the paid quota reservation.
 const FREE_LISTING_TRIAL = 3
 
 export async function POST(request: Request) {
@@ -18,9 +11,9 @@ export async function POST(request: Request) {
     if ('error' in auth) return NextResponse.json({ error: auth.error }, { status: auth.status })
     const { db, userId, tier } = auth
 
-    const body: ListingInput = await request.json()
-    if (!body.product_name || !body.product_type || !body.material || !body.style) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    const body: CategoryAwareListingInput = await request.json()
+    if (!body.product_name || !body.product_type) {
+      return NextResponse.json({ error: 'Product name and product type are required' }, { status: 400 })
     }
 
     const { count } = await db
@@ -31,13 +24,11 @@ export async function POST(request: Request) {
 
     const withinTrial = tier === 'Free' && (count ?? 0) < FREE_LISTING_TRIAL
     const { brandTone, brandKeywords } = await getBrandPrefs(db, userId)
-    const prepared = prepareCategoryAwareListingInput({
+    const generate = () => generateCategoryAwareListing({
       ...body,
       brand_tone: brandTone ?? undefined,
       brand_keywords: brandKeywords ?? undefined,
     })
-
-    const generate = () => generateListing(prepared.input)
 
     let result
     if (withinTrial) {
@@ -50,19 +41,14 @@ export async function POST(request: Request) {
       result = charged.value
     }
 
-    const output = {
-      ...result,
-      ...readinessMetadata(prepared.readiness),
-    }
-
     await db.from('generations').insert({
       user_id: userId,
       tool_type: 'listing',
       input_data: body,
-      output_data: output,
+      output_data: result,
     })
 
-    return NextResponse.json(output)
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Error in generate-listing:', error)
     return NextResponse.json({ error: "We couldn't generate this listing. Please try again." }, { status: 500 })
