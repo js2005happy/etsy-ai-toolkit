@@ -1,15 +1,16 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createServiceClient } from '@/lib/supabase/service'
 
-// Atomic quota decrements. These call SECURITY DEFINER RPCs (see migration
-// 0012) so the decrement is a single guarded write. Returns false when quota
-// cannot be reserved (or the RPC fails).
+// Atomic quota reservations are server-only. The SECURITY DEFINER RPCs remain
+// guarded in SQL, but application calls always use the service-role client so
+// anon/authenticated execution can be revoked at the database boundary.
 export async function consumeCredits(
-  db: SupabaseClient,
+  _db: SupabaseClient,
   userId: string,
   amount: number
 ): Promise<boolean> {
-  const { data, error } = await db.rpc('consume_credits', {
+  const service = createServiceClient()
+  const { data, error } = await service.rpc('consume_credits', {
     p_user_id: userId,
     p_amount: amount,
   })
@@ -21,11 +22,12 @@ export async function consumeCredits(
 }
 
 export async function consumeImageCredits(
-  db: SupabaseClient,
+  _db: SupabaseClient,
   userId: string,
   amount: number
 ): Promise<boolean> {
-  const { data, error } = await db.rpc('consume_image_credits', {
+  const service = createServiceClient()
+  const { data, error } = await service.rpc('consume_image_credits', {
     p_user_id: userId,
     p_amount: amount,
   })
