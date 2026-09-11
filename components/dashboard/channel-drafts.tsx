@@ -14,8 +14,8 @@ export default function ChannelDrafts({ listings, onPublished }: { listings: any
   const [message, setMessage] = useState('')
 
   const publish = async (listing: any) => {
-    if (!DIRECT_PUBLISH.has(listing.platform)) return
-    const ok = window.confirm(`Publish this reviewed ${listing.platform} draft to your connected store? This is an external action.`)
+    if (!DIRECT_PUBLISH.has(listing.platform) || listing.external_id) return
+    const ok = window.confirm(`Publish this reviewed ${listing.platform} draft to your connected store? This creates a new external listing/product.`)
     if (!ok) return
     setPublishingId(listing.id); setMessage('')
     try {
@@ -68,7 +68,8 @@ export default function ChannelDrafts({ listings, onPublished }: { listings: any
       {message && <p className="rounded-lg bg-muted px-3 py-2 text-sm">{message}</p>}
       {listings.map((listing) => {
         const supported = DIRECT_PUBLISH.has(listing.platform)
-        const syncSupported = DIRECT_SYNC.has(listing.platform) && Boolean(listing.external_id)
+        const alreadyPublished = Boolean(listing.external_id)
+        const syncSupported = DIRECT_SYNC.has(listing.platform) && alreadyPublished
         return (
           <div key={listing.id} className="rounded-lg border p-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
@@ -76,14 +77,17 @@ export default function ChannelDrafts({ listings, onPublished }: { listings: any
               <div className="flex flex-wrap items-center gap-2">
                 {listing.external_url && <Button size="sm" variant="outline" asChild><a href={listing.external_url} target="_blank" rel="noreferrer"><ExternalLink className="mr-1 h-3.5 w-3.5" />Open</a></Button>}
                 {syncSupported && <><Button size="sm" variant="outline" onClick={() => sync(listing, 'inventory')} disabled={syncingKey != null}>{syncingKey === `${listing.id}:inventory` ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="mr-1 h-3.5 w-3.5" />}Sync stock</Button><Button size="sm" variant="outline" onClick={() => sync(listing, 'price')} disabled={syncingKey != null}>{syncingKey === `${listing.id}:price` ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="mr-1 h-3.5 w-3.5" />}Sync price</Button></>}
-                {supported ? <Button size="sm" onClick={() => publish(listing)} disabled={publishingId === listing.id || listing.sync_status === 'pending'}>{publishingId === listing.id ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-1 h-3.5 w-3.5" />}{listing.external_id ? 'Republish draft' : 'Publish'}</Button> : <Button size="sm" variant="secondary" disabled>Draft only</Button>}
+                {supported ? alreadyPublished
+                  ? <Button size="sm" variant="secondary" disabled>Published</Button>
+                  : <Button size="sm" onClick={() => publish(listing)} disabled={publishingId === listing.id || listing.sync_status === 'pending'}>{publishingId === listing.id ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-1 h-3.5 w-3.5" />}Publish</Button>
+                  : <Button size="sm" variant="secondary" disabled>Draft only</Button>}
               </div>
             </div>
             {listing.last_error && <p className="mt-2 text-xs text-destructive">{listing.last_error}</p>}
           </div>
         )
       })}
-      <p className="text-xs text-muted-foreground">Publishing and reviewed stock/price synchronization support Shopify, WooCommerce and eBay. Every external sync requires preview + second confirmation. Existing Shopify/eBay connections may need reconnecting once for the newer inventory/order scopes. Configure connections in <Link className="text-primary hover:underline" href="/account">Account</Link>.</p>
+      <p className="text-xs text-muted-foreground">Publishing and reviewed stock/price synchronization support Shopify, WooCommerce and eBay. Published items are never recreated by the UI; use the dedicated sync controls for supported external changes. Every sync requires preview + second confirmation. Existing Shopify/eBay connections may need reconnecting once for newer inventory/order scopes. Configure connections in <Link className="text-primary hover:underline" href="/account">Account</Link>.</p>
     </div>
   )
 }
