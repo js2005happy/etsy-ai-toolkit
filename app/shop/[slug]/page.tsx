@@ -27,7 +27,7 @@ async function loadStorefront(slug: string) {
 
   const { data: products } = await service
     .from('products')
-    .select('id,title,description,product_type,brand,price,currency,inventory_quantity,images,status')
+    .select('id,title,description,category,product_type,brand,price,currency,inventory_quantity,images,status')
     .eq('user_id', storefront.user_id)
     .eq('status', 'ready')
     .in('id', ids)
@@ -60,13 +60,19 @@ export default async function PublicStorefrontPage({ params }: { params: Promise
   const loaded = await loadStorefront(slug)
   if (!loaded) notFound()
   const { storefront, products } = loaded
+  const categories = Array.from(new Set(products.map((product: any) => product.category).filter(Boolean))).slice(0, 8)
 
   return (
     <main className="min-h-screen bg-background text-foreground">
       <header className="border-b bg-card/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
           <Link href={`/shop/${storefront.slug}`} className="font-display text-xl font-bold">{storefront.name}</Link>
-          <Link href="/" className="text-xs font-medium text-muted-foreground hover:text-foreground">Powered by Craftly</Link>
+          <div className="flex items-center gap-4 text-sm">
+            <Link href="/discover" className="text-muted-foreground hover:text-foreground">Discover</Link>
+            <Link href="/discover/sellers" className="text-muted-foreground hover:text-foreground">Sellers</Link>
+            <Link href="/wishlist" className="text-muted-foreground hover:text-foreground">Saved</Link>
+            <Link href="/" className="text-xs font-medium text-muted-foreground hover:text-foreground">Powered by Craftly</Link>
+          </div>
         </div>
       </header>
 
@@ -77,8 +83,14 @@ export default async function PublicStorefrontPage({ params }: { params: Promise
         <div className="relative mx-auto max-w-7xl px-5 py-16 md:py-24">
           <div className="max-w-3xl">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-primary">Independent seller storefront</p>
-            <h1 className="mt-3 font-display text-4xl font-bold tracking-tight md:text-6xl">{storefront.headline || storefront.name}</h1>
+            <div className="mt-4 flex items-center gap-4">
+              {storefront.logo_url && /^https:\/\//i.test(storefront.logo_url) && <div className="h-16 w-16 shrink-0 rounded-2xl border bg-card bg-cover bg-center shadow-sm" style={{ backgroundImage: `url(${JSON.stringify(storefront.logo_url).slice(1, -1)})` }} />}
+              <h1 className="font-display text-4xl font-bold tracking-tight md:text-6xl">{storefront.headline || storefront.name}</h1>
+            </div>
             {storefront.description && <p className="mt-5 max-w-2xl text-lg leading-relaxed text-muted-foreground">{storefront.description}</p>}
+            <div className="mt-6 flex flex-wrap gap-2">
+              {categories.map((category: string) => <Link key={category} href={`/discover?category=${encodeURIComponent(category)}`} className="rounded-full border bg-card/80 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground">{category}</Link>)}
+            </div>
           </div>
         </div>
       </section>
@@ -97,28 +109,34 @@ export default async function PublicStorefrontPage({ params }: { params: Promise
               const image = firstImage(product)
               const available = product.inventory_quantity == null || Number(product.inventory_quantity) > 0
               return (
-                <article key={product.id} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
-                  <div className="aspect-square bg-muted bg-cover bg-center" style={image ? { backgroundImage: `url(${JSON.stringify(image).slice(1, -1)})` } : undefined}>
-                    {!image && <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Product image</div>}
-                  </div>
-                  <div className="p-5">
-                    {product.product_type && <p className="text-xs uppercase tracking-wide text-muted-foreground">{product.product_type}</p>}
-                    <h3 className="mt-1 line-clamp-2 font-display text-lg font-semibold">{product.title}</h3>
-                    {product.description && <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{product.description}</p>}
-                    <div className="mt-5 flex items-center justify-between gap-3">
-                      <p className="font-semibold">{product.price == null ? 'Contact seller' : `${product.currency || storefront.currency || 'USD'} ${Number(product.price).toFixed(2)}`}</p>
-                      <span className={`text-xs ${available ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}>{available ? 'Available' : 'Sold out'}</span>
+                <article key={product.id} className="overflow-hidden rounded-2xl border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                  <Link href={`/shop/${storefront.slug}/products/${product.id}`} className="block">
+                    <div className="aspect-square bg-muted bg-cover bg-center" style={image ? { backgroundImage: `url(${JSON.stringify(image).slice(1, -1)})` } : undefined}>
+                      {!image && <div className="flex h-full items-center justify-center text-sm text-muted-foreground">Product image</div>}
                     </div>
-                  </div>
+                    <div className="p-5">
+                      {product.category && <p className="text-xs font-medium uppercase tracking-wide text-primary">{product.category}</p>}
+                      <h3 className="mt-1 line-clamp-2 font-display text-lg font-semibold">{product.title}</h3>
+                      {product.description && <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">{product.description}</p>}
+                      <div className="mt-5 flex items-center justify-between gap-3">
+                        <p className="font-semibold">{product.price == null ? 'Contact seller' : `${product.currency || storefront.currency || 'USD'} ${Number(product.price).toFixed(2)}`}</p>
+                        <span className={`text-xs ${available ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`}>{available ? 'Available' : 'Sold out'}</span>
+                      </div>
+                    </div>
+                  </Link>
                 </article>
               )
             })}
           </div>
         )}
 
-        <div className="mt-12 rounded-2xl border bg-card p-6 text-sm text-muted-foreground">
-          This storefront is a seller catalog. Checkout is not enabled in this release; no payment or escrow is processed by Craftly here.
-          {storefront.contact_email && <> Contact the seller at <a className="font-medium text-primary hover:underline" href={`mailto:${storefront.contact_email}`}>{storefront.contact_email}</a>.</>}
+        <div className="mt-12 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="rounded-2xl border bg-card p-6 text-sm leading-6 text-muted-foreground">
+            <p className="font-medium text-foreground">About this seller</p>
+            <p className="mt-2">This is an independent seller catalog hosted by Craftly. Product information is supplied by the seller and only ready, publicly selected products appear here.</p>
+            {storefront.contact_email && <p className="mt-2">Seller contact: <a className="font-medium text-primary hover:underline" href={`mailto:${storefront.contact_email}`}>{storefront.contact_email}</a></p>}
+          </div>
+          <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6 text-sm leading-6 text-muted-foreground lg:max-w-sm">Checkout is not enabled in this release; no payment, escrow or buyer-protection transaction is processed by Craftly here.</div>
         </div>
       </section>
     </main>

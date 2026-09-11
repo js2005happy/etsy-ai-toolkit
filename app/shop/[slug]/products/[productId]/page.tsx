@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import WishlistButton from '@/components/marketplace/wishlist-button'
 import { createServiceClient } from '@/lib/supabase/service'
-import { firstMarketplaceImage, type PublicProduct, type PublicStorefront } from '@/lib/marketplace/public-catalog'
+import { firstMarketplaceImage, loadMarketplaceCatalog, type PublicProduct, type PublicStorefront } from '@/lib/marketplace/public-catalog'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,12 +13,12 @@ async function loadPublicProduct(slug: string, productId: string) {
   const service = createServiceClient()
   const { data: storefrontRow } = await service
     .from('storefronts')
-    .select('id,user_id,slug,name,headline,description,logo_url,currency')
+    .select('id,user_id,slug,name,headline,description,logo_url,currency,contact_email')
     .eq('slug', slug)
     .eq('is_published', true)
     .maybeSingle()
 
-  const storefront = storefrontRow as PublicStorefront | null
+  const storefront = storefrontRow as (PublicStorefront & { contact_email?: string | null }) | null
   if (!storefront) return null
 
   const { data: membership } = await service
@@ -62,6 +63,8 @@ export default async function PublicProductPage({ params }: { params: PageParams
   const facts = product.facts && typeof product.facts === 'object' && !Array.isArray(product.facts)
     ? Object.entries(product.facts as Record<string, unknown>).slice(0, 12)
     : []
+  const catalog = await loadMarketplaceCatalog(300)
+  const related = catalog.filter((item) => item.storefront.id === storefront.id && item.product.id !== product.id).slice(0, 4)
 
   return (
     <main className="min-h-screen bg-background text-foreground">
@@ -70,6 +73,8 @@ export default async function PublicProductPage({ params }: { params: PageParams
           <Link href={`/shop/${storefront.slug}`} className="font-display text-xl font-bold">{storefront.name}</Link>
           <div className="flex items-center gap-4 text-sm">
             <Link href="/discover" className="text-muted-foreground hover:text-foreground">Discover</Link>
+            <Link href="/discover/sellers" className="text-muted-foreground hover:text-foreground">Sellers</Link>
+            <Link href="/wishlist" className="text-muted-foreground hover:text-foreground">Saved</Link>
             <Link href="/" className="text-muted-foreground hover:text-foreground">Craftly</Link>
           </div>
         </div>
@@ -87,9 +92,12 @@ export default async function PublicProductPage({ params }: { params: PageParams
           <h1 className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl">{product.title}</h1>
           <Link href={`/shop/${storefront.slug}`} className="mt-3 inline-block text-sm text-muted-foreground hover:text-foreground">Sold by {storefront.name}</Link>
 
-          <div className="mt-7 flex items-center justify-between gap-4 border-y py-5">
+          <div className="mt-7 flex flex-wrap items-center justify-between gap-4 border-y py-5">
             <p className="text-2xl font-semibold">{product.price == null ? 'Contact seller' : `${product.currency || storefront.currency || 'USD'} ${Number(product.price).toFixed(2)}`}</p>
-            <span className={`rounded-full px-3 py-1 text-sm ${available ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-muted text-muted-foreground'}`}>{available ? 'Available' : 'Sold out'}</span>
+            <div className="flex items-center gap-2">
+              <span className={`rounded-full px-3 py-1 text-sm ${available ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300' : 'bg-muted text-muted-foreground'}`}>{available ? 'Available' : 'Sold out'}</span>
+              <WishlistButton storefrontId={storefront.id} productId={product.id} />
+            </div>
           </div>
 
           {product.description && <p className="mt-7 whitespace-pre-wrap text-base leading-7 text-muted-foreground">{product.description}</p>}
@@ -110,11 +118,32 @@ export default async function PublicProductPage({ params }: { params: PageParams
             </div>
           )}
 
-          <div className="mt-8 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5 text-sm leading-6 text-muted-foreground">
-            Craftly is showing this seller's published catalog. Checkout, escrow, payment collection and buyer protection are not enabled in this marketplace preview. Contact or purchase through the seller's supported channel only after reviewing their terms.
+          <div className="mt-8 rounded-2xl border bg-card p-5 text-sm leading-6">
+            <p className="font-medium">Seller information</p>
+            {storefront.description && <p className="mt-2 text-muted-foreground">{storefront.description}</p>}
+            <div className="mt-3 flex flex-wrap gap-3">
+              <Link href={`/shop/${storefront.slug}`} className="font-medium text-primary hover:underline">Visit {storefront.name}</Link>
+              {storefront.contact_email && <a href={`mailto:${storefront.contact_email}`} className="font-medium text-primary hover:underline">Contact seller</a>}
+            </div>
+          </div>
+
+          <div className="mt-5 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-5 text-sm leading-6 text-muted-foreground">
+            Craftly is showing this seller's published catalog. Checkout, escrow, payment collection and buyer protection are not enabled in this marketplace preview. Saving a product does not reserve inventory or create an order.
           </div>
         </div>
       </section>
+
+      {related.length > 0 && (
+        <section className="mx-auto max-w-7xl border-t px-5 py-12">
+          <div className="mb-6 flex items-end justify-between gap-4"><div><p className="text-sm font-medium text-primary">More from this seller</p><h2 className="mt-1 font-display text-2xl font-bold">You may also like</h2></div><Link href={`/shop/${storefront.slug}`} className="text-sm font-medium text-primary">View storefront →</Link></div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {related.map(({ product: item }) => {
+              const relatedImage = firstMarketplaceImage(item.images)
+              return <Link key={item.id} href={`/shop/${storefront.slug}/products/${item.id}`} className="overflow-hidden rounded-2xl border bg-card shadow-sm"><div className="aspect-square bg-muted bg-cover bg-center" style={relatedImage ? { backgroundImage: `url(${JSON.stringify(relatedImage).slice(1, -1)})` } : undefined} /> <div className="p-4"><p className="line-clamp-2 font-medium">{item.title}</p><p className="mt-2 text-sm text-muted-foreground">{item.price == null ? 'Contact seller' : `${item.currency || storefront.currency || 'USD'} ${Number(item.price).toFixed(2)}`}</p></div></Link>
+            })}
+          </div>
+        </section>
+      )}
     </main>
   )
 }
